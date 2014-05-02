@@ -1,3 +1,4 @@
+//HAHA I AM GLORIA!!!!
 window.addEventListener("load",function() {
 	var Q = window.Q = Quintus({ development: true })
 			.include("Sprites, Scenes, Input, 2D")
