@@ -1,7 +1,8 @@
 window.addEventListener("load",function() {
 	var Q = window.Q = Quintus({ development: true })
 			.include("Sprites, Scenes, Input, 2D")
-			.setup("myGame", { width: 416, height: 416 });
+			.setup("myGame", { width: 416, height: 416 })
+			.controls(true);
 
 	// 3. Add in the default keyboard controls
 	//    along with joypad controls for touch
@@ -15,16 +16,70 @@ window.addEventListener("load",function() {
 	var SPRITE_TILES = 2;
 	var SPRITE_ENEMY = 4;
 	var SPRITE_DOT = 8;
+
+      Q.component("towerManControls", {
+        // default properties to add onto our entity
+        defaults: { speed: 0, direction: 'up' },
+
+        // called when the component is added to
+        // an entity
+        added: function() {
+          var p = this.entity.p;
+
+          // add in our default properties
+          Q._defaults(p,this.defaults);
+
+          // every time our entity steps
+          // call our step method
+          this.entity.on("step",this,"step");
+        },
+
+        step: function(dt) {
+          // grab the entity's properties
+          // for easy reference
+          var p = this.entity.p;
+
+          // rotate the player
+          // based on our velocity
+          if(p.vx > 0) {
+            p.angle = 90;
+          } else if(p.vx < 0) {
+            p.angle = -90;
+          } else if(p.vy > 0) {
+            p.angle = 180;
+          } else if(p.vy < 0) {
+            p.angle = 0;
+          }
+
+          // grab a direction from the input
+          p.direction = Q.inputs['left']  ? 'left' :
+                        Q.inputs['right'] ? 'right' :
+                        Q.inputs['up']    ? 'up' :
+                        Q.inputs['down']  ? 'down' : 'none';
+
+          // based on our direction, try to add velocity
+          // in that direction
+          switch(p.direction) {
+            case "left": p.vx = -100; break;
+            case "right":p.vx = 100; break;
+            case "up":   p.vy = -100; break;
+            case "down": p.vy = 100; break;
+			case "none": p.vx = 0;p.vy = 0;break;
+          }
+        }
+      });
 	
 	// 4. Add in a basic sprite to get started
 	Q.Sprite.extend("Player", {
 		init: function(p) {
 
 			this._super(p,{
-				sheet:"player"
+				sheet:"player",
+				type: SPRITE_PLAYER,
+				collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_DOT
 			});
 
-			this.add("2d");
+			this.add("2d, towerManControls");
 		}
 	});
 
@@ -41,33 +96,38 @@ window.addEventListener("load",function() {
 		init: function(p) {
 			this._super(p,{
 				sheet: 'brick',
-				type: SPRITE_DOT,
+				//type: SPRITE_DOT,
+				type: SPRITE_TILES,
 				// Set sensor to true so that it gets notified when it's
 				// hit, but doesn't trigger collisions itself that cause
 				// the player to stop or change direction
-				sensor: true
+				//sensor: true
 			});
 
-			this.on("sensor");
+			//this.on("sensor");
 			this.on("inserted");
 		},
 
 		// When a dot is hit..
+		/*
 		sensor: function() {
 			// Destroy it and keep track of how many dots are left
+			
 			this.destroy();
 			this.stage.dotCount--;
 			// If there are no more dots left, just restart the game
 			if(this.stage.dotCount == 0) {
 				Q.stageScene("level1");
 			}
+			
 		},
+		*/
 
 		// When a dot is inserted, use it's parent (the stage)
 		// to keep track of the total number of dots on the stage
 		inserted: function() {
-			//this.stage.dotCount = this.stage.dotCount || 0;
-			//this.stage.dotCount++;
+			this.stage.dotCount = this.stage.dotCount || 0;
+			this.stage.dotCount++;
 		}
 	});
 	
@@ -117,7 +177,7 @@ window.addEventListener("load",function() {
 			this._super({//p,{
 				type: SPRITE_TILES,
 				//dataAsset: 'level.json',
-				dataAsset: 'newLevel.json',
+				dataAsset: 'level1.json',
 				sheet:     'tiles',
 			});
 		},
@@ -180,7 +240,6 @@ window.addEventListener("load",function() {
 					case 9:
 						this.stage.insert(new Q['BirdSE'](Q.tilePos(x,y)));
 						row[x] = 0;
-						console.log("here is bird");
 						break;
 					}
 				}
@@ -188,15 +247,90 @@ window.addEventListener("load",function() {
 		}
 	});
 	
+	Q.component("enemyControls", {
+        defaults: { speed: 50, direction: 'left', switchPercent: 2 },
+
+        added: function() {
+          var p = this.entity.p;
+
+          Q._defaults(p,this.defaults);
+
+          this.entity.on("step",this,"step");
+          this.entity.on('hit',this,"changeDirection");
+        },
+
+        step: function(dt) {
+          var p = this.entity.p;
+
+          if(Math.random() < p.switchPercent / 100) {
+            this.tryDirection();
+          }
+
+          switch(p.direction) {
+            case "left": p.vx = -p.speed; break;
+            case "right":p.vx = p.speed; break;
+            case "up":   p.vy = -p.speed; break;
+            case "down": p.vy = p.speed; break;
+          }
+        },
+
+        tryDirection: function() {
+          var p = this.entity.p; 
+          var from = p.direction;
+          if(p.vy != 0 && p.vx == 0) {
+            p.direction = Math.random() < 0.5 ? 'left' : 'right';
+          } else if(p.vx != 0 && p.vy == 0) {
+            p.direction = Math.random() < 0.5 ? 'up' : 'down';
+          }
+        },
+
+        changeDirection: function(collision) {
+          var p = this.entity.p;
+          if(p.vx == 0 && p.vy == 0) {
+            if(collision.normalY) {
+              p.direction = Math.random() < 0.5 ? 'left' : 'right';
+            } else if(collision.normalX) {
+              p.direction = Math.random() < 0.5 ? 'up' : 'down';
+            }
+          }
+        }
+      });
+
+
+      Q.Sprite.extend("Enemy", {
+        init: function(p) {
+
+          this._super(p,{
+            sheet:"enemy",
+            type: SPRITE_ENEMY,
+            collisionMask: SPRITE_PLAYER | SPRITE_TILES
+          });
+
+          this.add("2d,enemyControls");
+          this.on("hit.sprite",this,"hit");
+        },
+
+        hit: function(col) {
+          if(col.obj.isA("Player")) {
+            Q.stageScene("level1");
+          }
+        }
+      });
+	
 	Q.scene("level1",function(stage) {
 		var map = stage.collisionLayer(new Q.TowerManMap());
 		map.setup();
 
-		var player = stage.insert(new Q.Player(Q.tilePos(0.5,0.5)));
+		var player = stage.insert(new Q.Player(Q.tilePos(6.5,0.5)));
+		
+		//stage.insert(new Q.Enemy(Q.tilePos(10,4)));
+        //stage.insert(new Q.Enemy(Q.tilePos(15,10)));
+        //stage.insert(new Q.Enemy(Q.tilePos(5,10)));
+		
 	});
 
-	Q.load("sprites.png, newSprites.json, newLevel.json", function() {
-		//Q.sheet("tiles","tiles.png", { tileW: 16, tileH: 16 });
+	Q.load("sprites.png, newSprites.json, level1.json, tiles.png", function() {
+		Q.sheet("tiles","tiles.png", { tileW: 16, tileH: 16 });
 
 		Q.compileSheets("sprites.png","newSprites.json");
 
