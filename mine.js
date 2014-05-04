@@ -41,6 +41,7 @@ window.addEventListener("load",function() {
 
           // rotate the player
           // based on our velocity
+		  
           if(p.vx > 0) {
             p.angle = 90;
           } else if(p.vx < 0) {
@@ -87,6 +88,15 @@ window.addEventListener("load",function() {
 		init: function(p) {
 			this._super(p,{
 				sheet: 'swall',
+				type: SPRITE_TILES,
+			});
+		}
+	});
+	
+	Q.Sprite.extend("Tree", {
+		init: function(p) {
+			this._super(p,{
+				sheet: 'tree',
 				type: SPRITE_TILES,
 			});
 		}
@@ -174,16 +184,19 @@ window.addEventListener("load",function() {
 	
 	Q.TileLayer.extend("TowerManMap",{
 		init: function(p) {
-			this._super({//p,{
+			this._super(p,{
 				type: SPRITE_TILES,
-				//dataAsset: 'level.json',
-				dataAsset: 'level1.json',
-				sheet:     'tiles',
+				//dataAsset: 'level1.json',
+				dataAsset: '',
+				sheet: ''
+				//sheet:     'tiles'
 			});
 		},
 
 		setup: function() {
 			// Clone the top level arriw
+			console.log("p: "+this.p);
+			console.log("tiles: "+this.p.tiles);
 			var tiles = this.p.tiles = this.p.tiles.concat();
 			var size = this.p.tileW;
 			for(var y=0;y<tiles.length;y++) {
@@ -312,24 +325,37 @@ window.addEventListener("load",function() {
 
         hit: function(col) {
           if(col.obj.isA("Player")) {
-            Q.stageScene("level1");
+			Q.clearStage(1);
+            Q.stageScene("level2");
           }
         }
       });
 	
 	Q.scene("level1",function(stage) {
-		var map = stage.collisionLayer(new Q.TowerManMap());
+		var map = stage.collisionLayer(new Q.TowerManMap({dataAsset: 'level1.json', sheet: 'tiles'}));
 		map.setup();
 
 		var player = stage.insert(new Q.Player(Q.tilePos(6.5,0.5)));
 		
-		//stage.insert(new Q.Enemy(Q.tilePos(10,4)));
-        //stage.insert(new Q.Enemy(Q.tilePos(15,10)));
+		stage.insert(new Q.Enemy(Q.tilePos(2.5,0.5)));
+        stage.insert(new Q.Enemy(Q.tilePos(2.5,12.5)));
+        //stage.insert(new Q.Enemy(Q.tilePos(5,10)));
+		
+	});
+	
+	Q.scene("level2",function(stage) {
+		var map = stage.collisionLayer(new Q.TowerManMap({dataAsset: 'level2.json', sheet: 'tiles'}));
+		map.setup();
+
+		var player = stage.insert(new Q.Player(Q.tilePos(8.5,24.5)));
+		
+		//stage.insert(new Q.Enemy(Q.tilePos(2.5,0.5)));
+        //stage.insert(new Q.Enemy(Q.tilePos(12.5,0.5)));
         //stage.insert(new Q.Enemy(Q.tilePos(5,10)));
 		
 	});
 
-	Q.load("sprites.png, newSprites.json, level1.json, tiles.png", function() {
+	Q.load("sprites.png, newSprites.json, level1.json, level2.json, tiles.png", function() {
 		Q.sheet("tiles","tiles.png", { tileW: 16, tileH: 16 });
 
 		Q.compileSheets("sprites.png","newSprites.json");
