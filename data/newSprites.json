@@ -3,11 +3,9 @@
 "enemy":{"sx":0,"sy":32,"cols":1,"tilew":32,"tileh":32,"frames":1},
 "brick":{"sx":512,"sy":128,"cols":1,"tilew":16,"tileh":16,"frames":1},
 "swall":{"sx":512,"sy":144,"cols":1,"tilew":16,"tileh":16,"frames":1},
-"tree":{"sx":528,"sy":144,"cols":1,"tilew":16,"tileh":16,"frames":1},
+"tree":{"sx":544,"sy":64,"cols":1,"tilew":32,"tileh":32,"frames":1},
+"smalltree":{"sx":528,"sy":144,"cols":1,"tilew":16,"tileh":16,"frames":1},
 "water":{"sx":512,"sy":160,"cols":1,"tilew":16,"tileh":16,"frames":1},
 "ice":{"sx":544,"sy":144,"cols":1,"tilew":16,"tileh":16,"frames":1},
-"birdNW":{"sx":608,"sy":64,"cols":1,"tilew":16,"tileh":16,"frames":1},
-"birdNE":{"sx":624,"sy":64,"cols":1,"tilew":16,"tileh":16,"frames":1},
-"birdSW":{"sx":608,"sy":80,"cols":1,"tilew":16,"tileh":16,"frames":1},
-"birdSE":{"sx":624,"sy":80,"cols":1,"tilew":16,"tileh":16,"frames":1}
+"bird":{"sx":608,"sy":64,"cols":1,"tilew":32,"tileh":32,"frames":1}
 }

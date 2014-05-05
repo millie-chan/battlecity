@@ -98,6 +98,7 @@ window.addEventListener("load",function() {
 			this._super(p,{
 				sheet: 'tree',
 				type: SPRITE_TILES,
+				sensor: true
 			});
 		}
 	});
@@ -143,7 +144,14 @@ window.addEventListener("load",function() {
 	
 	// Tower is just a dot with a different sheet - use the same
 	// sensor and counting functionality
-	
+	Q.Brick.extend("Bird", {
+		init: function(p) {
+			this._super(Q._defaults(p,{
+				sheet: 'bird'
+			}));
+		}
+	});
+	/*
 	Q.Brick.extend("BirdNW", {
 		init: function(p) {
 			this._super(Q._defaults(p,{
@@ -175,11 +183,18 @@ window.addEventListener("load",function() {
 			}));
 		}
 	});
+	*/
 	
 	Q.tilePos = function(col,row) {
 		//return { x: col*16 + 16, y: row*16 +16 };
 		//return { x: col*32 + 16, y: row*32 + 16 };
 		return { x: col*16+8, y: row*16+8 };
+	}
+	
+	Q.tilePos2 = function(col,row) {
+		//return { x: col*16 + 16, y: row*16 +16 };
+		return { x: col*32 + 16, y: row*32 + 16 };
+		//return { x: col*16+8, y: row*16+8 };
 	}
 	
 	Q.TileLayer.extend("TowerManMap",{
@@ -195,8 +210,8 @@ window.addEventListener("load",function() {
 
 		setup: function() {
 			// Clone the top level arriw
-			console.log("p: "+this.p);
-			console.log("tiles: "+this.p.tiles);
+			//console.log("p: "+this.p);
+			//console.log("tiles: "+this.p.tiles);
 			var tiles = this.p.tiles = this.p.tiles.concat();
 			var size = this.p.tileW;
 			for(var y=0;y<tiles.length;y++) {
@@ -227,8 +242,8 @@ window.addEventListener("load",function() {
 						row[x] = 0;
 						break;
 					case 3:
-						this.stage.insert(new Q['Tree'](Q.tilePos(x,y)));
-						row[x] = 0;
+						//this.stage.insert(new Q['Tree'](Q.tilePos(x,y)));
+						//row[x] = 0;
 						break;
 					case 4:
 						this.stage.insert(new Q['Water'](Q.tilePos(x,y)));
@@ -238,6 +253,7 @@ window.addEventListener("load",function() {
 						this.stage.insert(new Q['Ice'](Q.tilePos(x,y)));
 						row[x] = 0;
 						break;
+					/*
 					case 6:
 						this.stage.insert(new Q['BirdNW'](Q.tilePos(x,y)));
 						row[x] = 0;
@@ -254,7 +270,9 @@ window.addEventListener("load",function() {
 						this.stage.insert(new Q['BirdSE'](Q.tilePos(x,y)));
 						row[x] = 0;
 						break;
+					*/
 					}
+					
 				}
 			}
 		}
@@ -336,6 +354,7 @@ window.addEventListener("load",function() {
 		map.setup();
 
 		var player = stage.insert(new Q.Player(Q.tilePos(6.5,0.5)));
+		stage.insert(new Q.Bird(Q.tilePos2(7.5,12.5)));
 		
 		stage.insert(new Q.Enemy(Q.tilePos(2.5,0.5)));
         stage.insert(new Q.Enemy(Q.tilePos(2.5,12.5)));
@@ -347,20 +366,75 @@ window.addEventListener("load",function() {
 		var map = stage.collisionLayer(new Q.TowerManMap({dataAsset: 'level2.json', sheet: 'tiles'}));
 		map.setup();
 
-		var player = stage.insert(new Q.Player(Q.tilePos(8.5,24.5)));
+		var player = stage.insert(new Q.Player(Q.tilePos2(5,4)));
+		stage.insert(new Q.Bird(Q.tilePos2(7.5,12.5)));
 		
+		stage.insert(new Q.Tree(Q.tilePos2(1.5,4.5)));
+		stage.insert(new Q.Tree(Q.tilePos2(1.5,5.5)));
+		stage.insert(new Q.Tree(Q.tilePos2(2.5,5.5)));
+		stage.insert(new Q.Tree(Q.tilePos2(5.5,6.5)));
+		stage.insert(new Q.Tree(Q.tilePos2(5.5,7.5)));
+		stage.insert(new Q.Tree(Q.tilePos2(6.5,6.5)));
+		stage.insert(new Q.Tree(Q.tilePos2(7.5,6.5)));
+		stage.insert(new Q.Tree(Q.tilePos2(11.5,4.5)));
+		stage.insert(new Q.Tree(Q.tilePos2(11.5,5.5)));
+		stage.insert(new Q.Tree(Q.tilePos2(11.5,6.5)));
+		/*
+		stage.insert(new Q.Tree(Q.tilePos(1,11)));
+		stage.insert(new Q.Tree(Q.tilePos(2,11)));
+		stage.insert(new Q.Tree(Q.tilePos(1,12)));
+		stage.insert(new Q.Tree(Q.tilePos(2,12)));
+		stage.insert(new Q.Tree(Q.tilePos(3,11)));
+		stage.insert(new Q.Tree(Q.tilePos(4,11)));
+		stage.insert(new Q.Tree(Q.tilePos(3,12)));
+		stage.insert(new Q.Tree(Q.tilePos(4,12)));
+		stage.insert(new Q.Tree(Q.tilePos(1,9)));
+		stage.insert(new Q.Tree(Q.tilePos(2,9)));
+		stage.insert(new Q.Tree(Q.tilePos(1,10)));
+		stage.insert(new Q.Tree(Q.tilePos(2,10)));
+		
+		stage.insert(new Q.Tree(Q.tilePos(9,13)));
+		stage.insert(new Q.Tree(Q.tilePos(9,14)));
+		stage.insert(new Q.Tree(Q.tilePos(10,13)));
+		stage.insert(new Q.Tree(Q.tilePos(10,14)));
+		stage.insert(new Q.Tree(Q.tilePos(9,15)));
+		stage.insert(new Q.Tree(Q.tilePos(9,16)));
+		stage.insert(new Q.Tree(Q.tilePos(10,15)));
+		stage.insert(new Q.Tree(Q.tilePos(10,16)));
+		stage.insert(new Q.Tree(Q.tilePos(11,13)));
+		stage.insert(new Q.Tree(Q.tilePos(11,14)));
+		stage.insert(new Q.Tree(Q.tilePos(12,13)));
+		stage.insert(new Q.Tree(Q.tilePos(12,14)));
+		stage.insert(new Q.Tree(Q.tilePos(13,13)));
+		stage.insert(new Q.Tree(Q.tilePos(13,14)));
+		stage.insert(new Q.Tree(Q.tilePos(14,13)));
+		stage.insert(new Q.Tree(Q.tilePos(14,14)));
+		
+		stage.insert(new Q.Tree(Q.tilePos(21,9)));
+		stage.insert(new Q.Tree(Q.tilePos(21,10)));
+		stage.insert(new Q.Tree(Q.tilePos(22,9)));
+		stage.insert(new Q.Tree(Q.tilePos(22,10)));
+		stage.insert(new Q.Tree(Q.tilePos(21,11)));
+		stage.insert(new Q.Tree(Q.tilePos(21,12)));
+		stage.insert(new Q.Tree(Q.tilePos(22,11)));
+		stage.insert(new Q.Tree(Q.tilePos(22,12)));
+		stage.insert(new Q.Tree(Q.tilePos(21,13)));
+		stage.insert(new Q.Tree(Q.tilePos(21,14)));
+		stage.insert(new Q.Tree(Q.tilePos(22,13)));
+		stage.insert(new Q.Tree(Q.tilePos(22,14)));
+		*/
 		//stage.insert(new Q.Enemy(Q.tilePos(2.5,0.5)));
         //stage.insert(new Q.Enemy(Q.tilePos(12.5,0.5)));
         //stage.insert(new Q.Enemy(Q.tilePos(5,10)));
 		
 	});
 
-	Q.load("sprites.png, newSprites.json, level1.json, level2.json, tiles.png", function() {
+	Q.load("sprites2.png, newSprites.json, level1.json, level2.json, tiles.png", function() {
 		Q.sheet("tiles","tiles.png", { tileW: 16, tileH: 16 });
 
-		Q.compileSheets("sprites.png","newSprites.json");
+		Q.compileSheets("sprites2.png","newSprites.json");
 
-		Q.stageScene("level1");
+		Q.stageScene("level2");
 	});
 	
 	/*
