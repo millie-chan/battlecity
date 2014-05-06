@@ -82,7 +82,7 @@ window.addEventListener("load",function() {
 				angle: props.angle,
 				shooter: props.shooter, 
 				type:SPRITE_BULLET,
-				first_colli: true;
+				first_colli: true,
 				collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLETE
 			});
 			this.on("hit.sprite",'collision');
@@ -150,7 +150,7 @@ window.addEventListener("load",function() {
 				this.destroy();
 			}
 			else if(collision.obj.isA("Bird")){
-				collision.obj.p.sheet='flag';
+				collision.obj.hit();
 				this.p.belong.fire = true;
 				this.destroy();
 			}
