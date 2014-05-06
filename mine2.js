@@ -1,6 +1,16 @@
 window.addEventListener("load",function() {
 	
 	$("#outer").css("left", (window.innerWidth-544)/2+"px");
+	for (var i=1; i <= 20; i++) {
+		if (i % 2 ==0) {
+			$('<div class="numSprite bomb eneven" id="en'+i+'" style="display:none"></div>').appendTo($("#outer"));
+			$("#en"+i).css("top", (32 + i*8)+'px');
+		} else if (i % 2 ==1) {
+			$('<div class="numSprite bomb enodd" id="en'+i+'" style="display:none"></div>').appendTo($("#outer"));
+			$("#en"+i).css("top", (40 + i*8)+'px');
+		}
+	}
+		
 	var Q = window.Q = Quintus({ development: true })
 			.include("Sprites, Scenes, Input, 2D, Anim")
 			.setup("myGame", { width: 448, height: 448 })
@@ -801,15 +811,12 @@ window.addEventListener("load",function() {
 	
 	Q.scene('ui', function(stage){
 		$("#lives1").addClass("num" + Q.state.get("lives"));
-		for (var i=1; i <= Q.state.get("eNum"); i++) {
-			if (i % 2 ==0) {
-				$('<div class="numSprite bomb eneven" id="en'+i+'"></div>').appendTo($("#outer"));
-				$("#en"+i).css("top", (32 + i*8)+'px');
-			} else if (i % 2 ==1) {
-				$('<div class="numSprite bomb enodd" id="en'+i+'"></div>').appendTo($("#outer"));
-				$("#en"+i).css("top", (40 + i*8)+'px');
+		var divs = $(".bomb").map(function(){
+			if (this.id.replace('en', '') <= Q.state.get("eNum")) {
+				return this;
 			}
-		}
+		}).get();
+		$(divs).show();
 		
 		Q.state.on("change.eNum",this, function() {
 			if (Q.state.get("eNum") == 0) {
