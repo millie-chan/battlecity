@@ -17,63 +17,50 @@ window.addEventListener("load",function() {
 	var SPRITE_ENEMY = 4;
 	var SPRITE_BULLET = 8;
 	var SPRITE_BULLETE = 16;
-//	var SPRITE_BRICK = 16;
-//	var SPRITE_BIRD = 32;
 
-      Q.component("towerManControls", {
-        // default properties to add onto our entity
-        // defaults: { speed: 100, direction: 'stop' },
-		defaults: { speed: 0, direction: 'up' },
-        // called when the component is added to
-        // an entity
-        added: function() {
-          var p = this.entity.p;
-	
-          // add in our default properties
-          Q._defaults(p,this.defaults);
+	Q.component("towerManControls", {
+		// default properties to add onto our entity
+		defaults: { speed: 0, direction: 'up' , bulletCooldown: false},
+		added: function() {
+			var p = this.entity.p;
+			Q._defaults(p,this.defaults);
+			//console.log(this);
+			//console.log(this.entity);
+			this.entity.on("step",this,"step");
+		},
 
-          // every time our entity steps
-          // call our step method
-          this.entity.on("step",this,"step");
-        },
+		step: function(dt) {
+			// grab the entity's properties
+			// for easy reference
+			var p = this.entity.p;
 
-        step: function(dt) {
-          // grab the entity's properties
-          // for easy reference
-          var p = this.entity.p;
+			// grab a direction from the input
+			p.direction = Q.inputs['left']  ? 'left' :
+			Q.inputs['right'] ? 'right' :
+			Q.inputs['up']    ? 'up' :
+			Q.inputs['down']  ? 'down' : 
+			'none';
 
-          // rotate the player
-          // based on our velocity
-          if(p.vx > 0) {
-            p.angle = 90;
-          } else if(p.vx < 0) {
-            p.angle = -90;
-          } else if(p.vy > 0) {
-            p.angle = 180;
-          } else if(p.vy < 0) {
-            p.angle = 0;
-          }
-
-          // grab a direction from the input
-          p.direction = Q.inputs['fire']  ? 'fire' :
-						Q.inputs['left']  ? 'left' :
-                        Q.inputs['right'] ? 'right' :
-                        Q.inputs['up']    ? 'up' :
-                        Q.inputs['down']  ? 'down' : 
-						'none';
-
-          // based on our direction, try to add velocity
-          // in that direction
-          switch(p.direction) {
-            case "fire": Q.stage(0).PlayerTank.fire(); break;
-            case "left": p.vx = -100; break;
-            case "right":p.vx = 100; break;
-            case "up":   p.vy = -100; break;
-            case "down": p.vy = 100; break;
-			case "none": p.vx = 0;p.vy = 0;break;
-          }
-        }
-      });
+			//fire if space is being pressed
+			if(Q.inputs['fire'] == true){
+				if(p.bulletCooldown == false){
+					Q.stage(0).PlayerTank.fire();
+					p.bulletCooldown = true;
+					setTimeout( function(){p.bulletCooldown = false;},  500);
+				}
+			}
+			
+			// based on our direction, try to add velocity in that direction
+			switch(p.direction) {
+				case "left": p.vx = -100; p.vy = 0; p.angle = -90; break;
+				case "right":p.vx = 100; p.vy = 0; p.angle = 90; break;
+				case "up":   p.vx = 0; p.vy = -100; p.angle = 0; break;
+				case "down": p.vx = 0; p.vy = 100; p.angle = 180; break;
+				case "none": p.vx = 0;p.vy = 0;break;
+			}
+		}
+		
+	});
 	
 	//bullet_available: true when the bullet is available to shoot
 	var bullet_available = true;
@@ -105,9 +92,9 @@ window.addEventListener("load",function() {
 		},
 		
 		collision: function(collision) {
-//		console.log(collision.obj);
+//		//console.log(collision.obj);
 			if(collision.obj.isA("EnemyA")||collision.obj.isA("EnemyB")||collision.obj.isA("EnemyC")||collision.obj.isA("EnemyD")) {
-			console.log("coll");console.log(collision.obj);//	collision.obj.hit();
+			////console.log("coll");//console.log(collision.obj);//	collision.obj.hit();
 				this.destroy();
 				bullet_available = true;
 			}
@@ -122,88 +109,6 @@ window.addEventListener("load",function() {
 			}
 		}
 	});
-	
-	Q.component("bulletControls", {
-		defaults: { speed: 200},
-
-		added: function() {
-			var p = this.entity.p;
-
-			Q._defaults(p,this.defaults);
-
-			console.log(p);
-			//this.step();
-			this.entity.on("step",this,"step");
-			//this.entity.on('hit',this,"changeDirection");
-		},
-		
-		step: function(dt) {
-			var p = this.entity.p;
-			
-			if(p.angle ==0){
-				p.direction = "up";
-			}
-			if(p.angle ==90){
-				p.direction = "right";
-			}
-			if(p.angle ==180){
-				p.direction = "down";
-			}
-			if(p.angle ==-90){
-				p.direction = "left";
-			}
-//			console.log(p.direction);
-			
-			switch(p.direction) {
-			case "left": p.vx = -p.speed; break;
-			case "right":p.vx = p.speed; break;
-			case "up":   p.vy = -p.speed; break;
-			case "down": p.vy = p.speed; break;
-			}
-		}
-		
-	});
-	Q.component("bulletEControls", {
-		defaults: { speed: 200},
-
-		added: function() {
-			var p = this.entity.p;
-
-			Q._defaults(p,this.defaults);
-
-//			console.log(p);
-			//this.step();
-			this.entity.on("step",this,"step");
-			//this.entity.on('hit',this,"changeDirection");
-		},
-		
-		step: function(dt) {
-			var p = this.entity.p;
-			
-			if(p.angle ==0){
-				p.direction = "up";
-			}
-			if(p.angle ==90){
-				p.direction = "right";
-			}
-			if(p.angle ==180){
-				p.direction = "down";
-			}
-			if(p.angle ==-90){
-				p.direction = "left";
-			}
-//			console.log(p.direction);
-			
-			switch(p.direction) {
-			case "left": p.vx = -p.speed; break;
-			case "right":p.vx = p.speed; break;
-			case "up":   p.vy = -p.speed; break;
-			case "down": p.vy = p.speed; break;
-			}
-		}
-		
-	});
-	
 	Q.Sprite.extend('BulletE',{
 		init: function(props) {
 			this._super({
@@ -232,9 +137,9 @@ window.addEventListener("load",function() {
 		},
 		
 		collision: function(collision) {
-//		console.log(collision.obj);
+//		//console.log(collision.obj);
 /*			if(collision.obj.isA("EnemyA")||collision.obj.isA("EnemyB")||collision.obj.isA("EnemyC")||collision.obj.isA("EnemyD")) {
-			console.log("coll");console.log(collision.obj);//	collision.obj.hit();
+			//console.log("coll");//console.log(collision.obj);//	collision.obj.hit();
 				this.destroy();
 				bullet_available = true;
 			}
@@ -245,11 +150,92 @@ window.addEventListener("load",function() {
 				
 			}
 			else if(collision.obj.isA("Swall")||collision.obj.isA("Bullet")){
-//			console.log(this);
+//			//console.log(this);
 				this.p.belong.fire = true;
 				this.destroy();
 			}
 		}
+	});
+	
+	Q.component("bulletControls", {
+		defaults: { speed: 200},
+
+		added: function() {
+			var p = this.entity.p;
+
+			Q._defaults(p,this.defaults);
+
+			////console.log(p);
+			//this.step();
+			this.entity.on("step",this,"step");
+			//this.entity.on('hit',this,"changeDirection");
+		},
+		
+		step: function(dt) {
+			var p = this.entity.p;
+			
+			if(p.angle ==0){
+				p.direction = "up";
+			}
+			if(p.angle ==90){
+				p.direction = "right";
+			}
+			if(p.angle ==180){
+				p.direction = "down";
+			}
+			if(p.angle ==-90){
+				p.direction = "left";
+			}
+//			//console.log(p.direction);
+			
+			switch(p.direction) {
+			case "left": p.vx = -p.speed; break;
+			case "right":p.vx = p.speed; break;
+			case "up":   p.vy = -p.speed; break;
+			case "down": p.vy = p.speed; break;
+			}
+		}
+		
+	});
+	Q.component("bulletEControls", {
+		defaults: { speed: 200},
+
+		added: function() {
+			var p = this.entity.p;
+
+			Q._defaults(p,this.defaults);
+
+//			//console.log(p);
+			//this.step();
+			this.entity.on("step",this,"step");
+			//this.entity.on('hit',this,"changeDirection");
+		},
+		
+		step: function(dt) {
+			var p = this.entity.p;
+			
+			if(p.angle ==0){
+				p.direction = "up";
+			}
+			if(p.angle ==90){
+				p.direction = "right";
+			}
+			if(p.angle ==180){
+				p.direction = "down";
+			}
+			if(p.angle ==-90){
+				p.direction = "left";
+			}
+//			//console.log(p.direction);
+			
+			switch(p.direction) {
+			case "left": p.vx = -p.speed; break;
+			case "right":p.vx = p.speed; break;
+			case "up":   p.vy = -p.speed; break;
+			case "down": p.vy = p.speed; break;
+			}
+		}
+		
 	});
 	
 	// 4. Add in a basic sprite to get started
@@ -270,7 +256,7 @@ window.addEventListener("load",function() {
 		fire: function() {
 			var bullet_x;
 			var bullet_y;
-			console.log(this.p.angle);
+			////console.log(this.p.angle);
 			//if the tank face up
 			if(this.p.angle == 0){
 				bullet_x = this.p.x;
@@ -297,8 +283,8 @@ window.addEventListener("load",function() {
 				Q.stage().insert(bullet);
 				bullet_available = false;
 			}
-			//console.log(this.p.angle);
-			console.log("fired");
+			////console.log(this.p.angle);
+			////console.log("fired");
 		}
 	});
 	
@@ -307,7 +293,7 @@ window.addEventListener("load",function() {
 
         added: function() {
           var p = this.entity.p;
-console.log(p.health);
+////console.log(p.health);
 /*		  if(p.name=="A"){
 			this.defaults={speed: 100,  direction: 'down', switchPercent: 0, bullet: 1 ,health: 1};
 		  }
@@ -322,8 +308,8 @@ console.log(p.health);
 		  }
 		  */
 //          Q._defaults(p,this.defaults);
-		  console.log(p.direction);
-		  console.log(p.fire);
+		 // //console.log(p.direction);
+		  ////console.log(p.fire);
           this.entity.on("step",this,"step");
           this.entity.on('hit',this,"changeDirection");
         },
@@ -359,7 +345,7 @@ console.log(p.health);
 		  }
 		  if(p.fire){
 			var bullet = new Q.BulletE({dx: bullet_x, dy: bullet_y, angle: p.angle, ene: p});
-//			console.log(bullet);
+//			//console.log(bullet);
 			this.entity.stage.insert(bullet);
 			p.fire = false;
 		  }
@@ -377,7 +363,7 @@ console.log(p.health);
 
         changeDirection: function(collision) {
           var p = this.entity.p;
-//console.log(this.entity.stage.lists.Player[0].p.y);
+////console.log(this.entity.stage.lists.Player[0].p.y);
           if(p.vx == 0 && p.vy == 0) {
             if(collision.normalY) {
               p.direction = Math.random() < 0.5 ? 'left' : 'right';
@@ -417,13 +403,13 @@ Q.animations('ani', {
 			if(this.p.health==0){
 				var xX=this.p.x;
 				var yY=this.p.y;
-				console.log("x "+xX+" y "+yY);
+				////console.log("x "+xX+" y "+yY);
 				this.destroy();
 				var f;
 				stage.insert(f=new Q.Disappear1({ x: xX, y: yY }));
-				console.log(f);
+				////console.log(f);
 				f.play("disappear1");
-				console.log(stage.enemyNum);
+				////console.log(stage.enemyNum);
 				if(stage.enemyNum>0){
 					var pos=[3.5,wid/2+0.5,wid-2.5];
 					setTimeout(function(){
@@ -446,9 +432,9 @@ Q.animations('ani', {
           }
         },
 		inserted: function() {
-//			console.log(this);
+//			//console.log(this);
 			this.stage.enemyNum--;
-			console.log(this.stage.enemyNum);
+			////console.log(this.stage.enemyNum);
 		}
       });
 	  
@@ -466,10 +452,10 @@ Q.animations('ani', {
 		  this.add("animation");
         },
 		inserted: function() {
-//			console.log(this);
+//			//console.log(this);
 			this.stage.enemyNum--;
 			this.stage.enemyANum--;
-			console.log(this.stage);
+			//console.log(this.stage.enemyANum);
 		}
       });
       Q.Enemy.extend("EnemyB", {
@@ -485,10 +471,10 @@ Q.animations('ani', {
           }));
         },
 		inserted: function() {
-//			console.log(this);
+//			//console.log(this);
 			this.stage.enemyNum--;
 			this.stage.enemyBNum--;
-			console.log(this.stage);
+			//console.log(this.stage.enemyBNum);
 		}
       });
       Q.Enemy.extend("EnemyC", {
@@ -504,10 +490,10 @@ Q.animations('ani', {
           }));
         },
 		inserted: function() {
-//			console.log(this);
+//			//console.log(this);
 			this.stage.enemyNum--;
 			this.stage.enemyCNum--;
-			console.log(this.stage.enemyCNum);
+			//console.log(this.stage.enemyCNum);
 		}
       });
       Q.Enemy.extend("EnemyD", {
@@ -523,10 +509,10 @@ Q.animations('ani', {
           }));
         },
 		inserted: function() {
-//			console.log(this);
+//			//console.log(this);
 			this.stage.enemyNum--;
 			this.stage.enemyDNum--;
-			console.log(this.stage.enemyDNum);
+			//console.log(this.stage.enemyDNum);
 		}
       });	  
 	  Q.Sprite.extend("Appear", {
@@ -542,8 +528,8 @@ Q.animations('ani', {
 			this.on("end",this,"des");
 		},
 		des:function() {
-			console.log("end");
-			console.log(this);
+			//console.log("end");
+			//console.log(this);
 			this.destroy();
 			switch(this.p.kind) {
 				case 0: this.stage.insert(new Q.EnemyA(Q.tilePos(this.p.posx,1.5)));break;
@@ -566,8 +552,8 @@ Q.animations('ani', {
 			this.on("end",this,"des");
 		},
 		des:function() {
-			console.log("end");
-			console.log(this);
+			//console.log("end");
+			//console.log(this);
 			var xX=this.p.x;
 			var yY=this.p.y;
 			this.destroy();
@@ -587,14 +573,14 @@ Q.animations('ani', {
 			this.on("end",this,"des");
 		},
 		des:function() {
-			console.log("end");
-			console.log(this);
+			//console.log("end");
+			//console.log(this);
 			this.destroy();
 		}
 	  });
 	  Q.genEnemy=function(stage,wid,num){
 		var pos=[3.5,wid/2+0.5,wid-2.5];
-		console.log(num);
+		//console.log(num);
 		for(var i=0;i<num;i++){
 			setTimeout(function(){
 				var r=Math.floor((Math.random() * 3));
@@ -680,14 +666,14 @@ Q.animations('ani', {
 		//		Q.stageScene("level1");
 		//	}
 			if(col.obj.isA("Bullet")) {
-				this.destroy();//console.log(this.stage.donut);this.stage.donut=10;console.log(this.stage.donut);
+				this.destroy();////console.log(this.stage.donut);this.stage.donut=10;//console.log(this.stage.donut);
 			}
 		},
 
 		// When a dot is inserted, use it's parent (the stage)
 		// to keep track of the total number of dots on the stage
 		/*inserted: function() {
-			console.log(this);
+			//console.log(this);
 			this.stage.donut = this.stage.donut || 0;
 			this.stage.donut++;
 		}*/
@@ -829,7 +815,7 @@ Q.animations('ani', {
 					case 9:
 						this.stage.insert(new Q['BirdSE'](Q.tilePos(x,y)));
 						row[x] = 0;
-						console.log("here is bird");
+						//console.log("here is bird");
 						break;
 */
 					}
