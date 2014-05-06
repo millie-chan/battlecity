@@ -42,8 +42,17 @@ window.addEventListener("load",function() {
 			Q.inputs['down']  ? 'down' : 
 			'none';
 
+			if(Q.stage().endgame){
+				p.direction='none';
+			}
+			if(Q.stage().currentEnemy == 0 && Q.stage().enemyNum==0){
+				Q.stage().endgame = true;
+			}
+			
 			//fire if space is being pressed
 			if(Q.inputs['fire'] == true){
+				console.log(Q.stage().currentEnemy);
+				console.log(Q.stage().enemyNum);
 				if(p.cannonCooldown == false){
 					Q.stage(0).PlayerTank.fire();
 					p.cannonCooldown = true;
@@ -73,6 +82,7 @@ window.addEventListener("load",function() {
 				angle: props.angle,
 				shooter: props.shooter, 
 				type:SPRITE_BULLET,
+				first_colli: true;
 				collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLETE
 			});
 			this.on("hit.sprite",'collision');
@@ -86,13 +96,19 @@ window.addEventListener("load",function() {
 				this.destroy();
 			}
 			else if(collision.obj.isA("Brick")){
+				if(this.p.first_colli){
+					this.p.shooter.bullet++;
+					this.p.first_colli = false;
+				}
 				collision.obj.destroy();
-				this.p.shooter.bullet++;
 				this.destroy();
 
 			}
 			else if(collision.obj.isA("Swall")||collision.obj.isA("BulletE")){
-				this.p.shooter.bullet++;
+				if(this.p.first_colli){
+					this.p.shooter.bullet++;
+					this.p.first_colli = false;
+				}
 				this.destroy();
 			}
 			else if(collision.obj.isA("Bird")){
@@ -111,7 +127,6 @@ window.addEventListener("load",function() {
 				y: props.dy,
 				angle: props.angle,
 				belong: props.ene,
-				seconds: 3,
 				type:SPRITE_BULLETE,
 				collisionMask: SPRITE_TILES | SPRITE_PLAYER | SPRITE_BULLET
 			});
@@ -120,11 +135,15 @@ window.addEventListener("load",function() {
 		},
 		
 		collision: function(collision) {
-			if(collision.obj.isA("Brick")||collision.obj.isA("Player")){
+			if(collision.obj.isA("Brick")){
 				collision.obj.destroy();
 				this.p.belong.fire = true;
 				this.destroy();
 				
+			}else if(collision.obj.isA("Player")){
+				collision.obj.die();
+				this.p.belong.fire = true;
+				this.destroy();
 			}
 			else if(collision.obj.isA("Swall")||collision.obj.isA("Bullet")){
 				this.p.belong.fire = true;
@@ -187,10 +206,23 @@ window.addEventListener("load",function() {
 				sheet:"player",
 				type: SPRITE_PLAYER,
 				collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLETE, 
-				bullet: 2
+				bullet: 2,
+				barrier_time: 3,
+				muteki: true
 			});
 			
+			//Gloria add barrier animation
 			this.add("2d, towerManControls");
+			this.on('step',this,'countdown');
+		},    
+		
+		countdown: function(dt) {
+			this.p.barrier_time -= dt;
+			//console.log(this.p.barrier_time);
+			if(this.p.barrier_time <= 0) { 
+				this.p.muteki = false;
+				//Gloria destroy barrier animation
+			}
 		},
 		
 		
@@ -223,6 +255,27 @@ window.addEventListener("load",function() {
 				var bullet = new Q.Bullet({dx: bullet_x, dy: bullet_y, angle: this.p.angle, shooter: this.p});
 				Q.stage().insert(bullet);
 				this.p.bullet--;
+			}
+		},
+		
+		
+		
+		die: function(){
+			if(this.p.muteki != true){
+				if(Q.stage().playerLife>0){
+					console.log("die");
+					Q.stage().playerLife--;
+					//Gloria add animation~~~~~~yeah~~~~~~~
+					//add flash and then revive~
+					Q.stage().PlayerTank = Q.stage().insert(new Q.Player(Q.tilePos(2.5,10.5)));
+					this.destroy();
+				}else{
+					console.log("No life, endgame");
+					Q.stage().endgame = true;
+					this.destroy();
+				}
+			}else{
+				console.log("muteki, wahaha");
 			}
 		}
 	});
@@ -271,11 +324,13 @@ window.addEventListener("load",function() {
 				case 0:   bullet_x = p.x; bullet_y = p.y-22;break;
 				case 180:  bullet_x = p.x; bullet_y = p.y+22;break;
 			}
-			if(p.fire){
+			if((p.fire)&&(!p.bulletCooldown)){
 				var bullet = new Q.BulletE({dx: bullet_x, dy: bullet_y, angle: p.angle, ene: p});
 //				//console.log(bullet);
 				this.entity.stage.insert(bullet);
 				p.fire = false;
+				p.bulletCooldown=true;
+				setTimeout( function(){p.bulletCooldown = false;},  500);
 			}
         },
 
@@ -315,7 +370,8 @@ window.addEventListener("load",function() {
 				sheet:"enemy",
 				type: SPRITE_ENEMY,
 				collisionMask: SPRITE_PLAYER | SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLET, //| SPRITE_BRICK | SPRITE_BIRD
-				fire:true
+				fire:true,
+				bulletCooldown: false
 			});
 
 			this.add("2d,enemyControls");
@@ -333,6 +389,7 @@ window.addEventListener("load",function() {
 				var yY=this.p.y;
 				////console.log("x "+xX+" y "+yY);
 				this.destroy();
+				stage.currentEnemy--;
 				var f;
 				stage.insert(f=new Q.Disappear1({ x: xX, y: yY }));
 				////console.log(f);
@@ -360,7 +417,9 @@ window.addEventListener("load",function() {
 		inserted: function() {
 //			//console.log(this);
 			this.stage.enemyNum--;
-			////console.log(this.stage.enemyNum);
+			this.stage.currentEnemy++;
+			console.log(this.stage.enemyNum);
+			console.log(this.stage.currentEnemy);
 		}
     });
 	  
@@ -381,6 +440,7 @@ window.addEventListener("load",function() {
 //			//console.log(this);
 			this.stage.enemyNum--;
 			this.stage.enemyANum--;
+			this.stage.currentEnemy++;
 			//console.log(this.stage.enemyANum);
 		}
     });
@@ -401,6 +461,7 @@ window.addEventListener("load",function() {
 //			//console.log(this);
 			this.stage.enemyNum--;
 			this.stage.enemyBNum--;
+			this.stage.currentEnemy++;
 			//console.log(this.stage.enemyBNum);
 		}
     });
@@ -421,6 +482,7 @@ window.addEventListener("load",function() {
 //			//console.log(this);
 			this.stage.enemyNum--;
 			this.stage.enemyCNum--;
+			this.stage.currentEnemy++;
 			//console.log(this.stage.enemyCNum);
 		}
     });
@@ -441,6 +503,7 @@ window.addEventListener("load",function() {
 //			//console.log(this);
 			this.stage.enemyNum--;
 			this.stage.enemyDNum--;
+			this.stage.currentEnemy++;
 			//console.log(this.stage.enemyDNum);
 		}
     });	  
@@ -589,32 +652,9 @@ window.addEventListener("load",function() {
 				//sensor: true
 			});
 
-		//	this.on("sensor");
-			this.on("hit.sprite",this,"hit");
-		//	this.on("inserted");
-		},
+		}
 
 		// When a dot is hit..
-		hit: function(col) {
-			// Destroy it and keep track of how many dots are left
-		//	this.destroy();
-		//	this.stage.dotCount--;
-			// If there are no more dots left, just restart the game
-		//	if(this.stage.dotCount == 0) {
-		//		Q.stageScene("level1");
-		//	}
-/*			if(col.obj.isA("Bullet")) {
-				this.destroy();////console.log(this.stage.donut);this.stage.donut=10;//console.log(this.stage.donut);
-			}*/
-		},
-
-		// When a dot is inserted, use it's parent (the stage)
-		// to keep track of the total number of dots on the stage
-		/*inserted: function() {
-			//console.log(this);
-			this.stage.donut = this.stage.donut || 0;
-			this.stage.donut++;
-		}*/
 	});
 	
 	// Tower is just a dot with a different sheet - use the same
@@ -629,6 +669,7 @@ window.addEventListener("load",function() {
 		hit: function(){
 			this.p.sheet='flag';
 			console.log("endgame");
+			Q.stage().endgame = true;
 		}
 	});
 
@@ -722,12 +763,15 @@ window.addEventListener("load",function() {
 		stage.insert(new Q.Bird(Q.tilePos2(7.5,12.5)));
 		stage.PlayerTank = stage.insert(new Q.Player(Q.tilePos(2.5,10.5)));
 //		 stage.add("viewport").follow(stage.PlayerTank);
+		stage.playerLife = 2;
+		stage.endgame = false;
 		stage.enemyNum=10;
 		stage.enemyANum=8;
 		stage.enemyBNum=2;
 		stage.enemyCNum=0;
 		stage.enemyDNum=0;
 		stage.enemyMax=3;
+		stage.currentEnemy=0;
 		var arr=[];
 		for(var i=0;i<8;i++){
 			arr.push(0);
