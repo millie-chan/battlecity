@@ -17,10 +17,11 @@ window.addEventListener("load",function() {
 	var SPRITE_ENEMY = 4;
 	var SPRITE_BULLET = 8;
 	var SPRITE_BULLETE = 16;
+	var SPRITE_APP = 32;
 
 	Q.component("towerManControls", {
 		// default properties to add onto our entity
-		defaults: { speed: 0, direction: 'up' , bulletCooldown: false},
+		defaults: { speed: 0, direction: 'up' , cannonCooldown: false},
 		added: function() {
 			var p = this.entity.p;
 			Q._defaults(p,this.defaults);
@@ -43,14 +44,15 @@ window.addEventListener("load",function() {
 
 			//fire if space is being pressed
 			if(Q.inputs['fire'] == true){
-				if(p.bulletCooldown == false){
+				if(p.cannonCooldown == false){
 					Q.stage(0).PlayerTank.fire();
-					p.bulletCooldown = true;
-					setTimeout( function(){p.bulletCooldown = false;},  500);
+					p.cannonCooldown = true;
+					setTimeout( function(){p.cannonCooldown = false;},  300);
 				}
 			}
 			
 			// based on our direction, try to add velocity in that direction
+
 			switch(p.direction) {
 				case "left": p.vx = -100; p.vy = 0; p.angle = -90; break;
 				case "right":p.vx = 100; p.vy = 0; p.angle = 90; break;
@@ -62,9 +64,6 @@ window.addEventListener("load",function() {
 		
 	});
 	
-	//bullet_available: true when the bullet is available to shoot
-	var bullet_available = true;
-	
 	Q.Sprite.extend('Bullet',{
 		init: function(props) {
 			this._super({
@@ -72,43 +71,38 @@ window.addEventListener("load",function() {
 				x: props.dx,
 				y: props.dy,
 				angle: props.angle,
-				seconds: 3,
+				shooter: props.shooter, 
 				type:SPRITE_BULLET,
 				collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLETE
 			});
-//			this.on('step',this,'countdown');
 			this.on("hit.sprite",'collision');
 			this.add("2d,bulletControls");
 		},
-
-		countdown: function(dt) {
-			this.p.seconds -= dt;
-			if(this.p.seconds < 0) { 
-				this.destroy();
-				bullet_available = true;
-			} else if(this.p.seconds < 1) {
-				this.set({ "fill-opacity": this.p.seconds });
-			}
-		},
 		
 		collision: function(collision) {
-//		//console.log(collision.obj);
 			if(collision.obj.isA("EnemyA")||collision.obj.isA("EnemyB")||collision.obj.isA("EnemyC")||collision.obj.isA("EnemyD")) {
-			////console.log("coll");//console.log(collision.obj);//	collision.obj.hit();
+				collision.obj.hit();
+				this.p.shooter.bullet++;
 				this.destroy();
-				bullet_available = true;
 			}
 			else if(collision.obj.isA("Brick")){
 				collision.obj.destroy();
+				this.p.shooter.bullet++;
 				this.destroy();
-				bullet_available = true;
+
 			}
 			else if(collision.obj.isA("Swall")||collision.obj.isA("BulletE")){
+				this.p.shooter.bullet++;
 				this.destroy();
-				bullet_available = true;
+			}
+			else if(collision.obj.isA("Bird")){
+				collision.obj.hit();
+				this.p.shooter.bullet++;
+				this.destroy();
 			}
 		}
 	});
+	
 	Q.Sprite.extend('BulletE',{
 		init: function(props) {
 			this._super({
@@ -121,36 +115,23 @@ window.addEventListener("load",function() {
 				type:SPRITE_BULLETE,
 				collisionMask: SPRITE_TILES | SPRITE_PLAYER | SPRITE_BULLET
 			});
-//			this.on('step',this,'countdown');
 			this.on("hit.sprite",'collision');
-			this.add("2d,bulletEControls");
-		},
-
-		countdown: function(dt) {
-			this.p.seconds -= dt;
-			if(this.p.seconds < 0) { 
-				this.destroy();
-				bullet_available = true;
-			} else if(this.p.seconds < 1) {
-				this.set({ "fill-opacity": this.p.seconds });
-			}
+			this.add("2d,bulletControls");
 		},
 		
 		collision: function(collision) {
-//		//console.log(collision.obj);
-/*			if(collision.obj.isA("EnemyA")||collision.obj.isA("EnemyB")||collision.obj.isA("EnemyC")||collision.obj.isA("EnemyD")) {
-			//console.log("coll");//console.log(collision.obj);//	collision.obj.hit();
-				this.destroy();
-				bullet_available = true;
-			}
-			else */if(collision.obj.isA("Brick")||collision.obj.isA("Player")){
+			if(collision.obj.isA("Brick")||collision.obj.isA("Player")){
 				collision.obj.destroy();
 				this.p.belong.fire = true;
 				this.destroy();
 				
 			}
 			else if(collision.obj.isA("Swall")||collision.obj.isA("Bullet")){
-//			//console.log(this);
+				this.p.belong.fire = true;
+				this.destroy();
+			}
+			else if(collision.obj.isA("Bird")){
+				collision.obj.p.sheet='flag';
 				this.p.belong.fire = true;
 				this.destroy();
 			}
@@ -197,46 +178,6 @@ window.addEventListener("load",function() {
 		}
 		
 	});
-	Q.component("bulletEControls", {
-		defaults: { speed: 200},
-
-		added: function() {
-			var p = this.entity.p;
-
-			Q._defaults(p,this.defaults);
-
-//			//console.log(p);
-			//this.step();
-			this.entity.on("step",this,"step");
-			//this.entity.on('hit',this,"changeDirection");
-		},
-		
-		step: function(dt) {
-			var p = this.entity.p;
-			
-			if(p.angle ==0){
-				p.direction = "up";
-			}
-			if(p.angle ==90){
-				p.direction = "right";
-			}
-			if(p.angle ==180){
-				p.direction = "down";
-			}
-			if(p.angle ==-90){
-				p.direction = "left";
-			}
-//			//console.log(p.direction);
-			
-			switch(p.direction) {
-			case "left": p.vx = -p.speed; break;
-			case "right":p.vx = p.speed; break;
-			case "up":   p.vy = -p.speed; break;
-			case "down": p.vy = p.speed; break;
-			}
-		}
-		
-	});
 	
 	// 4. Add in a basic sprite to get started
 	Q.Sprite.extend("Player", {
@@ -245,10 +186,10 @@ window.addEventListener("load",function() {
 			this._super(p,{
 				sheet:"player",
 				type: SPRITE_PLAYER,
-				collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLETE// | SPRITE_BRICK | SPRITE_BIRD,
+				collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLETE, 
+				bullet: 2
 			});
-
-			bullet_available = true;
+			
 			this.add("2d, towerManControls");
 		},
 		
@@ -278,125 +219,112 @@ window.addEventListener("load",function() {
 				bullet_y = this.p.y;
 			}
 			
-			var bullet = new Q.Bullet({dx: bullet_x, dy: bullet_y, angle: this.p.angle});
-			if(bullet_available){
+			if(this.p.bullet != 0){
+				var bullet = new Q.Bullet({dx: bullet_x, dy: bullet_y, angle: this.p.angle, shooter: this.p});
 				Q.stage().insert(bullet);
-				bullet_available = false;
+				this.p.bullet--;
 			}
-			////console.log(this.p.angle);
-			////console.log("fired");
 		}
 	});
 	
-      Q.component("enemyControls", {
+	Q.component("enemyControls", {
 //        defaults: {speed: 100,  direction: 'down', switchPercent: 0, bullet: 1 ,health: 1},
 
         added: function() {
-          var p = this.entity.p;
-////console.log(p.health);
-/*		  if(p.name=="A"){
-			this.defaults={speed: 100,  direction: 'down', switchPercent: 0, bullet: 1 ,health: 1};
-		  }
-		  else if(p.name=="B"){
-			this.defaults={speed: 150,  direction: 'down', switchPercent: 0, bullet: 1 ,health: 2};
-		  }
-		  else if(p.name=="C"){
-			this.defaults={speed: 100,  direction: 'down', switchPercent: 0, bullet: 1 ,health: 1};
-		  }
-		  else if(p.name=="D"){
-			this.defaults={speed: 100,  direction: 'down', switchPercent: 0, bullet: 1 ,health: 3};
-		  }
-		  */
-//          Q._defaults(p,this.defaults);
-		 // //console.log(p.direction);
-		  ////console.log(p.fire);
-          this.entity.on("step",this,"step");
-          this.entity.on('hit',this,"changeDirection");
+			var p = this.entity.p;
+		////console.log(p.health);
+
+
+		//          Q._defaults(p,this.defaults);
+			 // //console.log(p.direction);
+			  ////console.log(p.fire);
+			this.entity.on("step",this,"step");
+			this.entity.on('hit',this,"changeDirection");
         },
 
         step: function(dt) {
-          var p = this.entity.p;
-		  var bullet_x;
-		  var bullet_y;
-		  if(p.vx > 0) {
-            p.angle = 90;
-          } else if(p.vx < 0) {
-            p.angle = -90;
-          } else if(p.vy > 0) {
-            p.angle = 180;
-          } else if(p.vy < 0) {
-            p.angle = 0;
-          }
-          if(Math.random() < p.switchPercent / 100) {
-            this.tryDirection();
-          }
-          switch(p.direction) {
-            case "left": p.vx = -p.speed; break;
-            case "right":p.vx = p.speed; break;
-            case "up":   p.vy = -p.speed; break;
-            case "down": p.vy = p.speed; break;
-			case "stop": p.vx = 0; p.vy = 0;break;
-          }
-		  switch(p.angle){
-		    case -90: bullet_x = p.x-22;bullet_y = p.y;break;
-            case 90: bullet_x = p.x+22;bullet_y = p.y;break;
-            case 0:   bullet_x = p.x; bullet_y = p.y-22;break;
-            case 180:  bullet_x = p.x; bullet_y = p.y+22;break;
-		  }
-		  if(p.fire){
-			var bullet = new Q.BulletE({dx: bullet_x, dy: bullet_y, angle: p.angle, ene: p});
-//			//console.log(bullet);
-			this.entity.stage.insert(bullet);
-			p.fire = false;
-		  }
+			var p = this.entity.p;
+			var bullet_x;
+			var bullet_y;
+			if(p.vx > 0) {
+				p.angle = 90;
+			} else if(p.vx < 0) {
+				p.angle = -90;
+			} else if(p.vy > 0) {
+				p.angle = 180;
+			} else if(p.vy < 0) {
+				p.angle = 0;
+			}
+			if(Math.random() < p.switchPercent / 100) {
+				this.tryDirection();
+			}
+			switch(p.direction) {
+				case "left": p.vx = -p.speed; break;
+				case "right":p.vx = p.speed; break;
+				case "up":   p.vy = -p.speed; break;
+				case "down": p.vy = p.speed; break;
+				case "stop": p.vx = 0; p.vy = 0;break;
+			}
+			switch(p.angle){
+				case -90: bullet_x = p.x-22;bullet_y = p.y;break;
+				case 90: bullet_x = p.x+22;bullet_y = p.y;break;
+				case 0:   bullet_x = p.x; bullet_y = p.y-22;break;
+				case 180:  bullet_x = p.x; bullet_y = p.y+22;break;
+			}
+			if(p.fire){
+				var bullet = new Q.BulletE({dx: bullet_x, dy: bullet_y, angle: p.angle, ene: p});
+//				//console.log(bullet);
+				this.entity.stage.insert(bullet);
+				p.fire = false;
+			}
         },
 
         tryDirection: function() {
-          var p = this.entity.p; 
-          var from = p.direction;
-          if(p.vy != 0 && p.vx == 0) {
-            p.direction = Math.random() < 0.5 ? 'left' : 'right';
-          } else if(p.vx != 0 && p.vy == 0) {
-            p.direction = Math.random() < 0.5 ? 'up' : 'down';
-          }
+			var p = this.entity.p; 
+			var from = p.direction;
+			if(p.vy != 0 && p.vx == 0) {
+				p.direction = Math.random() < 0.5 ? 'left' : 'right';
+			} else if(p.vx != 0 && p.vy == 0) {
+				p.direction = Math.random() < 0.5 ? 'up' : 'down';
+			}
         },
 
         changeDirection: function(collision) {
-          var p = this.entity.p;
+			var p = this.entity.p;
 ////console.log(this.entity.stage.lists.Player[0].p.y);
-          if(p.vx == 0 && p.vy == 0) {
-            if(collision.normalY) {
-              p.direction = Math.random() < 0.5 ? 'left' : 'right';
-            } else if(collision.normalX) {
-              p.direction = Math.random() < 0.5 ? 'up' : 'down';
-            }
-          }
+			if(p.vx == 0 && p.vy == 0) {
+				if(collision.normalY) {
+					p.direction = Math.random() < 0.5 ? 'left' : 'right';
+				} else if(collision.normalX) {
+					p.direction = Math.random() < 0.5 ? 'up' : 'down';
+				}
+			}
         }
       });
 
-Q.animations('ani', {
-  appear: { frames: [0,1,2,3,2,1,0,1,2,3,2,1,0,1,2,3], rate: 1/5, loop: false , trigger: 'end'}, 
-  disappear1: { frames: [0,1,2], rate:1/8, trigger: 'end', loop: false  },
-  disappear2: { frames: [0,1], rate:1/8, loop: false , trigger: 'end' }
-});
+	Q.animations('ani', {
+	  appear: { frames: [0,1,2,3,2,1,0,1,2,3,2,1,0,1,2,3], rate: 1/5, loop: false , trigger: 'end'}, 
+	  disappear1: { frames: [0,1,2], rate:1/8, trigger: 'end', loop: false  },
+	  disappear2: { frames: [0,1], rate:1/8, loop: false , trigger: 'end' }
+	});
 
-      Q.Sprite.extend("Enemy", {
-        init: function(p) {
+    Q.Sprite.extend("Enemy", {
+		init: function(p) {
 
-          this._super(p,{
-            sheet:"enemy",
-            type: SPRITE_ENEMY,
-            collisionMask: SPRITE_PLAYER | SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLET, //| SPRITE_BRICK | SPRITE_BIRD
-			fire:true
-          });
+			this._super(p,{
+				sheet:"enemy",
+				type: SPRITE_ENEMY,
+				collisionMask: SPRITE_PLAYER | SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLET, //| SPRITE_BRICK | SPRITE_BIRD
+				fire:true
+			});
 
-          this.add("2d,enemyControls");
-          this.on("hit.sprite",this,"hit");
-		  this.on("inserted");
+			this.add("2d,enemyControls");
+//      	    this.on("hit.sprite",this,"hit");
+			this.on("inserted");
         },
 
-        hit: function(col) {
-          if(col.obj.isA("Bullet")) {
+        hit: function() {
+        //  if(col.obj.isA("Bullet")) {
 			var stage=this.stage;
 			var wid=stage._collisionLayers[0].p.cols;
             this.p.health--;
@@ -414,42 +342,40 @@ Q.animations('ani', {
 					var pos=[3.5,wid/2+0.5,wid-2.5];
 					setTimeout(function(){
 						var r=Math.floor((Math.random() * 3));
-						var gen=0;
-						while(!gen){
-							var e=Math.floor((Math.random() * 4));
-							switch(e) {
-								case 0: if(stage.enemyANum>0){stage.insert(ene=new Q.Appear(Q.tilePos(pos[r],1.5),0,pos[r]));ene.play("appear");gen=1;} break;
-								case 1: if(stage.enemyBNum>0){stage.insert(ene=new Q.Appear(Q.tilePos(pos[r],1.5),1,pos[r]));ene.play("appear");gen=1;} break;
-								case 2: if(stage.enemyCNum>0){stage.insert(ene=new Q.Appear(Q.tilePos(pos[r],1.5),2,pos[r]));ene.play("appear");gen=1;} break;
-								case 3: if(stage.enemyDNum>0){stage.insert(ene=new Q.Appear(Q.tilePos(pos[r],1.5),3,pos[r]));ene.play("appear");gen=1;} break;
-							}
-							//this.stage.insert(new Q.EnemyA(Q.tilePos(pos[r],0.5)));
-							// this.stage.insert(new Q.Enemy(Q.tilePos(4.5,6.5)));
+//						var gen=0;
+//						while(!gen){
+						var e=stage.enemyArr.shift();//Math.floor((Math.random() * 4));
+						switch(e) {
+							case 0: if(stage.enemyANum>0){stage.insert(ene=new Q.Appear(Q.tilePos(pos[r],1.5),0,pos[r]));ene.play("appear");} break;
+							case 1: if(stage.enemyBNum>0){stage.insert(ene=new Q.Appear(Q.tilePos(pos[r],1.5),1,pos[r]));ene.play("appear");} break;
+							case 2: if(stage.enemyCNum>0){stage.insert(ene=new Q.Appear(Q.tilePos(pos[r],1.5),2,pos[r]));ene.play("appear");} break;
+							case 3: if(stage.enemyDNum>0){stage.insert(ene=new Q.Appear(Q.tilePos(pos[r],1.5),3,pos[r]));ene.play("appear");} break;
 						}
+						//this.stage.insert(new Q.EnemyA(Q.tilePos(pos[r],0.5)));
+						// this.stage.insert(new Q.Enemy(Q.tilePos(4.5,6.5)));
 					},2500);
 				}
 			}
-          }
         },
 		inserted: function() {
 //			//console.log(this);
 			this.stage.enemyNum--;
 			////console.log(this.stage.enemyNum);
 		}
-      });
+    });
 	  
-      Q.Enemy.extend("EnemyA", {
+    Q.Enemy.extend("EnemyA", {
         init: function(p) {
-          this._super(Q._defaults(p,{
-            sheet: "enemyA",
-			name: "A",
-			speed: 100,
-			direction: 'down',
-			switchPercent: 0,
-			bullet: 1,
-			health: 1
-          }));
-		  this.add("animation");
+			this._super(Q._defaults(p,{
+				sheet: "enemyA",
+				name: "A",
+				speed: 100,
+				direction: 'down',
+				switchPercent: 0,
+				bullet: 1,
+				health: 1
+			}));
+			this.add("animation");
         },
 		inserted: function() {
 //			//console.log(this);
@@ -457,18 +383,19 @@ Q.animations('ani', {
 			this.stage.enemyANum--;
 			//console.log(this.stage.enemyANum);
 		}
-      });
-      Q.Enemy.extend("EnemyB", {
+    });
+	
+    Q.Enemy.extend("EnemyB", {
         init: function(p) {
-          this._super(Q._defaults(p,{
-            sheet: "enemyB",
-			name: "B",
-			speed: 150,
-			direction: 'down',
-			switchPercent: 0,
-			bullet: 1,
-			health: 2
-          }));
+			this._super(Q._defaults(p,{
+				sheet: "enemyB",
+				name: "B",
+				speed: 150,
+				direction: 'down',
+				switchPercent: 0,
+				bullet: 1,
+				health: 2
+			}));
         },
 		inserted: function() {
 //			//console.log(this);
@@ -476,18 +403,19 @@ Q.animations('ani', {
 			this.stage.enemyBNum--;
 			//console.log(this.stage.enemyBNum);
 		}
-      });
-      Q.Enemy.extend("EnemyC", {
+    });
+	  
+    Q.Enemy.extend("EnemyC", {
         init: function(p) {
-          this._super(Q._defaults(p,{
-            sheet: "enemyC",
-			name: "C",
-			speed: 100,
-			direction: 'down',
-			switchPercent: 0,
-			bullet: 1,
-			health: 1
-          }));
+			this._super(Q._defaults(p,{
+				sheet: "enemyC",
+				name: "C",
+				speed: 100,
+				direction: 'down',
+				switchPercent: 0,
+				bullet: 1,
+				health: 1
+			}));
         },
 		inserted: function() {
 //			//console.log(this);
@@ -495,18 +423,19 @@ Q.animations('ani', {
 			this.stage.enemyCNum--;
 			//console.log(this.stage.enemyCNum);
 		}
-      });
-      Q.Enemy.extend("EnemyD", {
+    });
+	
+    Q.Enemy.extend("EnemyD", {
         init: function(p) {
-          this._super(Q._defaults(p,{
-            sheet: "enemyD",
-			name: "D",
-			speed: 100,
-			direction: 'down',
-			switchPercent: 0,
-			bullet: 1,
-			health: 3
-          }));
+			this._super(Q._defaults(p,{
+				sheet: "enemyD",
+				name: "D",
+				speed: 100,
+				direction: 'down',
+				switchPercent: 0,
+				bullet: 1,
+				health: 3
+			}));
         },
 		inserted: function() {
 //			//console.log(this);
@@ -514,13 +443,14 @@ Q.animations('ani', {
 			this.stage.enemyDNum--;
 			//console.log(this.stage.enemyDNum);
 		}
-      });	  
-	  Q.Sprite.extend("Appear", {
+    });	  
+	
+	Q.Sprite.extend("Appear", {
 		init: function(p,k,pos) {
 			this._super(p,{
 				sheet: 'appear',
 				sprite: "ani",
-				type: SPRITE_TILES,
+				type: SPRITE_APP,
 				kind:k,
 				posx:pos
 			});
@@ -538,13 +468,14 @@ Q.animations('ani', {
 				case 3: this.stage.insert(new Q.EnemyD(Q.tilePos(this.p.posx,1.5)));break;
 			}
 		}
-	  });
-	  Q.Sprite.extend("Disappear1", {
+	});
+	
+	Q.Sprite.extend("Disappear1", {
 		init: function(p) {
 			this._super(p,{
 				sheet: 'disappear1',
 				sprite: "ani",
-				type: SPRITE_TILES,
+				type: SPRITE_APP,
 //				posx:x,
 //				posy:y
 			});
@@ -561,13 +492,14 @@ Q.animations('ani', {
 			this.stage.insert(f=new Q.Disappear2({ x: xX, y: yY }));
 			f.play('disappear2');
 		}
-	  });
-	  Q.Sprite.extend("Disappear2", {
+	});
+	
+	Q.Sprite.extend("Disappear2", {
 		init: function(p) {
 			this._super(p,{
 				sheet: 'disappear2',
 				sprite: "ani",
-				type: SPRITE_TILES
+				type: SPRITE_APP
 			});
 			this.add("animation");
 			this.on("end",this,"des");
@@ -577,50 +509,56 @@ Q.animations('ani', {
 			//console.log(this);
 			this.destroy();
 		}
-	  });
-	  Q.genEnemy=function(stage,wid,num){
+	});
+	
+	Q.shuffle=function(o){ 
+		for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+		return o;
+	};
+	Q.genEnemy=function(stage,wid,num){
 		var pos=[3.5,wid/2+0.5,wid-2.5];
 		//console.log(num);
 		for(var i=0;i<num;i++){
 			setTimeout(function(){
 				var r=Math.floor((Math.random() * 3));
-				var gen=0;
-				while(!gen){
+//				var gen=0;
+//				while(!gen){
 					var ene;
-					var e=Math.floor((Math.random() * 4));
+					var e=stage.enemyArr.shift();//Math.floor((Math.random() * 4));
 					switch(e) {
 						case 0: if(stage.enemyANum>0){
 									stage.insert(ene=new Q.Appear(Q.tilePos(pos[r],1.5),0,pos[r]));
 									ene.play("appear");
 									//stage.insert(new Q.EnemyA(Q.tilePos(pos[r],1.5)));
-									gen=1;
+//									gen=1;
 								} break;
 						case 1: if(stage.enemyBNum>0){
 									stage.insert(ene=new Q.Appear(Q.tilePos(pos[r],1.5),1,pos[r]));
 									ene.play("appear");
 									//stage.insert(new Q.EnemyB(Q.tilePos(pos[r],1.5)));
-									gen=1;
+//									gen=1;
 								} break;
 						case 2: if(stage.enemyCNum>0){
 									stage.insert(ene=new Q.Appear(Q.tilePos(pos[r],1.5),2,pos[r]));
 									ene.play("appear");
 									//stage.insert(new Q.EnemyC(Q.tilePos(pos[r],1.5)));
-									gen=1;
+//									gen=1;
 								} break;
 						case 3: if(stage.enemyDNum>0){
 									stage.insert(ene=new Q.Appear(Q.tilePos(pos[r],1.5),3,pos[r]));
 									ene.play("appear");
 									//stage.insert(new Q.EnemyD(Q.tilePos(pos[r],1.5)));
-									gen=1;
+//									gen=1;
 								} break;
 					}
-				}
+//				}
 			},i*3000);			
 		}//stage.insert(new Q.EnemyA(Q.tilePos(pos[r],0.5)));
 /*		stage.insert(new Q.EnemyA(Q.tilePos(pos[0],1.5)));
 		stage.insert(new Q.EnemyA(Q.tilePos(pos[1],1.5)));
 		stage.insert(new Q.EnemyA(Q.tilePos(pos[2],1.5)));*/
-	  }
+	};
+	
 	Q.Sprite.extend("Swall", {
 		init: function(p) {
 			this._super(p,{
@@ -665,9 +603,9 @@ Q.animations('ani', {
 		//	if(this.stage.dotCount == 0) {
 		//		Q.stageScene("level1");
 		//	}
-			if(col.obj.isA("Bullet")) {
+/*			if(col.obj.isA("Bullet")) {
 				this.destroy();////console.log(this.stage.donut);this.stage.donut=10;//console.log(this.stage.donut);
-			}
+			}*/
 		},
 
 		// When a dot is inserted, use it's parent (the stage)
@@ -687,45 +625,14 @@ Q.animations('ani', {
 			this._super(Q._defaults(p,{
 				sheet: 'bird'
 			}));
-		}
-	});
-/*
-	Q.Brick.extend("BirdNW", {
-		init: function(p) {
-			this._super(Q._defaults(p,{
-				sheet: 'birdNW',
-				type: SPRITE_BIRD
-			}));
+		},
+		hit: function(){
+			this.p.sheet='flag';
+			console.log("endgame");
 		}
 	});
 
-	Q.Brick.extend("BirdNE", {
-		init: function(p) {
-			this._super(Q._defaults(p,{
-				sheet: 'birdNE',
-				type: SPRITE_BIRD
-			}));
-		}
-	});
-	
-	Q.Brick.extend("BirdSW", {
-		init: function(p) {
-			this._super(Q._defaults(p,{
-				sheet: 'birdSW',
-				type: SPRITE_BIRD
-			}));
-		}
-	});
-	
-	Q.Brick.extend("BirdSE", {
-		init: function(p) {
-			this._super(Q._defaults(p,{
-				sheet: 'birdSE',
-				type: SPRITE_BIRD
-			}));
-		}
-	});
-*/
+
 	
 	Q.tilePos = function(col,row) {
 		//return { x: col*16 + 16, y: row*16 +16 };
@@ -754,27 +661,11 @@ Q.animations('ani', {
 			// Clone the top level arriw
 			var tiles = this.p.tiles = this.p.tiles.concat();
 			var size = this.p.tileW;
-			//this.stage.enemyNum = this.stage.enemyNum || enemyNum;
-			//this.stage.enemyANum = this.stage.enemyANum || enemyANum;
-			//this.stage.enemyBNum = this.stage.enemyBNum || enemyBNum;
-			//this.stage.enemyCNum = this.stage.enemyCNum || enemyCNum;
-			//this.stage.enemyDNum = this.stage.enemyDNum || enemyDNum;
-			//this.stage.enemyMax = this.stage.enemyMax || enemyMax;
 			for(var y=0;y<tiles.length;y++) {
 				var row = tiles[y] = tiles[y].concat();
 				for(var x =0;x<row.length;x++) {
 					var tile = row[x];
 
-					
-					// Replace 0's with dots and 2's with Towers
-					/*
-					if(tile == 0 || tile == 2) {
-						var className = 'BirdSE';
-						//var className = tile == 0 ? 'Wall' : 'Tower'
-						this.stage.insert(new Q[className](Q.tilePos(x,y)));
-						row[x] = 0;
-					}
-					*/
 					
 					
 					switch (tile)
@@ -837,6 +728,15 @@ Q.animations('ani', {
 		stage.enemyCNum=0;
 		stage.enemyDNum=0;
 		stage.enemyMax=3;
+		var arr=[];
+		for(var i=0;i<8;i++){
+			arr.push(0);
+		}
+		for(var i=0;i<2;i++){
+			arr.push(1);
+		}
+		stage.enemyArr=Q.shuffle(arr);
+		console.log(stage.enemyArr);
 		stage.add("viewport");
 		stage.moveTo(32,0);
 		Q.genEnemy(stage,map.p.tiles[0].length,stage.enemyMax);
@@ -846,8 +746,8 @@ Q.animations('ani', {
 		var map = stage.collisionLayer(new Q.TowerManMap({dataAsset: 'level2.json', sheet: 'tiles'}));
 		map.setup();
 
-stage.add("viewport");
-stage.moveTo(32,0);
+		stage.add("viewport");
+		stage.moveTo(32,0);
 
 		var player = stage.insert(new Q.Player(Q.tilePos2(5,4)));
 		stage.insert(new Q.Bird(Q.tilePos2(7.5,12.5)));
@@ -862,54 +762,7 @@ stage.moveTo(32,0);
 		stage.insert(new Q.Tree(Q.tilePos2(11.5,4.5)));
 		stage.insert(new Q.Tree(Q.tilePos2(11.5,5.5)));
 		stage.insert(new Q.Tree(Q.tilePos2(11.5,6.5)));
-		/*
-		stage.insert(new Q.Tree(Q.tilePos(1,11)));
-		stage.insert(new Q.Tree(Q.tilePos(2,11)));
-		stage.insert(new Q.Tree(Q.tilePos(1,12)));
-		stage.insert(new Q.Tree(Q.tilePos(2,12)));
-		stage.insert(new Q.Tree(Q.tilePos(3,11)));
-		stage.insert(new Q.Tree(Q.tilePos(4,11)));
-		stage.insert(new Q.Tree(Q.tilePos(3,12)));
-		stage.insert(new Q.Tree(Q.tilePos(4,12)));
-		stage.insert(new Q.Tree(Q.tilePos(1,9)));
-		stage.insert(new Q.Tree(Q.tilePos(2,9)));
-		stage.insert(new Q.Tree(Q.tilePos(1,10)));
-		stage.insert(new Q.Tree(Q.tilePos(2,10)));
-		
-		stage.insert(new Q.Tree(Q.tilePos(9,13)));
-		stage.insert(new Q.Tree(Q.tilePos(9,14)));
-		stage.insert(new Q.Tree(Q.tilePos(10,13)));
-		stage.insert(new Q.Tree(Q.tilePos(10,14)));
-		stage.insert(new Q.Tree(Q.tilePos(9,15)));
-		stage.insert(new Q.Tree(Q.tilePos(9,16)));
-		stage.insert(new Q.Tree(Q.tilePos(10,15)));
-		stage.insert(new Q.Tree(Q.tilePos(10,16)));
-		stage.insert(new Q.Tree(Q.tilePos(11,13)));
-		stage.insert(new Q.Tree(Q.tilePos(11,14)));
-		stage.insert(new Q.Tree(Q.tilePos(12,13)));
-		stage.insert(new Q.Tree(Q.tilePos(12,14)));
-		stage.insert(new Q.Tree(Q.tilePos(13,13)));
-		stage.insert(new Q.Tree(Q.tilePos(13,14)));
-		stage.insert(new Q.Tree(Q.tilePos(14,13)));
-		stage.insert(new Q.Tree(Q.tilePos(14,14)));
-		
-		stage.insert(new Q.Tree(Q.tilePos(21,9)));
-		stage.insert(new Q.Tree(Q.tilePos(21,10)));
-		stage.insert(new Q.Tree(Q.tilePos(22,9)));
-		stage.insert(new Q.Tree(Q.tilePos(22,10)));
-		stage.insert(new Q.Tree(Q.tilePos(21,11)));
-		stage.insert(new Q.Tree(Q.tilePos(21,12)));
-		stage.insert(new Q.Tree(Q.tilePos(22,11)));
-		stage.insert(new Q.Tree(Q.tilePos(22,12)));
-		stage.insert(new Q.Tree(Q.tilePos(21,13)));
-		stage.insert(new Q.Tree(Q.tilePos(21,14)));
-		stage.insert(new Q.Tree(Q.tilePos(22,13)));
-		stage.insert(new Q.Tree(Q.tilePos(22,14)));
-		*/
-		//stage.insert(new Q.Enemy(Q.tilePos(2.5,0.5)));
-        //stage.insert(new Q.Enemy(Q.tilePos(12.5,0.5)));
-        //stage.insert(new Q.Enemy(Q.tilePos(5,10)));
-		
+
 	});
 
 	Q.load("sprites2.png, newSprites.json, level1.json, level2.json", function() {
@@ -919,14 +772,6 @@ stage.moveTo(32,0);
 
 		Q.stageScene("level1");
 	});
+
 	
-	/*
-	Q.load("sprites.png, sprites.json, level.json, tiles.png", function() {
-		Q.sheet("tiles","tiles.png", { tileW: 32, tileH: 32 });
-
-		Q.compileSheets("sprites.png","sprites.json");
-
-		Q.stageScene("level1");
-	});
-	*/
 });
