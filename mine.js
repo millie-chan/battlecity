@@ -1,4 +1,14 @@
 window.addEventListener("load",function() {
+	$("#outer").css("left", (window.innerWidth-544)/2+"px");
+	for (var i=1; i <= 20; i++) {
+		if (i % 2 ==0) {
+			$('<div class="numSprite bomb eneven" id="en'+i+'" style="display:none"></div>').appendTo($("#outer"));
+			$("#en"+i).css("top", (32 + i*8)+'px');
+		} else if (i % 2 ==1) {
+			$('<div class="numSprite bomb enodd" id="en'+i+'" style="display:none"></div>').appendTo($("#outer"));
+			$("#en"+i).css("top", (40 + i*8)+'px');
+		}
+	}
 	var Q = window.Q = Quintus({ development: true })
 			.include("Sprites, Scenes, Input, 2D, Anim")
 			.setup("myGame", { width: 448, height: 448 })
@@ -18,10 +28,11 @@ window.addEventListener("load",function() {
 	var SPRITE_BULLET = 8;
 	var SPRITE_BULLETE = 16;
 	var SPRITE_APP = 32;
+	var SPRITE_BARRIER = 64;
 
 	Q.component("towerManControls", {
 		// default properties to add onto our entity
-		defaults: { speed: 0, direction: 'up' , bulletCooldown: false},
+		defaults: { speed: 0, direction: 'up' , cannonCooldown: false},
 		added: function() {
 			var p = this.entity.p;
 			Q._defaults(p,this.defaults);
@@ -43,12 +54,18 @@ window.addEventListener("load",function() {
 			Q.inputs['down']  ? 'down' : 
 			'none';
 
+			if(Q.stage().endgame){
+				p.direction='none';
+			}
+			if(Q.stage().currentEnemy == 0 && Q.stage().enemyNum==0){
+				Q.stage().endgame = true;
+			}
 			//fire if space is being pressed
 			if(Q.inputs['fire'] == true){
-				if(p.bulletCooldown == false){
+				if(p.cannonCooldown == false){
 					Q.stage(0).PlayerTank.fire();
-					p.bulletCooldown = true;
-					setTimeout( function(){p.bulletCooldown = false;},  500);
+					p.cannonCooldown = true;
+					setTimeout( function(){p.cannonCooldown = false;},  300);
 				}
 			}
 			
@@ -61,12 +78,14 @@ window.addEventListener("load",function() {
 				case "down": p.vx = 0; p.vy = 100; p.angle = 180; break;
 				case "none": p.vx = 0;p.vy = 0;break;
 			}
+			if(p.barrier){
+				p.barrier.p.x=p.x;
+				p.barrier.p.y=p.y;
+			}
 		}
 		
 	});
 	
-	//bullet_available: true when the bullet is available to shoot
-	var bullet_available = true;
 	
 	Q.Sprite.extend('Bullet',{
 		init: function(props) {
@@ -75,47 +94,73 @@ window.addEventListener("load",function() {
 				x: props.dx,
 				y: props.dy,
 				angle: props.angle,
-				seconds: 3,
+				shooter: props.shooter, 
 				type:SPRITE_BULLET,
-				collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLETE
+				first_colli: true,
+				collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLETE | SPRITE_BARRIER
 			});
 //			this.on('step',this,'countdown');
 			this.on("hit.sprite",'collision');
 			this.add("2d,bulletControls");
 		},
 
-		countdown: function(dt) {
-			this.p.seconds -= dt;
-			if(this.p.seconds < 0) { 
-				this.destroy();
-				bullet_available = true;
-			} else if(this.p.seconds < 1) {
-				this.set({ "fill-opacity": this.p.seconds });
-			}
-		},
 		
 		collision: function(collision) {
 //		//console.log(collision.obj);
+			var xX=this.p.x;
+			var yY=this.p.y;
+			var stage = this.stage;
 			if(collision.obj.isA("EnemyA")||collision.obj.isA("EnemyB")||collision.obj.isA("EnemyC")||collision.obj.isA("EnemyD")) {
 			////console.log("coll");//console.log(collision.obj);//	collision.obj.hit();
 				collision.obj.hit();
+				this.p.shooter.bullet++;
 				this.destroy();
-				bullet_available = true;
+				var f;
+				stage.insert(f=new Q.Disappear1({ x: xX, y: yY },false));
+				////console.log(f);
+				f.play("disappear1");
 			}
 			else if(collision.obj.isA("Brick")){
+				if(this.p.first_colli){
+					this.p.shooter.bullet++;
+					this.p.first_colli = false;
+				}
 				collision.obj.destroy();
 				this.destroy();
-				bullet_available = true;
+				var f;
+				stage.insert(f=new Q.Disappear1({ x: xX, y: yY},false));
+				////console.log(f);
+				f.play("disappear1");
 			}
 			else if(collision.obj.isA("Swall")||collision.obj.isA("BulletE")){
+				if(this.p.first_colli){
+					this.p.shooter.bullet++;
+					this.p.first_colli = false;
+				}
 				this.destroy();
-				bullet_available = true;
+				var f;
+				stage.insert(f=new Q.Disappear1({ x: xX, y: yY},false));
+				////console.log(f);
+				f.play("disappear1");
 			}
 			else if(collision.obj.isA("Bird")){
-				collision.obj.p.sheet='flag';
-
-				this.destroy();
-				bullet_available = true;
+				if(collision.obj.p.sheet!="flag"){
+					var pX=collision.obj.p.x;
+					var pY=collision.obj.p.y;
+					this.p.shooter.bullet++;
+					this.destroy();
+					var f1;
+					stage.insert(f1=new Q.Disappear1({ x: xX, y: yY},false));
+					var f2;
+					stage.insert(f2=new Q.Disappear1({ x: pX, y: pY},true));
+					f1.play("disappear1");
+					f2.play("disappear1");
+					collision.obj.p.sheet='flag';
+				}
+				else{
+					this.p.shooter.bullet++;
+					this.destroy();
+				}
 			}
 		}
 	});
@@ -128,47 +173,78 @@ window.addEventListener("load",function() {
 				y: props.dy,
 				angle: props.angle,
 				belong: props.ene,
-				seconds: 3,
+				firstCollide:true,
 				type:SPRITE_BULLETE,
-				collisionMask: SPRITE_TILES | SPRITE_PLAYER | SPRITE_BULLET
+				collisionMask: SPRITE_TILES | SPRITE_PLAYER | SPRITE_BULLET | SPRITE_BARRIER
 			});
 //			this.on('step',this,'countdown');
 			this.on("hit.sprite",'collision');
-			this.add("2d,bulletEControls");
-		},
-
-		countdown: function(dt) {
-			this.p.seconds -= dt;
-			if(this.p.seconds < 0) { 
-				this.destroy();
-				bullet_available = true;
-			} else if(this.p.seconds < 1) {
-				this.set({ "fill-opacity": this.p.seconds });
-			}
+			this.add("2d,bulletControls");	
 		},
 		
 		collision: function(collision) {
-//		//console.log(collision.obj);
-/*			if(collision.obj.isA("EnemyA")||collision.obj.isA("EnemyB")||collision.obj.isA("EnemyC")||collision.obj.isA("EnemyD")) {
-			//console.log("coll");//console.log(collision.obj);//	collision.obj.hit();
+			var xX=this.p.x;
+			var yY=this.p.y;
+			var stage = this.stage;
+			if(collision.obj.isA("Player")){
+//				console.log(collision.obj);
+				collision.obj.die();
+				if(this.p.firstCollide){
+					this.p.firstCollide=false;
+					this.p.belong.bullet++;
+				}
 				this.destroy();
-				bullet_available = true;
+				var f;
+				stage.insert(f=new Q.Disappear1({ x: xX, y: yY},false));
+				f.play("disappear1");
 			}
-			else */if(collision.obj.isA("Brick")||collision.obj.isA("Player")){
+			else if(collision.obj.isA("Brick")){
 				collision.obj.destroy();
-				this.p.belong.fire = true;
+				if(this.p.firstCollide){
+					this.p.firstCollide=false;
+					this.p.belong.bullet++;
+				}
 				this.destroy();
-				
+				var f;
+				stage.insert(f=new Q.Disappear1({ x: xX, y: yY},false));
+				f.play("disappear1");
 			}
 			else if(collision.obj.isA("Swall")||collision.obj.isA("Bullet")){
 //			//console.log(this);
-				this.p.belong.fire = true;
+				if(this.p.firstCollide){
+					this.p.firstCollide=false;
+					this.p.belong.bullet++;
+				}
 				this.destroy();
+				var f;
+				stage.insert(f=new Q.Disappear1({ x: xX, y: yY},false));
+				////console.log(f);
+				f.play("disappear1");
 			}
 			else if(collision.obj.isA("Bird")){
-				collision.obj.p.sheet='flag';
-				this.p.belong.fire = true;
-				this.destroy();
+				if(collision.obj.p.sheet!="flag"){
+					var pX=collision.obj.p.x;
+					var pY=collision.obj.p.y;
+					if(this.p.firstCollide){
+						this.p.firstCollide=false;
+						this.p.belong.bullet++;
+					}
+					this.destroy();
+					var f1;
+					stage.insert(f1=new Q.Disappear1({ x: xX, y: yY},false));
+					var f2;
+					stage.insert(f2=new Q.Disappear1({ x: pX, y: pY},true));
+					f1.play("disappear1");
+					f2.play("disappear1");
+					collision.obj.p.sheet='flag';
+				}
+				else{
+					if(this.p.firstCollide){
+					this.p.firstCollide=false;
+					this.p.belong.bullet++;
+					}
+					this.destroy();
+				}
 			}
 		}
 	});
@@ -214,48 +290,6 @@ window.addEventListener("load",function() {
 		
 	});
 	
-	Q.component("bulletEControls", {
-		defaults: { speed: 200},
-
-		added: function() {
-			var p = this.entity.p;
-
-			Q._defaults(p,this.defaults);
-
-//			//console.log(p);
-			//this.step();
-			this.entity.on("step",this,"step");
-			//this.entity.on('hit',this,"changeDirection");
-		},
-		
-		step: function(dt) {
-			var p = this.entity.p;
-			
-			if(p.angle ==0){
-				p.direction = "up";
-			}
-			if(p.angle ==90){
-				p.direction = "right";
-			}
-			if(p.angle ==180){
-				p.direction = "down";
-			}
-			if(p.angle ==-90){
-				p.direction = "left";
-			}
-//			//console.log(p.direction);
-			
-			switch(p.direction) {
-			case "left": p.vx = -p.speed; break;
-			case "right":p.vx = p.speed; break;
-			case "up":   p.vy = -p.speed; break;
-			case "down": p.vy = p.speed; break;
-			}
-		}
-		
-	});
-	
-
 
 	// 4. Add in a basic sprite to get started
 	Q.Sprite.extend("Player", {
@@ -264,13 +298,29 @@ window.addEventListener("load",function() {
 			this._super(p,{
 				sheet:"player",
 				type: SPRITE_PLAYER,
-				collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLETE// | SPRITE_BRICK | SPRITE_BIRD,
+				barrier: null,
+//				points: [  [ -8, -8 ], [  8, -8 ], [  8,  8 ], [ -8,  8 ] ],
+				collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLETE,// | SPRITE_BRICK | SPRITE_BIRD,
+				bullet: 2,
+				barrier_time: 3,
+				muteki: true
 			});
 
-			bullet_available = true;
+			
 			this.add("2d, towerManControls");
+			this.on("inserted");
+			this.on('step',this,'countdown');
 		},
 		
+		countdown: function(dt) {
+			this.p.barrier_time -= dt;
+			//console.log(this.p.barrier_time);
+			if(this.p.barrier_time <= 0) { 
+				this.p.muteki = false;
+				this.p.barrier.destroy();
+				//this.p.barrier=null;
+			}
+		},
 		
 		fire: function() {
 			var bullet_x;
@@ -297,13 +347,60 @@ window.addEventListener("load",function() {
 				bullet_y = this.p.y;
 			}
 			
-			var bullet = new Q.Bullet({dx: bullet_x, dy: bullet_y, angle: this.p.angle});
-			if(bullet_available){
+			if(this.p.bullet != 0){
+				var bullet = new Q.Bullet({dx: bullet_x, dy: bullet_y, angle: this.p.angle, shooter: this.p});
+
 				Q.stage().insert(bullet);
-				bullet_available = false;
+
+				this.p.bullet--;
 			}
-			////console.log(this.p.angle);
-			////console.log("fired");
+		},
+
+		inserted: function() {
+//			//console.log(this);
+			var f;
+			var p=this.p;
+			this.stage.insert(f=new Q.Barrier({ x: this.p.x, y: this.p.y }));
+			p.barrier=f;
+			console.log(p);
+			console.log(f);
+			f.play('barrier');
+			//setTimeout(function(){f.destroy();p.barrier=null;},5000);
+		},
+		die: function(){
+			if(this.p.muteki != true){
+				if(Q.stage().playerLife>0){
+					console.log("die");
+					Q.stage().playerLife--;
+					Q.state.dec("lives",1);
+					var pX=this.p.x;
+					var pY=this.p.y;
+					var f;
+					Q.stage().insert(f=new Q.Disappear1({ x: pX, y: pY},true));
+					console.log(f);
+					f.play("disappear1");
+					var ene;
+					Q.stage().insert(ene=new Q.Appear(Q.tilePos(3.5,10.5),4,3.5));
+					ene.play("appear");
+					//Gloria add animation~~~~~~yeah~~~~~~~
+					//add flash and then revive~
+					this.destroy();
+				}else{
+					console.log("No life, endgame");
+					var pX=this.p.x;
+					var pY=this.p.y;
+					var f;
+					Q.stage().insert(f=new Q.Disappear1({ x: pX, y: pY},true));
+					console.log(f);
+					f.play("disappear1");
+					Q.stage().endgame = true;
+					this.destroy();
+				}
+			}else{
+				console.log("muteki, wahaha");
+
+
+			}
 		}
 	});
 	
@@ -351,11 +448,14 @@ window.addEventListener("load",function() {
 				case 0:   bullet_x = p.x; bullet_y = p.y-22;break;
 				case 180:  bullet_x = p.x; bullet_y = p.y+22;break;
 			}
-			if(p.fire){
+			if((p.bullet>0)&&(!p.bulletCooldown)){
+//			console.log(p.bullet);
 				var bullet = new Q.BulletE({dx: bullet_x, dy: bullet_y, angle: p.angle, ene: p});
 //				//console.log(bullet);
 				this.entity.stage.insert(bullet);
-				p.fire = false;
+				p.bullet--;
+				p.bulletCooldown=true;
+				setTimeout( function(){p.bulletCooldown = false;},  500);
 			}
         },
 
@@ -385,7 +485,8 @@ window.addEventListener("load",function() {
 	Q.animations('ani', {
 	  appear: { frames: [0,1,2,3,2,1,0,1,2,3,2,1,0,1,2,3], rate: 1/5, loop: false , trigger: 'end'}, 
 	  disappear1: { frames: [0,1,2], rate:1/8, trigger: 'end', loop: false  },
-	  disappear2: { frames: [0,1], rate:1/8, loop: false , trigger: 'end' }
+	  disappear2: { frames: [0,1], rate:1/8, loop: false , trigger: 'end' },
+	  barrier: { frames: [0,1], rate:1/8, loop: true }
 	});
 
     Q.Sprite.extend("Enemy", {
@@ -394,8 +495,9 @@ window.addEventListener("load",function() {
 			this._super(p,{
 				sheet:"enemy",
 				type: SPRITE_ENEMY,
-				collisionMask: SPRITE_PLAYER | SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLET, //| SPRITE_BRICK | SPRITE_BIRD
-				fire:true
+				collisionMask: SPRITE_PLAYER | SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLET | SPRITE_BARRIER, //| SPRITE_BRICK | SPRITE_BIRD
+//				fire:true,
+				bulletCooldown: false
 			});
 
 			this.add("2d,enemyControls");
@@ -413,8 +515,9 @@ window.addEventListener("load",function() {
 				var yY=this.p.y;
 				////console.log("x "+xX+" y "+yY);
 				this.destroy();
+				stage.currentEnemy--;
 				var f;
-				stage.insert(f=new Q.Disappear1({ x: xX, y: yY }));
+				stage.insert(f=new Q.Disappear1({ x: xX, y: yY}, true));
 				////console.log(f);
 				f.play("disappear1");
 				////console.log(stage.enemyNum);
@@ -440,6 +543,8 @@ window.addEventListener("load",function() {
 		inserted: function() {
 //			//console.log(this);
 			this.stage.enemyNum--;
+			this.stage.currentEnemy++;
+			Q.state.dec("eNum",1);
 			////console.log(this.stage.enemyNum);
 		}
     });
@@ -452,7 +557,7 @@ window.addEventListener("load",function() {
 				speed: 100,
 				direction: 'down',
 				switchPercent: 0,
-				bullet: 1,
+				bullet: 2,
 				health: 1
 			}));
 			this.add("animation");
@@ -461,6 +566,8 @@ window.addEventListener("load",function() {
 //			//console.log(this);
 			this.stage.enemyNum--;
 			this.stage.enemyANum--;
+			this.stage.currentEnemy++;
+			Q.state.dec("eNum",1);
 			//console.log(this.stage.enemyANum);
 		}
     });
@@ -481,6 +588,8 @@ window.addEventListener("load",function() {
 //			//console.log(this);
 			this.stage.enemyNum--;
 			this.stage.enemyBNum--;
+			this.stage.currentEnemy++;
+			Q.state.dec("eNum",1);
 			//console.log(this.stage.enemyBNum);
 		}
     });
@@ -501,6 +610,8 @@ window.addEventListener("load",function() {
 //			//console.log(this);
 			this.stage.enemyNum--;
 			this.stage.enemyCNum--;
+			this.stage.currentEnemy++;
+			Q.state.dec("eNum",1);
 			//console.log(this.stage.enemyCNum);
 		}
     });
@@ -521,6 +632,8 @@ window.addEventListener("load",function() {
 //			//console.log(this);
 			this.stage.enemyNum--;
 			this.stage.enemyDNum--;
+			this.stage.currentEnemy++;
+			Q.state.dec("eNum",1);
 			//console.log(this.stage.enemyDNum);
 		}
     });	  
@@ -540,22 +653,25 @@ window.addEventListener("load",function() {
 		des:function() {
 			//console.log("end");
 			//console.log(this);
+			var s=this.stage;
 			this.destroy();
 			switch(this.p.kind) {
-				case 0: this.stage.insert(new Q.EnemyA(Q.tilePos(this.p.posx,1.5)));break;
-				case 1: this.stage.insert(new Q.EnemyB(Q.tilePos(this.p.posx,1.5)));break;
-				case 2: this.stage.insert(new Q.EnemyC(Q.tilePos(this.p.posx,1.5)));break;
-				case 3: this.stage.insert(new Q.EnemyD(Q.tilePos(this.p.posx,1.5)));break;
+				case 0: s.insert(new Q.EnemyA(Q.tilePos(this.p.posx,1.5)));break;
+				case 1: s.insert(new Q.EnemyB(Q.tilePos(this.p.posx,1.5)));break;
+				case 2: s.insert(new Q.EnemyC(Q.tilePos(this.p.posx,1.5)));break;
+				case 3: s.insert(new Q.EnemyD(Q.tilePos(this.p.posx,1.5)));break;
+				case 4: s.PlayerTank = s.insert(new Q.Player(Q.tilePos(3.5,10.5)));break;
 			}
 		}
 	});
 	
 	Q.Sprite.extend("Disappear1", {
-		init: function(p) {
+		init: function(p,cr) {
 			this._super(p,{
 				sheet: 'disappear1',
 				sprite: "ani",
 				type: SPRITE_APP,
+				caller:cr
 //				posx:x,
 //				posy:y
 			});
@@ -567,10 +683,14 @@ window.addEventListener("load",function() {
 			//console.log(this);
 			var xX=this.p.x;
 			var yY=this.p.y;
+			var c=this.p.caller;
+			var s= this.stage;
 			this.destroy();
-			var f;
-			this.stage.insert(f=new Q.Disappear2({ x: xX, y: yY }));
-			f.play('disappear2');
+			if(c){
+				var f;
+				s.insert(f=new Q.Disappear2({ x: xX, y: yY }));
+				f.play('disappear2');
+			}
 		}
 	});
 	
@@ -590,11 +710,30 @@ window.addEventListener("load",function() {
 			this.destroy();
 		}
 	});
+
+
+	Q.Sprite.extend("Barrier", {
+		init: function(p) {
+			this._super(p,{
+				sheet: 'barrier',
+				sprite: "ani",
+				type: SPRITE_BARRIER
+			});
+			this.add("animation");
+//			this.on("end",this,"des");
+		},
+		des:function() {
+			//console.log("end");
+			//console.log(this);
+			this.destroy();
+		}
+	});
 	
 	Q.shuffle=function(o){ 
 		for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
 		return o;
 	};
+
 	Q.genEnemy=function(stage,wid,num){
 		var pos=[3.5,wid/2+0.5,wid-2.5];
 		//console.log(num);
@@ -669,32 +808,8 @@ window.addEventListener("load",function() {
 				//sensor: true
 			});
 
-		//	this.on("sensor");
-			this.on("hit.sprite",this,"hit");
-		//	this.on("inserted");
-		},
 
-		// When a dot is hit..
-		hit: function(col) {
-			// Destroy it and keep track of how many dots are left
-		//	this.destroy();
-		//	this.stage.dotCount--;
-			// If there are no more dots left, just restart the game
-		//	if(this.stage.dotCount == 0) {
-		//		Q.stageScene("level1");
-		//	}
-/*			if(col.obj.isA("Bullet")) {
-				this.destroy();////console.log(this.stage.donut);this.stage.donut=10;//console.log(this.stage.donut);
-			}*/
-		},
-
-		// When a dot is inserted, use it's parent (the stage)
-		// to keep track of the total number of dots on the stage
-		/*inserted: function() {
-			//console.log(this);
-			this.stage.donut = this.stage.donut || 0;
-			this.stage.donut++;
-		}*/
+		}
 	});
 	
 	// Tower is just a dot with a different sheet - use the same
@@ -705,6 +820,12 @@ window.addEventListener("load",function() {
 			this._super(Q._defaults(p,{
 				sheet: 'bird'
 			}));
+			this.on("hit.sprite",this,"hit");
+		},
+		hit: function(){
+			this.p.sheet='flag';
+			console.log("endgame");
+			Q.stage().endgame = true;
 		}
 	});
 
@@ -792,18 +913,48 @@ window.addEventListener("load",function() {
 		}
 	});
 	
+	Q.scene('ui', function(stage){
+		$("#lives1").addClass("num" + Q.state.get("lives"));
+		var divs = $(".bomb").map(function(){
+			if (this.id.replace('en', '') <= Q.state.get("eNum")) {
+				return this;
+			}
+		}).get();
+		$(divs).show();
+		
+		Q.state.on("change.eNum",this, function() {
+/*			if (Q.state.get("eNum") == 0) {
+				Q.stageScene("level2");
+			}*/
+            var divs = $(".bomb").map(function(){
+				if (this.id.replace('en', '') > Q.state.get("eNum")) {
+					return this;
+				}
+			}).get();
+			$(divs).hide();
+        });
+		
+		Q.state.on("change.lives",this, function() {
+			$("#lives1").removeClass();
+			$("#lives1").addClass("numSprite num"+Q.state.get("lives"));
+        });
+    });
+	
 	Q.scene("level1",function(stage) {
 		var map = stage.collisionLayer(new Q.TowerManMap({dataAsset: 'level1.json', sheet: 'tiles'}));
 		map.setup();
 		stage.insert(new Q.Bird(Q.tilePos2(7.5,12.5)));
-		stage.PlayerTank = stage.insert(new Q.Player(Q.tilePos(2.5,10.5)));
+		stage.PlayerTank = stage.insert(new Q.Player(Q.tilePos(3.5,10.5)));
 //		 stage.add("viewport").follow(stage.PlayerTank);
+		stage.playerLife = 2;
+		stage.endgame = false;
 		stage.enemyNum=10;
 		stage.enemyANum=8;
 		stage.enemyBNum=2;
 		stage.enemyCNum=0;
 		stage.enemyDNum=0;
 		stage.enemyMax=3;
+		stage.currentEnemy=0;
 		var arr=[];
 		for(var i=0;i<8;i++){
 			arr.push(0);
@@ -816,6 +967,11 @@ window.addEventListener("load",function() {
 		stage.add("viewport");
 		stage.moveTo(32,0);
 		Q.genEnemy(stage,map.p.tiles[0].length,stage.enemyMax);
+		Q.state.set("eNum",stage.enemyNum);
+		Q.state.set("lives",stage.playerLife);
+		Q.stageScene("ui",1);
+		$("#level1").removeClass();
+		$("#level1").addClass("numSprite num1");
 	});
 	
 	Q.scene("level2",function(stage) {
@@ -839,6 +995,9 @@ window.addEventListener("load",function() {
 		stage.insert(new Q.Tree(Q.tilePos2(11.5,5.5)));
 		stage.insert(new Q.Tree(Q.tilePos2(11.5,6.5)));
 
+		Q.stageScene("ui",1);
+		$("#level1").removeClass();
+		$("#level1").addClass("numSprite num2");
 	});
 
 	Q.load("sprites2.png, newSprites.json, level1.json, level2.json", function() {
@@ -846,6 +1005,7 @@ window.addEventListener("load",function() {
 
 		Q.compileSheets("sprites2.png","newSprites.json");
 
+		Q.state.reset({ score: 0, lives: 2, stage: 1 });
 		Q.stageScene("level1");
 	});
 
