@@ -615,6 +615,12 @@ window.addEventListener("load",function() {
             p.health--;
 			if(p.health==0){
 				stage.score+=p.score;
+				switch(p.name){
+					case "A": stage.currentA++; break;
+					case "B": stage.currentB++; break;
+					case "C": stage.currentC++; break;
+					case "D": stage.currentD++; break;
+				}
 				var xX=p.x;
 				var yY=p.y;
 				////console.log("x "+xX+" y "+yY);
@@ -640,6 +646,7 @@ window.addEventListener("load",function() {
 						// this.stage.insert(new Q.Enemy(Q.tilePos(4.5,6.5)));
 					},2500);
 				}
+//				console.log("a "+stage.currentA+" b "+stage.currentB+" c "+stage.currentC+" d "+stage.currentD);
 			}
         },
 		inserted: function() {
@@ -926,6 +933,23 @@ window.addEventListener("load",function() {
 		stage.insert(new Q.EnemyA(Q.tilePos(pos[1],1.5)));
 		stage.insert(new Q.EnemyA(Q.tilePos(pos[2],1.5)));*/
 	};
+
+	Q.genArray=function(stage){
+		var arr=[];
+		for(var i=0;i<stage.enemyANum;i++){
+			arr.push(0);
+		}
+		for(var i=0;i<stage.enemyBNum;i++){
+			arr.push(1);
+		}
+		for(var i=0;i<stage.enemyCNum;i++){
+			arr.push(2);
+		}
+		for(var i=0;i<stage.enemyDNum;i++){
+			arr.push(3);
+		}
+		return Q.shuffle(arr);
+	}
 	
 	Q.Sprite.extend("Swall", {
 		init: function(p) {
@@ -1104,16 +1128,13 @@ window.addEventListener("load",function() {
 		stage.enemyDNum=0;
 		stage.enemyMax=3;
 		stage.currentEnemy=0;
+		stage.currentA=0;
+		stage.currentB=0;
+		stage.currentC=0;
+		stage.currentD=0;
 		stage.score=0;
 		stage.diff=0;
-		var arr=[];
-		for(var i=0;i<8;i++){
-			arr.push(0);
-		}
-		for(var i=0;i<2;i++){
-			arr.push(1);
-		}
-		stage.enemyArr=Q.shuffle(arr);
+		stage.enemyArr=Q.genArray(stage);
 		console.log(stage.enemyArr);
 		stage.add("viewport");
 		stage.moveTo(32,0);
