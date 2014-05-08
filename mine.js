@@ -59,6 +59,7 @@ window.addEventListener("load",function() {
 			}
 			if(Q.stage().currentEnemy == 0 && Q.stage().enemyNum==0){
 				Q.stage().endgame = true;
+				//console.log("score: "+this.entity.stage.score);
 			}
 			//fire if space is being pressed
 			if(Q.inputs['fire'] == true){
@@ -115,10 +116,8 @@ window.addEventListener("load",function() {
 				collision.obj.hit();
 				this.p.shooter.bullet++;
 				this.destroy();
-				var f;
-				stage.insert(f=new Q.Disappear1({ x: xX, y: yY },false));
+				stage.insert(new Q.Disappear1({ x: xX, y: yY },false));
 				////console.log(f);
-				f.play("disappear1");
 			}
 			else if(collision.obj.isA("Brick")){
 				if(this.p.first_colli){
@@ -127,10 +126,8 @@ window.addEventListener("load",function() {
 				}
 				collision.obj.destroy();
 				this.destroy();
-				var f;
-				stage.insert(f=new Q.Disappear1({ x: xX, y: yY},false));
+				stage.insert(new Q.Disappear1({ x: xX, y: yY},false));
 				////console.log(f);
-				f.play("disappear1");
 			}
 			else if(collision.obj.isA("Swall")||collision.obj.isA("BulletE")){
 				if(this.p.first_colli){
@@ -138,10 +135,8 @@ window.addEventListener("load",function() {
 					this.p.first_colli = false;
 				}
 				this.destroy();
-				var f;
-				stage.insert(f=new Q.Disappear1({ x: xX, y: yY},false));
+				stage.insert(new Q.Disappear1({ x: xX, y: yY},false));
 				////console.log(f);
-				f.play("disappear1");
 			}
 			else if(collision.obj.isA("Bird")){
 				if(collision.obj.p.sheet!="flag"){
@@ -149,12 +144,8 @@ window.addEventListener("load",function() {
 					var pY=collision.obj.p.y;
 					this.p.shooter.bullet++;
 					this.destroy();
-					var f1;
-					stage.insert(f1=new Q.Disappear1({ x: xX, y: yY},false));
-					var f2;
-					stage.insert(f2=new Q.Disappear1({ x: pX, y: pY},true));
-					f1.play("disappear1");
-					f2.play("disappear1");
+					stage.insert(new Q.Disappear1({ x: xX, y: yY},false));
+					stage.insert(new Q.Disappear1({ x: pX, y: pY},true));
 					collision.obj.p.sheet='flag';
 				}
 				else{
@@ -194,9 +185,7 @@ window.addEventListener("load",function() {
 					this.p.belong.bullet++;
 				}
 				this.destroy();
-				var f;
-				stage.insert(f=new Q.Disappear1({ x: xX, y: yY},false));
-				f.play("disappear1");
+				stage.insert(new Q.Disappear1({ x: xX, y: yY},false));
 			}
 			else if(collision.obj.isA("Brick")){
 				collision.obj.destroy();
@@ -205,9 +194,7 @@ window.addEventListener("load",function() {
 					this.p.belong.bullet++;
 				}
 				this.destroy();
-				var f;
-				stage.insert(f=new Q.Disappear1({ x: xX, y: yY},false));
-				f.play("disappear1");
+				stage.insert(new Q.Disappear1({ x: xX, y: yY},false));
 			}
 			else if(collision.obj.isA("Swall")||collision.obj.isA("Bullet")){
 //			//console.log(this);
@@ -216,10 +203,8 @@ window.addEventListener("load",function() {
 					this.p.belong.bullet++;
 				}
 				this.destroy();
-				var f;
-				stage.insert(f=new Q.Disappear1({ x: xX, y: yY},false));
+				stage.insert(new Q.Disappear1({ x: xX, y: yY},false));
 				////console.log(f);
-				f.play("disappear1");
 			}
 			else if(collision.obj.isA("Bird")){
 				if(collision.obj.p.sheet!="flag"){
@@ -230,12 +215,8 @@ window.addEventListener("load",function() {
 						this.p.belong.bullet++;
 					}
 					this.destroy();
-					var f1;
-					stage.insert(f1=new Q.Disappear1({ x: xX, y: yY},false));
-					var f2;
-					stage.insert(f2=new Q.Disappear1({ x: pX, y: pY},true));
-					f1.play("disappear1");
-					f2.play("disappear1");
+					stage.insert(new Q.Disappear1({ x: xX, y: yY},false));
+					stage.insert(new Q.Disappear1({ x: pX, y: pY},true));
 					collision.obj.p.sheet='flag';
 				}
 				else{
@@ -364,7 +345,7 @@ window.addEventListener("load",function() {
 			p.barrier=f;
 			console.log(p);
 			console.log(f);
-			f.play('barrier');
+			//f.play('barrier');
 			//setTimeout(function(){f.destroy();p.barrier=null;},5000);
 		},
 		die: function(){
@@ -375,24 +356,16 @@ window.addEventListener("load",function() {
 					Q.state.dec("lives",1);
 					var pX=this.p.x;
 					var pY=this.p.y;
-					var f;
-					Q.stage().insert(f=new Q.Disappear1({ x: pX, y: pY},true));
-					console.log(f);
-					f.play("disappear1");
-					var ene;
-					Q.stage().insert(ene=new Q.Appear(Q.tilePos(3.5,10.5),4,3.5));
-					ene.play("appear");
+					Q.stage().insert(new Q.Disappear1({ x: pX, y: pY},true));
+					Q.stage().insert(new Q.Appear(Q.tilePos(3.5,10.5),4,3.5));
 					//Gloria add animation~~~~~~yeah~~~~~~~
 					//add flash and then revive~
 					this.destroy();
 				}else{
-					console.log("No life, endgame");
+					console.log("No life, endgame, score: "+this.stage.score);
 					var pX=this.p.x;
 					var pY=this.p.y;
-					var f;
-					Q.stage().insert(f=new Q.Disappear1({ x: pX, y: pY},true));
-					console.log(f);
-					f.play("disappear1");
+					Q.stage().insert(new Q.Disappear1({ x: pX, y: pY},true));
 					Q.stage().endgame = true;
 					this.destroy();
 				}
@@ -432,14 +405,30 @@ window.addEventListener("load",function() {
 			} else if(p.vy < 0) {
 				p.angle = 0;
 			}
-			if(Math.random() < p.switchPercent / 100) {
-				this.tryDirection();
-			}
+			//if(this.entity.stage.diff==0){
+				if(Math.random() < p.switchPercent / 100) {
+					this.tryDirection();
+				}
+			// }
+			/*else {
+				if(Math.random() < p.switchPercent / 100) {
+					var nY= false;
+					var nX= false;
+					if(p.vy != 0 && p.vx == 0) {
+						nY= true;
+					}
+					else if(p.vx != 0 && p.vy == 0) {
+						nX= true;
+					}
+					console.log("change "+p.vx+" "+p.vy);
+					this.changeDirection({normalX:nX,normalY:nY});
+				}
+			 }*/
 			switch(p.direction) {
-				case "left": p.vx = -p.speed; break;
-				case "right":p.vx = p.speed; break;
-				case "up":   p.vy = -p.speed; break;
-				case "down": p.vy = p.speed; break;
+				case "left": p.vx = -p.speed; p.vy = 0;break;
+				case "right":p.vx = p.speed; p.vy = 0;break;
+				case "up":   p.vx = 0; p.vy = -p.speed; break;
+				case "down": p.vx = 0; p.vy = p.speed; break;
 				case "stop": p.vx = 0; p.vy = 0;break;
 			}
 			switch(p.angle){
@@ -460,25 +449,138 @@ window.addEventListener("load",function() {
         },
 
         tryDirection: function() {
+			var diff = this.entity.stage.diff;
 			var p = this.entity.p; 
 			var from = p.direction;
-			if(p.vy != 0 && p.vx == 0) {
-				p.direction = Math.random() < 0.5 ? 'left' : 'right';
-			} else if(p.vx != 0 && p.vy == 0) {
-				p.direction = Math.random() < 0.5 ? 'up' : 'down';
-			}
-        },
-
-        changeDirection: function(collision) {
-			var p = this.entity.p;
-////console.log(this.entity.stage.lists.Player[0].p.y);
-			if(p.vx == 0 && p.vy == 0) {
-				if(collision.normalY) {
+			if(diff==0){
+				if(p.vy != 0 && p.vx == 0) {
 					p.direction = Math.random() < 0.5 ? 'left' : 'right';
-				} else if(collision.normalX) {
+				} else if(p.vx != 0 && p.vy == 0) {
 					p.direction = Math.random() < 0.5 ? 'up' : 'down';
 				}
 			}
+			else{
+				if(diff==1){
+					var px=this.entity.stage.lists.Player[0].p.x;
+					var py=this.entity.stage.lists.Player[0].p.y;
+				}
+				else{
+					var px=this.entity.stage.lists.Bird[0].p.x;
+					var py=this.entity.stage.lists.Bird[0].p.y;
+				}
+				if(p.vy != 0 && p.vx == 0) {
+					if(p.x > px){
+						p.direction = Math.random() < 0.95 ? 'left' : 'right';
+					}
+					else if(p.x == px){
+						if(Math.random() < 0.95){
+							if(p.y > py){
+								p.direction = Math.random() < 0.95 ? 'up' : 'down';
+							}
+							else{
+								p.direction = Math.random() < 0.05 ? 'up' : 'down';
+							}
+						}
+						else{
+							p.direction = Math.random() < 0.5 ? 'left' : 'right';
+						}
+					}
+					else{
+						p.direction = Math.random() < 0.05 ? 'left' : 'right';
+					}
+				}
+				else if(p.vx != 0 && p.vy == 0) {
+					if(p.y > py){
+						p.direction = Math.random() < 0.95 ? 'up' : 'down';
+					}
+					else if(p.y == py){
+						if(Math.random() < 0.95){
+							if(p.x > px){
+								p.direction = Math.random() < 0.95 ? 'left' : 'right';
+							}
+							else{
+								p.direction = Math.random() < 0.05 ? 'left' : 'right';
+							}
+						}
+						else{
+							p.direction = Math.random() < 0.5 ? 'up' : 'down';
+						}
+					}
+					else{
+						p.direction = Math.random() < 0.05 ? 'up' : 'down';
+					}
+				}
+			}
+			// console.log("from "+from+" to "+p.direction+" "+p.vx+" "+p.vy);
+        },
+
+        changeDirection: function(collision) {
+			var diff = this.entity.stage.diff;
+			var p = this.entity.p;
+			var from = p.direction;
+////console.log(this.entity.stage.lists.Player[0].p.y);
+			if(diff==0){
+//				if(p.vx == 0 && p.vy == 0) {
+					if(collision.normalY) {
+						p.direction = Math.random() < 0.5 ? 'left' : 'right';
+					} else if(collision.normalX) {
+						p.direction = Math.random() < 0.5 ? 'up' : 'down';
+					}
+//				}
+			}
+			else{
+				if(diff==1){
+					var px=this.entity.stage.lists.Player[0].p.x;
+					var py=this.entity.stage.lists.Player[0].p.y;
+				}
+				else{
+					var px=this.entity.stage.lists.Bird[0].p.x;
+					var py=this.entity.stage.lists.Bird[0].p.y;
+				}
+				if(collision.normalY) {
+					if(p.x > px){
+						p.direction = Math.random() < 0.95 ? 'left' : 'right';
+					}
+					else if(p.x == px){
+						if(Math.random() < 0.95){
+							if(p.y > py){
+								p.direction = Math.random() < 0.95 ? 'up' : 'down';
+							}
+							else{
+								p.direction = Math.random() < 0.05 ? 'up' : 'down';
+							}
+						}
+						else{
+							p.direction = Math.random() < 0.5 ? 'left' : 'right';
+						}
+					}
+					else{
+						p.direction = Math.random() < 0.05 ? 'left' : 'right';
+					}
+				}
+				else if(collision.normalX) {
+					if(p.y > py){
+						p.direction = Math.random() < 0.95 ? 'up' : 'down';
+					}
+					else if(p.y == py){
+						if(Math.random() < 0.95){
+							if(p.x > px){
+								p.direction = Math.random() < 0.95 ? 'left' : 'right';
+							}
+							else{
+								p.direction = Math.random() < 0.05 ? 'left' : 'right';
+							}
+						}
+						else{
+							p.direction = Math.random() < 0.5 ? 'up' : 'down';
+						}
+					}
+					else{
+						p.direction = Math.random() < 0.05 ? 'up' : 'down';
+					}
+				}
+			}
+			// console.log("from "+from+" to "+p.direction+" "+p.vx+" "+p.vy);
         }
       });
 
@@ -511,15 +613,14 @@ window.addEventListener("load",function() {
 			var wid=stage._collisionLayers[0].p.cols;
             this.p.health--;
 			if(this.p.health==0){
+				stage.score+=this.p.score;
 				var xX=this.p.x;
 				var yY=this.p.y;
 				////console.log("x "+xX+" y "+yY);
 				this.destroy();
 				stage.currentEnemy--;
-				var f;
-				stage.insert(f=new Q.Disappear1({ x: xX, y: yY}, true));
+				stage.insert(new Q.Disappear1({ x: xX, y: yY}, true));
 				////console.log(f);
-				f.play("disappear1");
 				////console.log(stage.enemyNum);
 				if(stage.enemyNum>0){
 					var pos=[3.5,wid/2+0.5,wid-2.5];
@@ -529,10 +630,10 @@ window.addEventListener("load",function() {
 //						while(!gen){
 						var e=stage.enemyArr.shift();//Math.floor((Math.random() * 4));
 						switch(e) {
-							case 0: if(stage.enemyANum>0){stage.insert(ene=new Q.Appear(Q.tilePos(pos[r],1.5),0,pos[r]));ene.play("appear");} break;
-							case 1: if(stage.enemyBNum>0){stage.insert(ene=new Q.Appear(Q.tilePos(pos[r],1.5),1,pos[r]));ene.play("appear");} break;
-							case 2: if(stage.enemyCNum>0){stage.insert(ene=new Q.Appear(Q.tilePos(pos[r],1.5),2,pos[r]));ene.play("appear");} break;
-							case 3: if(stage.enemyDNum>0){stage.insert(ene=new Q.Appear(Q.tilePos(pos[r],1.5),3,pos[r]));ene.play("appear");} break;
+							case 0: if(stage.enemyANum>0){stage.insert(new Q.Appear(Q.tilePos(pos[r],1.5),0,pos[r]));} break;
+							case 1: if(stage.enemyBNum>0){stage.insert(new Q.Appear(Q.tilePos(pos[r],1.5),1,pos[r]));} break;
+							case 2: if(stage.enemyCNum>0){stage.insert(new Q.Appear(Q.tilePos(pos[r],1.5),2,pos[r]));} break;
+							case 3: if(stage.enemyDNum>0){stage.insert(new Q.Appear(Q.tilePos(pos[r],1.5),3,pos[r]));} break;
 						}
 						//this.stage.insert(new Q.EnemyA(Q.tilePos(pos[r],0.5)));
 						// this.stage.insert(new Q.Enemy(Q.tilePos(4.5,6.5)));
@@ -556,9 +657,10 @@ window.addEventListener("load",function() {
 				name: "A",
 				speed: 100,
 				direction: 'down',
-				switchPercent: 0,
-				bullet: 2,
-				health: 1
+				switchPercent: 1,
+				bullet: 1,
+				health: 1,
+				score: 100
 			}));
 			this.add("animation");
         },
@@ -579,9 +681,10 @@ window.addEventListener("load",function() {
 				name: "B",
 				speed: 150,
 				direction: 'down',
-				switchPercent: 0,
+				switchPercent: 2,
 				bullet: 1,
-				health: 2
+				health: 2,
+				score: 200
 			}));
         },
 		inserted: function() {
@@ -602,8 +705,9 @@ window.addEventListener("load",function() {
 				speed: 100,
 				direction: 'down',
 				switchPercent: 0,
-				bullet: 1,
-				health: 1
+				bullet: 2,
+				health: 1,
+				score: 300
 			}));
         },
 		inserted: function() {
@@ -621,11 +725,12 @@ window.addEventListener("load",function() {
 			this._super(Q._defaults(p,{
 				sheet: "enemyD",
 				name: "D",
-				speed: 100,
+				speed: 80,
 				direction: 'down',
-				switchPercent: 0,
+				switchPercent: 1,
 				bullet: 1,
-				health: 3
+				health: 3,
+				score: 400
 			}));
         },
 		inserted: function() {
@@ -649,6 +754,12 @@ window.addEventListener("load",function() {
 			});
 			this.add("animation");
 			this.on("end",this,"des");
+			this.on("inserted");
+		},
+		inserted: function() {
+//			//console.log(this);
+			this.play('appear');
+			//console.log(this.stage.enemyCNum);
 		},
 		des:function() {
 			//console.log("end");
@@ -677,6 +788,12 @@ window.addEventListener("load",function() {
 			});
 			this.add("animation");
 			this.on("end",this,"des");
+			this.on("inserted");
+		},
+		inserted: function() {
+//			//console.log(this);
+			this.play('disappear1');
+			//console.log(this.stage.enemyCNum);
 		},
 		des:function() {
 			//console.log("end");
@@ -687,9 +804,7 @@ window.addEventListener("load",function() {
 			var s= this.stage;
 			this.destroy();
 			if(c){
-				var f;
-				s.insert(f=new Q.Disappear2({ x: xX, y: yY }));
-				f.play('disappear2');
+				s.insert(new Q.Disappear2({ x: xX, y: yY }));
 			}
 		}
 	});
@@ -703,6 +818,12 @@ window.addEventListener("load",function() {
 			});
 			this.add("animation");
 			this.on("end",this,"des");
+			this.on("inserted");
+		},
+		inserted: function() {
+//			//console.log(this);
+			this.play('disappear2');
+			//console.log(this.stage.enemyCNum);
 		},
 		des:function() {
 			//console.log("end");
@@ -720,7 +841,13 @@ window.addEventListener("load",function() {
 				type: SPRITE_BARRIER
 			});
 			this.add("animation");
+			this.on("inserted");
 //			this.on("end",this,"des");
+		},
+		inserted: function() {
+//			//console.log(this);
+			this.play('barrier');
+			//console.log(this.stage.enemyCNum);
 		},
 		des:function() {
 			//console.log("end");
@@ -742,30 +869,25 @@ window.addEventListener("load",function() {
 				var r=Math.floor((Math.random() * 3));
 //				var gen=0;
 //				while(!gen){
-					var ene;
 					var e=stage.enemyArr.shift();//Math.floor((Math.random() * 4));
 					switch(e) {
 						case 0: if(stage.enemyANum>0){
-									stage.insert(ene=new Q.Appear(Q.tilePos(pos[r],1.5),0,pos[r]));
-									ene.play("appear");
+									stage.insert(new Q.Appear(Q.tilePos(pos[r],1.5),0,pos[r]));
 									//stage.insert(new Q.EnemyA(Q.tilePos(pos[r],1.5)));
 //									gen=1;
 								} break;
 						case 1: if(stage.enemyBNum>0){
-									stage.insert(ene=new Q.Appear(Q.tilePos(pos[r],1.5),1,pos[r]));
-									ene.play("appear");
+									stage.insert(new Q.Appear(Q.tilePos(pos[r],1.5),1,pos[r]));
 									//stage.insert(new Q.EnemyB(Q.tilePos(pos[r],1.5)));
 //									gen=1;
 								} break;
 						case 2: if(stage.enemyCNum>0){
-									stage.insert(ene=new Q.Appear(Q.tilePos(pos[r],1.5),2,pos[r]));
-									ene.play("appear");
+									stage.insert(new Q.Appear(Q.tilePos(pos[r],1.5),2,pos[r]));
 									//stage.insert(new Q.EnemyC(Q.tilePos(pos[r],1.5)));
 //									gen=1;
 								} break;
 						case 3: if(stage.enemyDNum>0){
-									stage.insert(ene=new Q.Appear(Q.tilePos(pos[r],1.5),3,pos[r]));
-									ene.play("appear");
+									stage.insert(new Q.Appear(Q.tilePos(pos[r],1.5),3,pos[r]));
 									//stage.insert(new Q.EnemyD(Q.tilePos(pos[r],1.5)));
 //									gen=1;
 								} break;
@@ -824,7 +946,7 @@ window.addEventListener("load",function() {
 		},
 		hit: function(){
 			this.p.sheet='flag';
-			console.log("endgame");
+			console.log("endgame, score: "+this.stage.score);
 			Q.stage().endgame = true;
 		}
 	});
@@ -955,6 +1077,8 @@ window.addEventListener("load",function() {
 		stage.enemyDNum=0;
 		stage.enemyMax=3;
 		stage.currentEnemy=0;
+		stage.score=0;
+		stage.diff=0;
 		var arr=[];
 		for(var i=0;i<8;i++){
 			arr.push(0);
