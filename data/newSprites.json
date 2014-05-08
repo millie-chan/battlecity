@@ -1,9 +1,10 @@
 {
 "player":{"sx":0,"sy":0,"cols":1,"tilew":30,"tileh":30,"frames":1},
+"barrier":{"sx":512,"sy":288,"cols":2,"tilew":32,"tileh":32,"frames":2},
 "enemy":{"sx":0,"sy":32,"cols":1,"tilew":32,"tileh":32,"frames":1},
-"bullet":{"sx":640,"sy":202,"cols":1,"tilew":10,"tileh":12,"frames":1},
+"bullet":{"sx":640,"sy":202,"cols":1,"tilew":12,"tileh":12,"frames":1},
 "enemyA":{"sx":0,"sy":32,"cols":1,"tilew":32,"tileh":32,"frames":1},
-"appear":{"sx":512,"sy":192,"cols":4,"tilew":32,"tileh":32,"frames":4},
+"appear":{"sx":512,"sy":192,"cols":4,"tilew":32,"tileh":31,"frames":4},
 "disappear1":{"sx":512,"sy":256,"cols":3,"tilew":32,"tileh":32,"frames":3},
 "disappear2":{"sx":608,"sy":256,"cols":2,"tilew":64,"tileh":64,"frames":2},
 "enemyB":{"sx":0,"sy":160,"cols":1,"tilew":32,"tileh":32,"frames":1},
@@ -16,5 +17,10 @@
 "water":{"sx":512,"sy":160,"cols":1,"tilew":16,"tileh":16,"frames":1},
 "ice":{"sx":544,"sy":144,"cols":1,"tilew":16,"tileh":16,"frames":1},
 "bird":{"sx":608,"sy":64,"cols":1,"tilew":32,"tileh":32,"frames":1},
-"flag":{"sx":640,"sy":64,"cols":1,"tilew":32,"tileh":32,"frames":1}
+"flag":{"sx":640,"sy":64,"cols":1,"tilew":32,"tileh":32,"frames":1},
+"100":{"sx":576,"sy":320,"cols":1,"tilew":32,"tileh":31,"frames":1},
+"200":{"sx":608,"sy":320,"cols":1,"tilew":32,"tileh":31,"frames":1},
+"300":{"sx":640,"sy":320,"cols":1,"tilew":32,"tileh":31,"frames":1},
+"400":{"sx":672,"sy":320,"cols":1,"tilew":32,"tileh":31,"frames":1},
+"500":{"sx":704,"sy":320,"cols":1,"tilew":32,"tileh":31,"frames":1}
 }

@@ -610,16 +610,17 @@ window.addEventListener("load",function() {
         hit: function() {
         //  if(col.obj.isA("Bullet")) {
 			var stage=this.stage;
+			var p= this.p;
 			var wid=stage._collisionLayers[0].p.cols;
-            this.p.health--;
-			if(this.p.health==0){
-				stage.score+=this.p.score;
-				var xX=this.p.x;
-				var yY=this.p.y;
+            p.health--;
+			if(p.health==0){
+				stage.score+=p.score;
+				var xX=p.x;
+				var yY=p.y;
 				////console.log("x "+xX+" y "+yY);
 				this.destroy();
 				stage.currentEnemy--;
-				stage.insert(new Q.Disappear1({ x: xX, y: yY}, true));
+				stage.insert(new Q.Disappear1({ x: xX, y: yY}, p.score));
 				////console.log(f);
 				////console.log(stage.enemyNum);
 				if(stage.enemyNum>0){
@@ -804,17 +805,18 @@ window.addEventListener("load",function() {
 			var s= this.stage;
 			this.destroy();
 			if(c){
-				s.insert(new Q.Disappear2({ x: xX, y: yY }));
+				s.insert(new Q.Disappear2({ x: xX, y: yY },c));
 			}
 		}
 	});
 	
 	Q.Sprite.extend("Disappear2", {
-		init: function(p) {
+		init: function(p,c) {
 			this._super(p,{
 				sheet: 'disappear2',
 				sprite: "ani",
-				type: SPRITE_APP
+				type: SPRITE_APP,
+				score:c
 			});
 			this.add("animation");
 			this.on("end",this,"des");
@@ -828,7 +830,32 @@ window.addEventListener("load",function() {
 		des:function() {
 			//console.log("end");
 			//console.log(this);
+			var xX=this.p.x;
+			var yY=this.p.y;
+			var c=this.p.score;
+			var s= this.stage;
 			this.destroy();
+			if(c){
+				s.insert(new Q.Score({ x: xX, y: yY },""+c));
+			}
+		}
+	});
+
+	Q.Sprite.extend("Score", {
+		init: function(p,c) {
+			this._super(p,{
+				sheet: c,
+				sprite: "ani",
+				type: SPRITE_APP
+			});
+			this.on("inserted");
+//			this.on("end",this,"des");
+		},
+		inserted: function() {
+			var p=this;
+//			console.log(this);
+			setTimeout(function(){p.destroy();},1000);
+			//console.log(this.stage.enemyCNum);
 		}
 	});
 
