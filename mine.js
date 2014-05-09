@@ -97,6 +97,7 @@ window.addEventListener("load",function() {
 				sheet:"bullet",
 				x: props.dx,
 				y: props.dy,
+				z: 0,
 				angle: props.angle,
 				shooter: props.shooter, 
 				type:SPRITE_BULLET,
@@ -165,6 +166,7 @@ window.addEventListener("load",function() {
 				sheet:"bullet",
 				x: props.dx,
 				y: props.dy,
+				z: 0,
 				angle: props.angle,
 				belong: props.ene,
 				firstCollide:true,
@@ -287,6 +289,7 @@ window.addEventListener("load",function() {
 				collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLETE,// | SPRITE_BRICK | SPRITE_BIRD,
 				bullet: 2,
 				barrier_time: 3,
+				z: 0,
 				muteki: true
 			});
 
@@ -608,6 +611,7 @@ window.addEventListener("load",function() {
 				type: SPRITE_ENEMY,
 				collisionMask: SPRITE_PLAYER | SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLET | SPRITE_BARRIER, //| SPRITE_BRICK | SPRITE_BIRD
 //				fire:true,
+				z: 0,
 				bulletCooldown: false
 			});
 
@@ -770,6 +774,7 @@ window.addEventListener("load",function() {
 				sprite: "ani",
 				type: SPRITE_APP,
 				kind:k,
+				z: 0,
 				posx:pos
 			});
 			this.add("animation");
@@ -865,6 +870,7 @@ window.addEventListener("load",function() {
 			this._super(p,{
 				sheet: c,
 				sprite: "ani",
+				z: 2,
 				type: SPRITE_APP
 			});
 			this.on("inserted");
@@ -884,6 +890,7 @@ window.addEventListener("load",function() {
 			this._super(p,{
 				sheet: 'barrier',
 				sprite: "ani",
+				z: 0,
 				type: SPRITE_BARRIER
 			});
 			this.add("animation");
@@ -977,6 +984,7 @@ window.addEventListener("load",function() {
 			this._super(p,{
 				sheet: 'tree',
 				type: SPRITE_TREE,
+				z: 1,
 				sensor: true
 			});
 		}
@@ -1211,9 +1219,9 @@ window.addEventListener("load",function() {
 //		 stage.add("viewport").follow(stage.PlayerTank);
 		stage.playerLife = 2;
 		stage.endgame = false;
-		stage.enemyNum=10;
-		stage.enemyANum=8;
-		stage.enemyBNum=2
+		stage.enemyNum=3;
+		stage.enemyANum=3;
+		stage.enemyBNum=0;
 		stage.enemyCNum=0;
 		stage.enemyDNum=0;
 		stage.enemyMax=3;
@@ -1249,7 +1257,7 @@ window.addEventListener("load",function() {
 			DScore: 400
 		});
 		Q.stageScene("ui",1);
-	});
+	}, {sort:true});
 	
 	Q.scene("level2",function(stage) {
 		var map = stage.collisionLayer(new Q.TowerManMap({dataAsset: 'level2.json', sheet: 'tiles'}));
@@ -1312,7 +1320,7 @@ window.addEventListener("load",function() {
 			//DScore: 400
 		});
 		Q.stageScene("ui",1);
-	});
+	}, {sort: true});
 
 	Q.load("sprites2.png, newSprites.json, level1.json, level2.json", function() {
 		//Q.sheet("tiles","tiles.png", { tileW: 16, tileH: 16 });
