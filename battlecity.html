@@ -2,13 +2,20 @@
 	<head>
 		<script src='http://cdn.html5quintus.com/v0.2.0/quintus-all.js'></script>
 		<script src='http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.js'></script>
+		<!-- <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/jquery-ui.min.js"></script> -->
 		<script src='mine.js'></script>
 		<!--style> body { padding:0px; margin:0px; background-color:black ; }  </style-->
 		<style>
-			#outer {
+			.outerImage {
 				width:544px;
 				height:480px;
 				background-image:url('images/status2.png');
+				position: absolute;
+			}
+			.outerBlack {
+				width:544px;
+				height:480px;
+				background-color:black;
 				position: absolute;
 			}
 			#myGame {
@@ -16,7 +23,92 @@
 				top: 16px;
 				left: -16px;
 			}
-
+			#levelNum {
+				position: absolute;
+				top: 96px;
+				left: 336px;
+				width: 16px;
+				height: 16px;
+			}
+			#scoreBG {
+				background-image:url('images/score.png');
+				position: absolute;
+				top: 16px;
+				left: 32px;
+				width:448px;
+				height:448px;
+				display: none;
+			}
+			#score0 {
+				position: absolute;
+				top: 160px;
+				left: 208px;
+				width: 16px;
+				height: 16px;
+			}
+			#score1 {
+				position: absolute;
+				top: 208px;
+				left: 144px;
+				width: 16px;
+				height: 16px;
+			}
+			#score2 {
+				position: absolute;
+				top: 256px;
+				left: 144px;
+				width: 16px;
+				height: 16px;
+			}
+			#score3 {
+				position: absolute;
+				top: 304px;
+				left: 144px;
+				width: 16px;
+				height: 16px;
+			}
+			#score4 {
+				position: absolute;
+				top: 352px;
+				left: 144px;
+				width: 16px;
+				height: 16px;
+			}
+			#carnum0 {
+				position: absolute;
+				top: 384px;
+				left: 256px;
+				width: 16px;
+				height: 16px;
+			}
+			#carnum1 {
+				position: absolute;
+				top: 208px;
+				left: 256px;
+				width: 16px;
+				height: 16px;
+			}
+			#carnum2 {
+				position: absolute;
+				top: 256px;
+				left: 256px;
+				width: 16px;
+				height: 16px;
+			}
+			#carnum3 {
+				position: absolute;
+				top: 304px;
+				left: 256px;
+				width: 16px;
+				height: 16px;
+			}
+			#carnum4 {
+				position: absolute;
+				top: 352px;
+				left: 256px;
+				width: 16px;
+				height: 16px;
+			}
 			#lives1 {
 				position: absolute;
 				top: 288px;
@@ -45,6 +137,15 @@
 				height: 16px;
 				width: 16px;
 			}
+			#over {
+				display:none;
+				background-image:url('images/over.png');
+				position: absolute;
+				top: 464px;
+				left: 224px;
+				height: 32px;
+				width: 64px;
+			}
 			.enodd {
 				position: absolute;
 				left: 496px;
@@ -65,47 +166,82 @@
 			}
 			.num0 {
 				background-position: -16px -16px;
+				height: 16px;
+				width: 16px;
 			}
 			.num1 {
 				background-position: -32px -16px;
+				height: 16px;
+				width: 16px;
 			}
 			.num2 {
 				background-position: -48px -16px;
+				height: 16px;
+				width: 16px;
 			}
 			.num3 {
 				background-position: -64px -16px;
+				height: 16px;
+				width: 16px;
 			}
 			.num4 {
 				background-position: -80px -16px;
+				height: 16px;
+				width: 16px;
 			}
 			.num5 {
 				background-position: -16px -32px;
+				height: 16px;
+				width: 16px;
 			}
 			.num6 {
 				background-position: -32px -32px;
+				height: 16px;
+				width: 16px;
 			}
 			.num7 {
 				background-position: -48px -32px;
+				height: 16px;
+				width: 16px;
 			}
 			.num8 {
 				background-position: -64px -32px;
+				height: 16px;
+				width: 16px;
 			}
 			.num9 {
 				background-position: -80px -32px;
+				height: 16px;
+				width: 16px;
 			}
 			.bomb {
 				background-position: 0px -32px;
+				height: 16px;
+				width: 16px;
 			}
 		</style>
 	</head>
 	<body>
 		<!--canvas id='myGame' width='448' height='448' style='background-color:black ;'></canvas-->
-		<div id='outer'>
+		<div class='outerImage' id='outer'>
 			<canvas id='myGame' width='448' height='448' style='background-color:black ;'></canvas>
+			<div id="scoreBG"></div>
+			<div id="levelNum"></div>
+			<div id="score0"></div>
+			<div id="score1"></div>
+			<div id="score2"></div>
+			<div id="score3"></div>
+			<div id="score4"></div>
+			<div id="carnum0"></div>
+			<div id="carnum1"></div>
+			<div id="carnum2"></div>
+			<div id="carnum3"></div>
+			<div id="carnum4"></div>
 			<div class="numSprite num0" id="level0"></div>
 			<div class="numSprite num0" id="level1"></div>
 			<div class="numSprite num0" id="lives1"></div>
 			<div class="numSprite num0" id="lives2"></div>
+			<div id="over"></div>
 		</div>
 		<!-- <canvas id='try' width='448' height='448' style='background-color:blue ;'></canvas> -->
 	</body>

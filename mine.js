@@ -59,6 +59,8 @@ window.addEventListener("load",function() {
 			}
 			if(Q.stage().currentEnemy == 0 && Q.stage().enemyNum==0){
 				Q.stage().endgame = true;
+				Q.clearStages();
+				Q.stageScene('showScore');
 				//console.log("score: "+this.entity.stage.score);
 			}
 			//fire if space is being pressed
@@ -368,6 +370,12 @@ window.addEventListener("load",function() {
 					Q.stage().insert(new Q.Disappear1({ x: pX, y: pY},true));
 					Q.stage().endgame = true;
 					this.destroy();
+					$("#over").show().animate({
+						top: 224
+					}, 3000, function (){
+						Q.clearStages();
+						Q.stageScene('showScore');
+					});
 				}
 			}else{
 				console.log("muteki, wahaha");
@@ -621,12 +629,15 @@ window.addEventListener("load",function() {
 					case "C": stage.currentC++; break;
 					case "D": stage.currentD++; break;
 				}
+				Q.state.dec(p.name+"Left",1);
 				var xX=p.x;
 				var yY=p.y;
 				////console.log("x "+xX+" y "+yY);
 				this.destroy();
 				stage.currentEnemy--;
 				stage.insert(new Q.Disappear1({ x: xX, y: yY}, p.score));
+				Q.state.inc("score", p.score);
+				
 				////console.log(f);
 				////console.log(stage.enemyNum);
 				if(stage.enemyNum>0){
@@ -999,6 +1010,12 @@ window.addEventListener("load",function() {
 			this.p.sheet='flag';
 			console.log("endgame, score: "+this.stage.score);
 			Q.stage().endgame = true;
+			$("#over").show().animate({
+				top: 224
+			}, 3000, function (){
+				Q.clearStages();
+				Q.stageScene('showScore');
+			});
 		}
 	});
 
@@ -1020,10 +1037,8 @@ window.addEventListener("load",function() {
 		init: function(p) {
 			this._super(p,{
 				type: SPRITE_TILES,
-				//dataAsset: 'level1.json',
 				dataAsset: '',
 				sheet: ''
-				//sheet:     'tiles'
 			});
 		},
 
@@ -1086,7 +1101,84 @@ window.addEventListener("load",function() {
 		}
 	});
 	
+	Q.scene('showScore', function(stage) {
+		//change outer into black and hide all numbers
+		$("#outer").removeClass("outerImage");
+		$("#outer").addClass("outerBlack");
+		$(".numSprite").hide();
+		$("#over").hide();
+		$("#over").css("top","464px");
+		$("#scoreBG").show();
+		$("#levelNum").removeClass();
+		$("#levelNum").addClass("numSprite num"+Q.state.get("stage"))
+		
+		//show total score(no animation)
+		//Q.state.get("score");
+		function numToImage(id, s, post){
+			var oldid = id;
+			//console.log("id: "+oldid+" s:"+s);
+			s = s + "";
+			var arr = s.split("");
+			arr.reverse();
+			$.each(arr, function(index, value){
+				//console.log("INDEX: " + index + " VALUE: " + value);
+				var $temp = $('<div class="numSprite grid num'+value+' '+post+'" id="temp'+index+post+'"></div>').insertBefore(oldid);
+				var pos = $(oldid).position();
+				$temp.css({
+					position: 'absolute',
+					top: Math.round(pos.top),
+					left: Math.round(pos.left)-16
+				});
+				oldid = "#"+$temp.attr("id");
+			});
+		}
+		
+		var myArray = ["tScore", "A", "B", "C", "D", "tNum"];
+		numToImage("#score0", Q.state.get("score"), "S0");
+		function showAll(index, value){
+			if (index > 4) {
+				numToImage("#carnum0", Q.state.get("total")-Q.state.get("ALeft")-Q.state.get("BLeft")-Q.state.get("CLeft")-Q.state.get("DLeft"), "C0");
+				setTimeout(function(){
+					$(".grid").remove();
+					$("#outer").removeClass("outerBlack");
+					$("#outer").addClass("outerImage");
+					$(".numSprite").show();
+					$(".bomb").hide();
+					$("#scoreBG").hide();
+					$("#levelNum").hide();
+					if (Q.state.get("eNum") > 0){
+						//game over
+						console.log("game over");
+					} else if (Q.state.get("stage") <= 2){
+						Q.clearStages();
+						Q.stageScene("level"+(Q.state.get("stage")+1));
+					}
+				}, 3000);
+				return;
+			}
+			var killed = Q.state.get(value+"Num") - Q.state.get(value+"Left");
+			var i = 0;
+			
+			var iid = setInterval(function showS(){
+				if (i <= killed) {
+					$(".S"+index).remove();
+					$(".C"+index).remove();
+					numToImage("#score"+index, i*Q.state.get(value+"Score"), "S"+index);
+					numToImage("#carnum"+index, i, "C"+index);
+					i++;
+				} else {
+					clearInterval(iid);
+					showAll(index+1, myArray[index+1]);
+				}
+			}, 400);
+		}
+		showAll(1, myArray[1]);
+		
+	});
+
 	Q.scene('ui', function(stage){
+		$("#level1").removeClass();
+		$("#level1").addClass("numSprite num"+Q.state.get("stage"));
 		$("#lives1").addClass("num" + Q.state.get("lives"));
 		var divs = $(".bomb").map(function(){
 			if (this.id.replace('en', '') <= Q.state.get("eNum")) {
@@ -1096,9 +1188,6 @@ window.addEventListener("load",function() {
 		$(divs).show();
 		
 		Q.state.on("change.eNum",this, function() {
-/*			if (Q.state.get("eNum") == 0) {
-				Q.stageScene("level2");
-			}*/
             var divs = $(".bomb").map(function(){
 				if (this.id.replace('en', '') > Q.state.get("eNum")) {
 					return this;
@@ -1110,8 +1199,8 @@ window.addEventListener("load",function() {
 		Q.state.on("change.lives",this, function() {
 			$("#lives1").removeClass();
 			$("#lives1").addClass("numSprite num"+Q.state.get("lives"));
-        });
-    });
+		});
+	});
 	
 	Q.scene("level1",function(stage) {
 		var map = stage.collisionLayer(new Q.TowerManMap({dataAsset: 'level1.json', sheet: 'tiles'}));
@@ -1120,6 +1209,69 @@ window.addEventListener("load",function() {
 		stage.PlayerTank = stage.insert(new Q.Player(Q.tilePos(3.5,10.5)));
 //		 stage.add("viewport").follow(stage.PlayerTank);
 		stage.playerLife = 2;
+		stage.endgame = false;
+		stage.enemyNum=10;
+		stage.enemyANum=8;
+		stage.enemyBNum=2
+		stage.enemyCNum=0;
+		stage.enemyDNum=0;
+		stage.enemyMax=3;
+		stage.currentEnemy=0;
+		stage.currentA=0;
+		stage.currentB=0;
+		stage.currentC=0;
+		stage.currentD=0;
+		stage.score=0;
+		stage.diff=0;
+		stage.enemyArr=Q.genArray(stage);
+		console.log(stage.enemyArr);
+		stage.add("viewport");
+		stage.moveTo(32,0);
+		Q.genEnemy(stage,map.p.tiles[0].length,stage.enemyMax);
+		Q.state.set({
+			eNum: stage.enemyNum,
+			lives: stage.playerLife,
+			stage: 1,
+			score: 0,
+			total: stage.enemyNum,
+			ANum: stage.enemyANum,
+			BNum: stage.enemyBNum,
+			CNum: stage.enemyCNum,
+			DNum: stage.enemyDNum,
+			ALeft: stage.enemyANum,
+			BLeft: stage.enemyBNum,
+			CLeft: stage.enemyCNum,
+			DLeft: stage.enemyDNum,
+			AScore: 100,
+			BScore: 200,
+			CScore: 300,
+			DScore: 400
+		});
+		Q.stageScene("ui",1);
+	});
+	
+	Q.scene("level2",function(stage) {
+		var map = stage.collisionLayer(new Q.TowerManMap({dataAsset: 'level2.json', sheet: 'tiles'}));
+		map.setup();
+
+		stage.add("viewport");
+		stage.moveTo(32,0);
+
+		stage.PlayerTank = stage.insert(new Q.Player(Q.tilePos2(5.5,12.5)));
+		stage.insert(new Q.Bird(Q.tilePos2(7.5,12.5)));
+		
+		stage.insert(new Q.Tree(Q.tilePos2(1.5,4.5)));
+		stage.insert(new Q.Tree(Q.tilePos2(1.5,5.5)));
+		stage.insert(new Q.Tree(Q.tilePos2(2.5,5.5)));
+		stage.insert(new Q.Tree(Q.tilePos2(5.5,6.5)));
+		stage.insert(new Q.Tree(Q.tilePos2(5.5,7.5)));
+		stage.insert(new Q.Tree(Q.tilePos2(6.5,6.5)));
+		stage.insert(new Q.Tree(Q.tilePos2(7.5,6.5)));
+		stage.insert(new Q.Tree(Q.tilePos2(11.5,4.5)));
+		stage.insert(new Q.Tree(Q.tilePos2(11.5,5.5)));
+		stage.insert(new Q.Tree(Q.tilePos2(11.5,6.5)));
+		
+		stage.playerLife = Q.state.get("lives");
 		stage.endgame = false;
 		stage.enemyNum=10;
 		stage.enemyANum=8;
@@ -1139,37 +1291,26 @@ window.addEventListener("load",function() {
 		stage.add("viewport");
 		stage.moveTo(32,0);
 		Q.genEnemy(stage,map.p.tiles[0].length,stage.enemyMax);
-		Q.state.set("eNum",stage.enemyNum);
-		Q.state.set("lives",stage.playerLife);
+		Q.state.set({
+			eNum: stage.enemyNum,
+			//lives: stage.playerLife,
+			stage: 2,
+			//score: 0,
+			total: stage.enemyNum,
+			ANum: stage.enemyANum,
+			BNum: stage.enemyBNum,
+			CNum: stage.enemyCNum,
+			DNum: stage.enemyDNum,
+			ALeft: stage.enemyANum,
+			BLeft: stage.enemyBNum,
+			CLeft: stage.enemyCNum,
+			DLeft: stage.enemyDNum,
+			//AScore: 100,
+			//BScore: 200,
+			//CScore: 300,
+			//DScore: 400
+		});
 		Q.stageScene("ui",1);
-		$("#level1").removeClass();
-		$("#level1").addClass("numSprite num1");
-	});
-	
-	Q.scene("level2",function(stage) {
-		var map = stage.collisionLayer(new Q.TowerManMap({dataAsset: 'level2.json', sheet: 'tiles'}));
-		map.setup();
-
-		stage.add("viewport");
-		stage.moveTo(32,0);
-
-		var player = stage.insert(new Q.Player(Q.tilePos2(5,4)));
-		stage.insert(new Q.Bird(Q.tilePos2(7.5,12.5)));
-		
-		stage.insert(new Q.Tree(Q.tilePos2(1.5,4.5)));
-		stage.insert(new Q.Tree(Q.tilePos2(1.5,5.5)));
-		stage.insert(new Q.Tree(Q.tilePos2(2.5,5.5)));
-		stage.insert(new Q.Tree(Q.tilePos2(5.5,6.5)));
-		stage.insert(new Q.Tree(Q.tilePos2(5.5,7.5)));
-		stage.insert(new Q.Tree(Q.tilePos2(6.5,6.5)));
-		stage.insert(new Q.Tree(Q.tilePos2(7.5,6.5)));
-		stage.insert(new Q.Tree(Q.tilePos2(11.5,4.5)));
-		stage.insert(new Q.Tree(Q.tilePos2(11.5,5.5)));
-		stage.insert(new Q.Tree(Q.tilePos2(11.5,6.5)));
-
-		Q.stageScene("ui",1);
-		$("#level1").removeClass();
-		$("#level1").addClass("numSprite num2");
 	});
 
 	Q.load("sprites2.png, newSprites.json, level1.json, level2.json", function() {
