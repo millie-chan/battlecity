@@ -29,6 +29,7 @@ window.addEventListener("load",function() {
 	var SPRITE_BULLETE = 16;
 	var SPRITE_APP = 32;
 	var SPRITE_BARRIER = 64;
+	var SPRITE_TREE = 128;
 
 	Q.component("towerManControls", {
 		// default properties to add onto our entity
@@ -975,7 +976,7 @@ window.addEventListener("load",function() {
 		init: function(p) {
 			this._super(p,{
 				sheet: 'tree',
-				type: SPRITE_TILES,
+				type: SPRITE_TREE,
 				sensor: true
 			});
 		}
