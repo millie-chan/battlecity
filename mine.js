@@ -59,9 +59,13 @@ window.addEventListener("load",function() {
 				p.direction='none';
 			}
 			if(Q.stage().currentEnemy == 0 && Q.stage().enemyNum==0){
-				Q.stage().endgame = true;
-				Q.clearStages();
-				Q.stageScene('showScore');
+				if (Q.stage().endgame == false) {
+					Q.stage().endgame = true;
+					setTimeout(function(){
+						Q.clearStages();
+						Q.stageScene('showScore');
+					}, 1500);
+				}
 				//console.log("score: "+this.entity.stage.score);
 			}
 			//fire if space is being pressed
@@ -363,7 +367,7 @@ window.addEventListener("load",function() {
 					var pX=this.p.x;
 					var pY=this.p.y;
 					Q.stage().insert(new Q.Disappear1({ x: pX, y: pY},true));
-					Q.stage().insert(new Q.Appear(Q.tilePos(3.5,10.5),4,3.5));
+					Q.stage().insert(new Q.Appear(Q.stage().playerStart,4,3.5));
 					//Gloria add animation~~~~~~yeah~~~~~~~
 					//add flash and then revive~
 					this.destroy();
@@ -372,14 +376,16 @@ window.addEventListener("load",function() {
 					var pX=this.p.x;
 					var pY=this.p.y;
 					Q.stage().insert(new Q.Disappear1({ x: pX, y: pY},true));
-					Q.stage().endgame = true;
 					this.destroy();
-					$("#over").show().animate({
-						top: 224
-					}, 3000, function (){
-						Q.clearStages();
-						Q.stageScene('showScore');
-					});
+					if (Q.stage().endgame == false) {
+						Q.stage().endgame = true;
+						$("#over").show().animate({
+							top: 224
+						}, 3000, function (){
+							Q.clearStages();
+							Q.stageScene('showScore');
+						});
+					}
 				}
 			}else{
 				console.log("muteki, wahaha");
@@ -635,6 +641,7 @@ window.addEventListener("load",function() {
 					case "D": stage.currentD++; break;
 				}
 				Q.state.dec(p.name+"Left",1);
+				Q.state.inc(p.name+"Killed", 1);
 				var xX=p.x;
 				var yY=p.y;
 				////console.log("x "+xX+" y "+yY);
@@ -642,7 +649,6 @@ window.addEventListener("load",function() {
 				stage.currentEnemy--;
 				stage.insert(new Q.Disappear1({ x: xX, y: yY}, p.score));
 				Q.state.inc("score", p.score);
-				
 				////console.log(f);
 				////console.log(stage.enemyNum);
 				if(stage.enemyNum>0){
@@ -796,7 +802,7 @@ window.addEventListener("load",function() {
 				case 1: s.insert(new Q.EnemyB(Q.tilePos(this.p.posx,1.5)));break;
 				case 2: s.insert(new Q.EnemyC(Q.tilePos(this.p.posx,1.5)));break;
 				case 3: s.insert(new Q.EnemyD(Q.tilePos(this.p.posx,1.5)));break;
-				case 4: s.PlayerTank = s.insert(new Q.Player(Q.tilePos(3.5,10.5)));break;
+				case 4: s.PlayerTank = s.insert(new Q.Player(s.playerStart));break;
 			}
 		}
 	});
@@ -1015,16 +1021,20 @@ window.addEventListener("load",function() {
 			}));
 			this.on("hit.sprite",this,"hit");
 		},
-		hit: function(){
-			this.p.sheet='flag';
-			console.log("endgame, score: "+this.stage.score);
-			Q.stage().endgame = true;
-			$("#over").show().animate({
-				top: 224
-			}, 3000, function (){
-				Q.clearStages();
-				Q.stageScene('showScore');
-			});
+		hit: function(col){
+			if(col.obj.isA("Bullet")||col.obj.isA("BulletE")){
+				this.p.sheet='flag';
+				console.log("endgame, score: "+this.stage.score);
+				if (Q.stage().endgame == false) {
+					Q.stage().endgame = true;
+					$("#over").show().animate({
+						top: 224
+					}, 3000, function (){
+						Q.clearStages();
+						Q.stageScene('showScore');
+					});
+				}
+			}
 		}
 	});
 
@@ -1119,7 +1129,8 @@ window.addEventListener("load",function() {
 		$("#over").css("top","464px");
 		$("#scoreBG").show();
 		$("#levelNum").removeClass();
-		$("#levelNum").addClass("numSprite num"+Q.state.get("stage"))
+		$("#levelNum").addClass("numSprite num"+Q.state.get("stage"));
+		$("#levelNum").show();
 		
 		//show total score(no animation)
 		//Q.state.get("score");
@@ -1146,26 +1157,26 @@ window.addEventListener("load",function() {
 		numToImage("#score0", Q.state.get("score"), "S0");
 		function showAll(index, value){
 			if (index > 4) {
-				numToImage("#carnum0", Q.state.get("total")-Q.state.get("ALeft")-Q.state.get("BLeft")-Q.state.get("CLeft")-Q.state.get("DLeft"), "C0");
+				numToImage("#carnum0", Q.state.get("AKilled")+Q.state.get("BKilled")+Q.state.get("CKilled")+Q.state.get("DKilled"), "C0");
 				setTimeout(function(){
 					$(".grid").remove();
 					$("#outer").removeClass("outerBlack");
 					$("#outer").addClass("outerImage");
-					$(".numSprite").show();
-					$(".bomb").hide();
+					//$(".numSprite").show();
 					$("#scoreBG").hide();
 					$("#levelNum").hide();
-					if (Q.state.get("eNum") > 0){
+					Q.clearStages();
+					var ll = Q.state.get("total")-Q.state.get("AKilled")-Q.state.get("BKilled")-Q.state.get("CKilled")-Q.state.get("DKilled");
+					if (ll > 0){
 						//game over
-						console.log("game over");
-					} else if (Q.state.get("stage") <= 2){
-						Q.clearStages();
+					} else if (ll == 0 && Q.state.get("stage") <= 2){
 						Q.stageScene("level"+(Q.state.get("stage")+1));
 					}
 				}, 3000);
 				return;
 			}
-			var killed = Q.state.get(value+"Num") - Q.state.get(value+"Left");
+			//var killed = Q.state.get(value+"Num") - Q.state.get(value+"Left");
+			var killed = Q.state.get(value+"Killed");
 			var i = 0;
 			
 			var iid = setInterval(function showS(){
@@ -1188,7 +1199,11 @@ window.addEventListener("load",function() {
 	Q.scene('ui', function(stage){
 		$("#level1").removeClass();
 		$("#level1").addClass("numSprite num"+Q.state.get("stage"));
+		$("#level0").show();
+		$("#level1").show();
 		$("#lives1").addClass("num" + Q.state.get("lives"));
+		$("#lives1").show();
+		//$(".bomb").hide();
 		var divs = $(".bomb").map(function(){
 			if (this.id.replace('en', '') <= Q.state.get("eNum")) {
 				return this;
@@ -1214,8 +1229,9 @@ window.addEventListener("load",function() {
 	Q.scene("level1",function(stage) {
 		var map = stage.collisionLayer(new Q.TowerManMap({dataAsset: 'level1.json', sheet: 'tiles'}));
 		map.setup();
+		stage.playerStart=Q.tilePos2(5.5,12.5);
 		stage.insert(new Q.Bird(Q.tilePos2(7.5,12.5)));
-		stage.PlayerTank = stage.insert(new Q.Player(Q.tilePos(3.5,10.5)));
+		stage.PlayerTank = stage.insert(new Q.Player(stage.playerStart));
 //		 stage.add("viewport").follow(stage.PlayerTank);
 		stage.playerLife = 2;
 		stage.endgame = false;
@@ -1251,6 +1267,10 @@ window.addEventListener("load",function() {
 			BLeft: stage.enemyBNum,
 			CLeft: stage.enemyCNum,
 			DLeft: stage.enemyDNum,
+			AKilled: stage.currentA,
+			BKilled: stage.currentB,
+			CKilled: stage.currentC,
+			DKilled: stage.currentD,
 			AScore: 100,
 			BScore: 200,
 			CScore: 300,
@@ -1265,8 +1285,8 @@ window.addEventListener("load",function() {
 
 		stage.add("viewport");
 		stage.moveTo(32,0);
-
-		stage.PlayerTank = stage.insert(new Q.Player(Q.tilePos2(5.5,12.5)));
+		stage.playerStart=Q.tilePos2(5.5,12.5);
+		stage.PlayerTank = stage.insert(new Q.Player(stage.playerStart));
 		stage.insert(new Q.Bird(Q.tilePos2(7.5,12.5)));
 		
 		stage.insert(new Q.Tree(Q.tilePos2(1.5,4.5)));
@@ -1314,6 +1334,10 @@ window.addEventListener("load",function() {
 			BLeft: stage.enemyBNum,
 			CLeft: stage.enemyCNum,
 			DLeft: stage.enemyDNum,
+			AKilled: stage.currentA,
+			BKilled: stage.currentB,
+			CKilled: stage.currentC,
+			DKilled: stage.currentD,
 			//AScore: 100,
 			//BScore: 200,
 			//CScore: 300,
