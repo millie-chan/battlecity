@@ -68,14 +68,6 @@ window.addEventListener("load",function() {
 				}
 				//console.log("score: "+this.entity.stage.score);
 			}
-			//fire if space is being pressed
-			if(Q.inputs['fire'] == true){
-				if(p.cannonCooldown == false){
-					Q.stage(0).PlayerTank.fire();
-					p.cannonCooldown = true;
-					setTimeout( function(){p.cannonCooldown = false;},  300);
-				}
-			}
 			
 			// based on our direction, try to add velocity in that direction
 
@@ -289,10 +281,12 @@ window.addEventListener("load",function() {
 				sheet:"player",
 				type: SPRITE_PLAYER,
 				barrier: null,
-//				points: [  [ -8, -8 ], [  8, -8 ], [  8,  8 ], [ -8,  8 ] ],
-				collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLETE,// | SPRITE_BRICK | SPRITE_BIRD,
+				collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLETE,
 				bullet: 2,
 				barrier_time: 3,
+				cooldown_time: 500,					//change-able ability
+				item_choice: "brick",
+				cannonCooldown: false,
 				z: 0,
 				muteki: true
 			});
@@ -300,8 +294,11 @@ window.addEventListener("load",function() {
 			
 			this.add("2d, towerManControls");
 			this.on("inserted");
-			this.on('step',this,'countdown');
+			//this.on('step',this,'countdown');
+			Q.input.on("fire",this,"fire");
+			Q.input.on("action",this,"item");
 		},
+		
 		
 		countdown: function(dt) {
 			this.p.barrier_time -= dt;
@@ -338,26 +335,105 @@ window.addEventListener("load",function() {
 				bullet_y = this.p.y;
 			}
 			
-			if(this.p.bullet != 0){
+			if(this.p.bullet != 0 && this.p.cannonCooldown == false){
 				var bullet = new Q.Bullet({dx: bullet_x, dy: bullet_y, angle: this.p.angle, shooter: this.p});
-
+				var playerTank = this.p;
 				Q.stage().insert(bullet);
 
 				this.p.bullet--;
+				this.p.cannonCooldown = true;
+				setTimeout(function(){playerTank.cannonCooldown = false },  this.p.cooldown_time);
 			}
 		},
+		
+		item: function(){
+			//Item: Barrier
+			//Usage: open barrier and become super tank(will not get hurt)			
+			if(this.p.item_choice == "barrier" && this.p.muteki == false){
+				console.log("barrier!");
+				this.open_barrier(8000);
+				this.p.item_choice = "none";
+			}
+			
+			//Item: Brick
+			//Usage: recover the bricks near the bird		
+			if(this.p.item_choice == "brick"){
+				var my_bird;
+				var brick_near_bird;
+				var wx, wy, i;
+				
+				var make_steel = function(input_x, input_y, direction){
+					var brick_near_bird = Q.stage().locate(input_x, input_y);
+					
+					if(brick_near_bird){
+						if(brick_near_bird.isA("Brick")){
+							brick_near_bird.destroy();
+						}else if(brick_near_bird.isA("Player")){		//put the tank away if they are near the bird
+							if(direction=="left")brick_near_bird.p.x = brick_near_bird.p.x -8;
+							if(direction=="right")brick_near_bird.p.x = brick_near_bird.p.x +8;
+							if(direction=="up")brick_near_bird.p.y = brick_near_bird.p.y -8;
+							if(direction=="down")brick_near_bird.p.y = brick_near_bird.p.y +8;
+						}else if(brick_near_bird.isA("Swall")){
+							return;
+						}						
+					}
+					
+					var temp_swall = new Q.Swall({x: input_x, y: input_y});
+					Q.stage().insert(temp_swall);
+					setTimeout(function(){
+						temp_swall.destroy();
+						Q.stage().insert(new Q.Brick({x: input_x, y: input_y}));
+					},  3000);
+					
+				}
+				
+				my_bird = Q.stage().lists.Bird[0].p;
+				
+				//left side
+				wx = my_bird.x-24;
+				wy = my_bird.y-24;
+				for(i=0; i<4; i++){
+					make_steel(wx, wy+16*i, "left");
+				}
+				
+				//right side
+				wx = my_bird.x+24;
+				wy = my_bird.y-24;
+				for(i=0; i<4; i++){
+					make_steel(wx, wy+16*i, "right");
+				}
+				
+				//upside
+				wx = my_bird.x-24;
+				wy = my_bird.y-24;
+				for(i=0; i<4; i++){
+					make_steel(wx+16*i, wy, "up");
+				}
 
-		inserted: function() {
-//			//console.log(this);
+				//downside
+				wx = my_bird.x-24;
+				wy = my_bird.y+24;
+				for(i=0; i<4; i++){
+					make_steel(wx+16*i, wy, "down");
+				}
+			}
+
+		},
+		
+		open_barrier: function(duration_time){
 			var f;
 			var p=this.p;
 			this.stage.insert(f=new Q.Barrier({ x: this.p.x, y: this.p.y }));
 			p.barrier=f;
-			console.log(p);
-			console.log(f);
-			//f.play('barrier');
-			//setTimeout(function(){f.destroy();p.barrier=null;},5000);
+			p.muteki=true;
+			
+			setTimeout(function(){f.destroy();p.barrier=null;p.muteki=false},duration_time);
 		},
+
+		inserted: function() {
+			this.open_barrier(3000);
+		},
+		
 		die: function(){
 			if(this.p.muteki != true){
 				if(Q.stage().playerLife>0){
