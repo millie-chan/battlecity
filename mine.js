@@ -368,7 +368,7 @@ window.addEventListener("load",function() {
 					if(brick_near_bird){
 						if(brick_near_bird.isA("Brick")){
 							brick_near_bird.destroy();
-						}else if(brick_near_bird.isA("Player")){		//put the tank away if they are near the bird
+						}else if(brick_near_bird.isA("Player") || brick_near_bird.isA("EnemyA") || brick_near_bird.isA("EnemyB") || brick_near_bird.isA("EnemyC") || brick_near_bird.isA("EnemyD") ||){		//put the tank away if they are near the bird
 							if(direction=="left")brick_near_bird.p.x = brick_near_bird.p.x -8;
 							if(direction=="right")brick_near_bird.p.x = brick_near_bird.p.x +8;
 							if(direction=="up")brick_near_bird.p.y = brick_near_bird.p.y -8;
