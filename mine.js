@@ -30,10 +30,12 @@ window.addEventListener("load",function() {
 	var SPRITE_APP = 32;
 	var SPRITE_BARRIER = 64;
 	var SPRITE_TREE = 128;
+	var SPRITE_WATER = 256;
+	var SPRITE_SNOW = 512;
 
 	Q.component("towerManControls", {
 		// default properties to add onto our entity
-		defaults: { speed: 0, direction: 'up' , cannonCooldown: false},
+		defaults: { speed: 0, direction: 'up' , cannonCooldown: false, isSliding: false, destx: 0, desty: 0},
 		added: function() {
 			var p = this.entity.p;
 			Q._defaults(p,this.defaults);
@@ -58,6 +60,12 @@ window.addEventListener("load",function() {
 			if(Q.stage().endgame){
 				p.direction='none';
 			}
+			if(p.isSliding == true){
+				p.direction = 'none';
+				if(p.vx == 0 && p.vy == 0)
+					p.isSliding = false;
+			}
+				
 			if(Q.stage().currentEnemy == 0 && Q.stage().enemyNum==0){
 				if (Q.stage().endgame == false) {
 					Q.stage().endgame = true;
@@ -76,7 +84,74 @@ window.addEventListener("load",function() {
 				case "right":p.vx = p.movement_speed; p.vy = 0; p.angle = 90; break;
 				case "up":   p.vx = 0; p.vy = -p.movement_speed; p.angle = 0; break;
 				case "down": p.vx = 0; p.vy = p.movement_speed; p.angle = 180; break;
-				case "none": p.vx = 0;p.vy = 0;break;
+				case "none": 
+				var isSnow ;
+				//initiate
+				isSnow = Q.stage().locate(p.x, p.y, SPRITE_SNOW);
+				if(isSnow && (p.vx!=0 || p.vy!=0) && (p.isSliding == false)){
+					if(p.angle == 90){
+						console.log("90");
+						p.destx = p.x + 32;
+						p.desty = p.y;
+					}
+					if(p.angle == -90){
+						console.log(p.isSliding);
+						p.destx = p.x - 32;
+						p.desty = p.y;
+					}
+					if(p.angle == 0){
+						console.log("0");
+						p.destx = p.x;
+						p.desty = p.y - 32;
+					}
+					if(p.angle == 180){
+						console.log("180");
+						p.destx = p.x;
+						p.desty = p.y + 32;
+					}
+					
+					p.isSliding = true;
+				}
+				
+				if(p.isSliding){
+					if(p.angle == 90){
+						if(p.x < p.destx){
+						}
+						else{
+							p.isSliding = false;
+							p.vx = 0;p.vy = 0;
+						}
+					}
+					if(p.angle == -90){
+						if(p.x > p.destx){
+						}
+						else{
+							p.isSliding = false;
+							p.vx = 0;p.vy = 0;
+						}
+					}
+					if(p.angle == 0){
+						if(p.y > p.desty){
+						}
+						else{
+							p.isSliding = false;
+							p.vx = 0;p.vy = 0;
+						}
+					}
+					if(p.angle == 180){
+						if(p.y < p.desty){
+						}
+						else{
+							p.isSliding = false;
+							p.vx = 0;p.vy = 0;
+						}
+					}
+				}else{
+					p.vx = 0;p.vy = 0;
+				}
+				isSnow = Q.stage().locate(p.x, p.y, SPRITE_SNOW);
+
+				break;
 			}
 			if(p.barrier){
 				p.barrier.p.x=p.x;
@@ -282,9 +357,9 @@ window.addEventListener("load",function() {
 			this._super(p,{
 				sheet:"player",
 				type: SPRITE_PLAYER,
-				tank_type: "blood2",
+				tank_type: "speed",
 				barrier: null,
-				collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLETE,
+				collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLETE | SPRITE_WATER,
 				bullet: 1,
 				max_bullet: 1,
 				barrier_time: 3,
@@ -327,7 +402,7 @@ window.addEventListener("load",function() {
 				p.sheet = "playerBullet2";
 			}
 			if(p.tank_type == "amptank"){
-				//p.movement_speed = p.movement_speed*1.5;
+				p.collisionMask = SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLETE;
 				p.sheet = "playerAmptank";
 			}
 		},
@@ -523,7 +598,8 @@ window.addEventListener("load",function() {
 		},
 
 		inserted: function() {
-			this.open_barrier(3000);			
+			this.open_barrier(3000);		
+			//Q.stage().add("viewport").follow(this);							//view here	
 		},
 		
 		die: function(){
@@ -787,7 +863,7 @@ window.addEventListener("load",function() {
 			this._super(p,{
 				sheet:"enemy",
 				type: SPRITE_ENEMY,
-				collisionMask: SPRITE_PLAYER | SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLET | SPRITE_BARRIER, //| SPRITE_BRICK | SPRITE_BIRD
+				collisionMask: SPRITE_PLAYER | SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLET | SPRITE_BARRIER | SPRITE_WATER, //| SPRITE_BRICK | SPRITE_BIRD
 //				fire:true,
 				z: 0,
 				bulletCooldown: false
@@ -1168,6 +1244,26 @@ window.addEventListener("load",function() {
 		}
 	});
 	
+	Q.Sprite.extend("Water", {
+		init: function(p) {
+			this._super(p,{
+				sheet: 'water',
+				type: SPRITE_WATER,
+				z: 0
+			});
+		}
+	});
+	
+	Q.Sprite.extend("Ice", {
+		init: function(p) {
+			this._super(p,{
+				sheet: 'ice',
+				type: SPRITE_SNOW,
+				z: 0
+			});
+		}
+	});
+	
 	Q.Sprite.extend("Brick", {
 		init: function(p) {
 			this._super(p,{
@@ -1255,8 +1351,8 @@ window.addEventListener("load",function() {
 						row[x] = 0;
 						break;
 					case 3:
-//						this.stage.insert(new Q['Tree'](Q.tilePos(x,y)));
-//						row[x] = 0;
+						this.stage.insert(new Q['Tree'](Q.tilePos(x,y)));
+						row[x] = 0;
 						break;
 					case 4:
 						this.stage.insert(new Q['Water'](Q.tilePos(x,y)));
@@ -1301,7 +1397,7 @@ window.addEventListener("load",function() {
 		$("#over").css("top","464px");
 		$("#scoreBG").show();
 		$("#levelNum").removeClass();
-		$("#levelNum").addClass("numSprite num"+Q.state.get("stage"));
+		$("#levelNum").addClass("numSprite2 num"+Q.state.get("stage"));
 		$("#levelNum").show();
 		
 		//show total score(no animation)
@@ -1314,7 +1410,7 @@ window.addEventListener("load",function() {
 			arr.reverse();
 			$.each(arr, function(index, value){
 				//console.log("INDEX: " + index + " VALUE: " + value);
-				var $temp = $('<div class="numSprite grid num'+value+' '+post+'" id="temp'+index+post+'"></div>').insertBefore(oldid);
+				var $temp = $('<div class="numSprite2 grid num'+value+' '+post+'" id="temp'+index+post+'"></div>').insertBefore(oldid);
 				var pos = $(oldid).position();
 				$temp.css({
 					position: 'absolute',
@@ -1341,7 +1437,7 @@ window.addEventListener("load",function() {
 					var ll = Q.state.get("total")-Q.state.get("AKilled")-Q.state.get("BKilled")-Q.state.get("CKilled")-Q.state.get("DKilled");
 					if (ll > 0){
 						//game over
-					} else if (ll == 0 && Q.state.get("stage") <= 2){
+					} else if (ll == 0 && Q.state.get("stage") <= 2){				//change here to make more stage
 						Q.stageScene("level"+(Q.state.get("stage")+1));
 					}
 				}, 3000);
@@ -1461,16 +1557,6 @@ window.addEventListener("load",function() {
 		stage.PlayerTank = stage.insert(new Q.Player(stage.playerStart));
 		stage.insert(new Q.Bird(Q.tilePos2(7.5,12.5)));
 		
-		stage.insert(new Q.Tree(Q.tilePos2(1.5,4.5)));
-		stage.insert(new Q.Tree(Q.tilePos2(1.5,5.5)));
-		stage.insert(new Q.Tree(Q.tilePos2(2.5,5.5)));
-		stage.insert(new Q.Tree(Q.tilePos2(5.5,6.5)));
-		stage.insert(new Q.Tree(Q.tilePos2(5.5,7.5)));
-		stage.insert(new Q.Tree(Q.tilePos2(6.5,6.5)));
-		stage.insert(new Q.Tree(Q.tilePos2(7.5,6.5)));
-		stage.insert(new Q.Tree(Q.tilePos2(11.5,4.5)));
-		stage.insert(new Q.Tree(Q.tilePos2(11.5,5.5)));
-		stage.insert(new Q.Tree(Q.tilePos2(11.5,6.5)));
 		
 		stage.playerLife = Q.state.get("lives");
 		stage.endgame = false;
@@ -1518,7 +1604,7 @@ window.addEventListener("load",function() {
 		Q.stageScene("ui",1);
 	}, {sort: true});
 
-	Q.load("sprites2.png, newSprites.json, level1.json, level2.json", function() {
+	Q.load("sprites2.png, newSprites.json, level1.json, level2.json, level3.json, level4.json, level5.json", function() {
 		//Q.sheet("tiles","tiles.png", { tileW: 16, tileH: 16 });
 
 		Q.compileSheets("sprites2.png","newSprites.json");
