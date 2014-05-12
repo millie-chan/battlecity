@@ -72,10 +72,10 @@ window.addEventListener("load",function() {
 			// based on our direction, try to add velocity in that direction
 
 			switch(p.direction) {
-				case "left": p.vx = -100; p.vy = 0; p.angle = -90; break;
-				case "right":p.vx = 100; p.vy = 0; p.angle = 90; break;
-				case "up":   p.vx = 0; p.vy = -100; p.angle = 0; break;
-				case "down": p.vx = 0; p.vy = 100; p.angle = 180; break;
+				case "left": p.vx = -p.movement_speed; p.vy = 0; p.angle = -90; break;
+				case "right":p.vx = p.movement_speed; p.vy = 0; p.angle = 90; break;
+				case "up":   p.vx = 0; p.vy = -p.movement_speed; p.angle = 0; break;
+				case "down": p.vx = 0; p.vy = p.movement_speed; p.angle = 180; break;
 				case "none": p.vx = 0;p.vy = 0;break;
 			}
 			if(p.barrier){
@@ -95,7 +95,9 @@ window.addEventListener("load",function() {
 				y: props.dy,
 				z: 0,
 				angle: props.angle,
-				shooter: props.shooter, 
+				bullet_speed: props.speed, 
+				shooter: props.shooter,
+				isBeam: props.isBeam,
 				type:SPRITE_BULLET,
 				first_colli: true,
 				collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLETE | SPRITE_BARRIER
@@ -114,14 +116,14 @@ window.addEventListener("load",function() {
 			if(collision.obj.isA("EnemyA")||collision.obj.isA("EnemyB")||collision.obj.isA("EnemyC")||collision.obj.isA("EnemyD")) {
 			////console.log("coll");//console.log(collision.obj);//	collision.obj.hit();
 				collision.obj.hit();
-				this.p.shooter.bullet++;
+				if(!this.p.isBeam)this.p.shooter.bullet++;
 				this.destroy();
 				stage.insert(new Q.Disappear1({ x: xX, y: yY },false));
 				////console.log(f);
 			}
 			else if(collision.obj.isA("Brick")){
 				if(this.p.first_colli){
-					this.p.shooter.bullet++;
+				if(!this.p.isBeam)this.p.shooter.bullet++;
 					this.p.first_colli = false;
 				}
 				collision.obj.destroy();
@@ -131,7 +133,7 @@ window.addEventListener("load",function() {
 			}
 			else if(collision.obj.isA("Swall")||collision.obj.isA("BulletE")){
 				if(this.p.first_colli){
-					this.p.shooter.bullet++;
+				if(!this.p.isBeam)this.p.shooter.bullet++;
 					this.p.first_colli = false;
 				}
 				this.destroy();
@@ -142,14 +144,14 @@ window.addEventListener("load",function() {
 				if(collision.obj.p.sheet!="flag"){
 					var pX=collision.obj.p.x;
 					var pY=collision.obj.p.y;
-					this.p.shooter.bullet++;
+					if(!this.p.isBeam)this.p.shooter.bullet++;
 					this.destroy();
 					stage.insert(new Q.Disappear1({ x: xX, y: yY},false));
 					stage.insert(new Q.Disappear1({ x: pX, y: pY},true));
 					collision.obj.p.sheet='flag';
 				}
 				else{
-					this.p.shooter.bullet++;
+					if(!this.p.isBeam)this.p.shooter.bullet++;
 					this.destroy();
 				}
 			}
@@ -236,9 +238,9 @@ window.addEventListener("load",function() {
 
 		added: function() {
 			var p = this.entity.p;
-
+			
 			Q._defaults(p,this.defaults);
-
+			if(p.bullet_speed)p.speed = p.bullet_speed;
 			////console.log(p);
 			//this.step();
 			this.entity.on("step",this,"step");
@@ -280,12 +282,17 @@ window.addEventListener("load",function() {
 			this._super(p,{
 				sheet:"player",
 				type: SPRITE_PLAYER,
+				tank_type: "blood2",
 				barrier: null,
 				collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLETE,
-				bullet: 2,
+				bullet: 1,
+				max_bullet: 1,
 				barrier_time: 3,
-				cooldown_time: 500,					//change-able ability
-				item_choice: "brick",
+				cooldown_time: 300,					//change-able ability
+				bullet_speed: 225,					//change-able ability
+				movement_speed: 90, 				//change-able ability
+				health: 1,
+				item_choice: "beam",
 				cannonCooldown: false,
 				z: 0,
 				muteki: true
@@ -294,19 +301,34 @@ window.addEventListener("load",function() {
 			
 			this.add("2d, towerManControls");
 			this.on("inserted");
+			this.extend();
 			//this.on('step',this,'countdown');
 			Q.input.on("fire",this,"fire");
 			Q.input.on("action",this,"item");
 		},
 		
-		
-		countdown: function(dt) {
-			this.p.barrier_time -= dt;
-			//console.log(this.p.barrier_time);
-			if(this.p.barrier_time <= 0) { 
-				this.p.muteki = false;
-				this.p.barrier.destroy();
-				//this.p.barrier=null;
+		extend: function() {
+			var p = this.p;
+			if(p.tank_type == "normal"){
+				//do nothing
+			}
+			if(p.tank_type == "speed"){
+				p.movement_speed = p.movement_speed*1.5;
+				p.sheet = "playerSpeed";
+			}
+			if(p.tank_type == "blood2"){
+				p.health = 2;
+				p.sheet = "playerBlood2";
+			}
+			if(p.tank_type == "bullet2"){
+				p.bullet = 2;
+				p.max_bullet = 2;
+				p.cooldown_time = p.cooldown_time/2;
+				p.sheet = "playerBullet2";
+			}
+			if(p.tank_type == "amptank"){
+				//p.movement_speed = p.movement_speed*1.5;
+				p.sheet = "playerAmptank";
 			}
 		},
 		
@@ -335,8 +357,8 @@ window.addEventListener("load",function() {
 				bullet_y = this.p.y;
 			}
 			
-			if(this.p.bullet != 0 && this.p.cannonCooldown == false){
-				var bullet = new Q.Bullet({dx: bullet_x, dy: bullet_y, angle: this.p.angle, shooter: this.p});
+			if((this.p.bullet != 0)&& (this.p.cannonCooldown == false) && (Q.stage().endgame != true)){
+				var bullet = new Q.Bullet({dx: bullet_x, dy: bullet_y, angle: this.p.angle, shooter: this.p, speed: this.p.bullet_speed, isBeam: false});
 				var playerTank = this.p;
 				Q.stage().insert(bullet);
 
@@ -416,7 +438,77 @@ window.addEventListener("load",function() {
 				for(i=0; i<4; i++){
 					make_steel(wx+16*i, wy, "down");
 				}
+				
+				this.p.item_choice = "none";
 			}
+			
+			//Item: Grenade
+			//Usage: kill ALL AI
+			if(this.p.item_choice == "grenade"){
+				var i;
+				for (i in Q.stage().lists.EnemyA){
+					console.log(Q.stage().lists.EnemyA[i].p.health);
+					Q.stage().lists.EnemyA[i].p.health = 1;
+					Q.stage().lists.EnemyA[i].hit();
+				}
+				for (i in Q.stage().lists.EnemyB){
+					console.log(Q.stage().lists.EnemyB[i].p.health);
+					Q.stage().lists.EnemyB[i].p.health = 1;
+					Q.stage().lists.EnemyB[i].hit();
+				}
+				for (i in Q.stage().lists.EnemyC){
+					console.log(Q.stage().lists.EnemyC[i].p.health);
+					Q.stage().lists.EnemyC[i].p.health = 1;
+					Q.stage().lists.EnemyC[i].hit();
+				}
+				for (i in Q.stage().lists.EnemyD){
+					console.log(Q.stage().lists.EnemyD[i].p.health);
+					Q.stage().lists.EnemyD[i].p.health = 1;
+					Q.stage().lists.EnemyD[i].hit();
+				}
+				this.p.item_choice = "none";
+			}
+			
+			if(this.p.item_choice == "beam"){
+				playerTank = this.p;
+				var i;
+				var fire_one = function(){
+					var bullet_x;
+					var bullet_y;
+					////console.log(this.p.angle);
+					//if the tank face up
+					if(playerTank.angle == 0){
+						bullet_x = playerTank.x;
+						bullet_y = playerTank.y-22;
+					}
+					//if the tank face down
+					if(playerTank.angle == 180){
+						bullet_x = playerTank.x;
+						bullet_y = playerTank.y+22;
+					}
+					//if the tank face left
+					if(playerTank.angle == -90){
+						bullet_x = playerTank.x-22;
+						bullet_y = playerTank.y;
+					}
+					//if the tank face right
+					if(playerTank.angle == 90){
+						bullet_x = playerTank.x+22;
+						bullet_y = playerTank.y;
+					}
+					
+					var bullet = new Q.Bullet({dx: bullet_x, dy: bullet_y, angle: playerTank.angle, shooter: playerTank, speed: playerTank.bullet_speed, isBeam: true});
+					Q.stage().insert(bullet);
+				}
+				
+				for(i=0; i<8; i++){
+					setTimeout(fire_one, 10*i);
+				}
+				
+				//this.p.item_choice = "none";
+			}
+			
+			
 
 		},
 		
@@ -431,11 +523,18 @@ window.addEventListener("load",function() {
 		},
 
 		inserted: function() {
-			this.open_barrier(3000);
+			this.open_barrier(3000);			
 		},
 		
 		die: function(){
-			if(this.p.muteki != true){
+			if(this.p.muteki == true){
+				console.log("muteki, wahaha");
+				return;
+			}
+			else if(this.p.health>1){
+				this.p.health--;
+				console.log("just get hurt");
+			}else{
 				if(Q.stage().playerLife>0){
 					console.log("die");
 					Q.stage().playerLife--;
@@ -463,13 +562,10 @@ window.addEventListener("load",function() {
 						});
 					}
 				}
-			}else{
-				console.log("muteki, wahaha");
-
-
 			}
 		}
 	});
+	
 	
 	Q.component("enemyControls", {
 //        defaults: {speed: 100,  direction: 'down', switchPercent: 0, bullet: 1 ,health: 1},

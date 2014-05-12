@@ -1,5 +1,9 @@
 {
 "player":{"sx":0,"sy":0,"cols":1,"tilew":30,"tileh":30,"frames":1},
+"playerSpeed":{"sx":0,"sy":160,"cols":1,"tilew":30,"tileh":30,"frames":1},
+"playerBlood2":{"sx":0,"sy":96,"cols":1,"tilew":30,"tileh":30,"frames":1},
+"playerBullet2":{"sx":0,"sy":128,"cols":1,"tilew":30,"tileh":30,"frames":1},
+"playerAmptank":{"sx":0,"sy":224,"cols":1,"tilew":30,"tileh":30,"frames":1},
 "barrier":{"sx":512,"sy":288,"cols":2,"tilew":32,"tileh":32,"frames":2},
 "enemy":{"sx":0,"sy":32,"cols":1,"tilew":32,"tileh":32,"frames":1},
 "bullet":{"sx":640,"sy":202,"cols":1,"tilew":12,"tileh":12,"frames":1},
