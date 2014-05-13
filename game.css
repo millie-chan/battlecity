@@ -1,0 +1,92 @@
+#outer {
+	margin-top: 50px;
+	width:544px;
+	height:480px;
+	background-image:url('images/status2.png');
+	position: absolute;
+}
+#myGame {
+	position: relative;
+	top: 16px;
+	left: -16px;
+}
+
+#lives1 {
+	position: absolute;
+	top: 288px;
+	left: 512px;
+	height: 16px;
+	width: 16px;
+}
+#lives2 {
+	position: absolute;
+	top: 336px;
+	left: 512px;
+	height: 16px;
+	width: 16px;
+}
+#level0 {
+	position: absolute;
+	top: 400px;
+	left: 496px;
+	height: 16px;
+	width: 16px;
+}
+#level1 {
+	position: absolute;
+	top: 400px;
+	left: 512px;
+	height: 16px;
+	width: 16px;
+}
+.enodd {
+	position: absolute;
+	left: 496px;
+	height: 16px;
+	width: 16px;
+}
+.eneven {
+	position: absolute;
+	left: 512px;
+	height: 16px;
+	width: 16px;
+}
+.numSprite {
+	background-image:url('images/status3.png');
+	background-color:transparent;
+	background-repeat:no-repeat;
+	display:block;
+}
+.num0 {
+	background-position: -16px -16px;
+}
+.num1 {
+	background-position: -32px -16px;
+}
+.num2 {
+	background-position: -48px -16px;
+}
+.num3 {
+	background-position: -64px -16px;
+}
+.num4 {
+	background-position: -80px -16px;
+}
+.num5 {
+	background-position: -16px -32px;
+}
+.num6 {
+	background-position: -32px -32px;
+}
+.num7 {
+	background-position: -48px -32px;
+}
+.num8 {
+	background-position: -64px -32px;
+}
+.num9 {
+	background-position: -80px -32px;
+}
+.bomb {
+	background-position: 0px -32px;
+}

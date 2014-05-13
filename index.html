@@ -1,0 +1,171 @@
+<html>
+
+<head>
+	<script src='http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.js'></script>
+	<script src='./gameroom.js'></script>
+	<link href="mystyle.css" rel="stylesheet">
+	<link href="game.css" rel="stylesheet">
+	<script src='http://cdn.html5quintus.com/v0.2.0/quintus-all.js'></script>
+	<script src='mine.js'></script>
+</head>
+
+
+<body>
+	<script>
+		window.fbAsyncInit = function() {
+			FB.init({
+				appId      : '528688120569031',
+				xfbml      : true,
+				version    : 'v2.0'
+			});
+		};
+
+		(function(d, s, id){
+			var js, fjs = d.getElementsByTagName(s)[0];
+			if (d.getElementById(id)) {return;}
+			js = d.createElement(s); js.id = id;
+			js.src = "//connect.facebook.net/en_US/sdk.js";
+			fjs.parentNode.insertBefore(js, fjs);
+		}(document, 'script', 'facebook-jssdk'));
+	</script>
+	<div id="top">
+		<span>
+			<img id="banner" src="./images/logo.png"></img>
+		</span>
+		<span id="login">
+			<input type="checkbox" name="up" value="go">update</input>
+			<div class="fb-login-button" scope="email" data-max-rows="1" data-size="large" data-show-faces="false" data-auto-logout-link="true" onlogin="login();"></div>
+		</span>
+	</div>
+		<div id='outer' style="display:none">
+			<canvas id='myGame' width='448' height='448' style='background-color:black ;'></canvas>
+			<div class="numSprite num0" id="level0"></div>
+			<div class="numSprite num0" id="level1"></div>
+			<div class="numSprite num0" id="lives1"></div>
+			<div class="numSprite num0" id="lives2"></div>
+		</div>
+	<div id="main">
+		<div id="gr">
+			<img id="grbanner" src="./images/gameroom.png"></img>
+		</div>
+		<div id="gamerooms">
+			<span id="list">
+				<div class="tbl" id="rooms">
+				</div>
+<!--				<table id="room1">
+					<tr>
+						<td>
+							<table>
+								<tr><td></td><td class="join2"><button>join</button></td><td></td></tr>
+								<tr><td><button class="join1">join</button></td><td class="table"></td><td><button class="join3">join</button></td></tr>
+								<tr><td></td><td class="join4"><button>join</button></td><td></td></tr>
+							</table>
+						</td>
+						<td>
+							<table>
+								<tr><td></td><td class="join2"><button>join</button></td><td></td></tr>
+								<tr><td><button class="join1">join</button></td><td class="table"></td><td><button class="join3">join</button></td></tr>
+								<tr><td></td><td class="join4"><button>join</button></td><td></td></tr>
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<table>
+								<tr><td></td><td class="join2"><button>join</button></td><td></td></tr>
+								<tr><td><button class="join1">join</button></td><td class="table"></td><td><button class="join3">join</button></td></tr>
+								<tr><td></td><td class="join4"><button>join</button></td><td></td></tr>
+							</table>
+						</td>
+						<td>
+							<table>
+								<tr><td></td><td class="join2"><button>join</button></td><td></td></tr>
+								<tr><td><button class="join1">join</button></td><td class="table"></td><td><button class="join3">join</button></td></tr>
+								<tr><td></td><td class="join4"><button>join</button></td><td></td></tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+				<div class="tbl" id="rooms">
+					<div class="tbl_row">
+						<div class="tbl_cell">
+							<div class="tbl room" id="room1">
+								<div class="tbl_row"><div class="tbl_cell"></div><div class="tbl_cell join center"><button class="join2">join</button></div><div class="tbl_cell"></div></div>
+								<div class="tbl_row"><div class="tbl_cell join middle"><button class="join1">join</button></div><div class="tbl_cell table"><img class="pre" src="http://cdn.wikimg.net/strategywiki/images/5/5e/Battle_City_Stage01.png"></img></div><div class="tbl_cell join middle"><button class="join3">join</button></div></div>
+								<div class="tbl_row"><div class="tbl_cell"></div><div class="tbl_cell join center"><button class="join4">join</button></div><div class="tbl_cell"></div></div>
+							</div>
+						</div>
+						<div class="tbl_cell">
+							<div class="tbl roomInfo" id="info1">
+								<div class="tbl_row"><div class="tbl_cell">Information: <br>- 2 Players<br>- Team Play<br>- Level 5</div></div>
+							</div>
+						</div>
+						<div class="tbl_cell">
+							<div class="tbl room" id="room1">
+								<div class="tbl_row"><div class="tbl_cell"></div><div class="tbl_cell join center"><button class="join2">join</button></div><div class="tbl_cell"></div></div>
+								<div class="tbl_row"><div class="tbl_cell join middle"><button class="join1">join</button></div><div class="tbl_cell table"><img class="pre" src="http://cdn.wikimg.net/strategywiki/images/5/5e/Battle_City_Stage01.png"></img></div><div class="tbl_cell join middle"><button class="join3">join</button></div></div>
+								<div class="tbl_row"><div class="tbl_cell"></div><div class="tbl_cell join center"><button class="join4">join</button></div><div class="tbl_cell"></div></div>
+							</div>
+						</div>
+						<div class="tbl_cell">
+							<div class="tbl roomInfo" id="info1">
+								<div class="tbl_row"><div class="tbl_cell">2 Players<br>Team Play<br>Level 5</div></div>
+							</div>
+						</div>
+					</div>
+					<div class="tbl_row">
+						<div class="tbl_cell">
+							<div class="tbl room" id="room1">
+								<div class="tbl_row"><div class="tbl_cell"></div><div class="tbl_cell join center"><button class="join2">join</button></div><div class="tbl_cell"></div></div>
+								<div class="tbl_row"><div class="tbl_cell join middle"><button class="join1">join</button></div><div class="tbl_cell table"><img class="pre" src="http://cdn.wikimg.net/strategywiki/images/5/5e/Battle_City_Stage01.png"></img></div><div class="tbl_cell join middle"><button class="join3">join</button></div></div>
+								<div class="tbl_row"><div class="tbl_cell"></div><div class="tbl_cell join center"><button class="join4">join</button></div><div class="tbl_cell"></div></div>
+							</div>
+						</div>
+						<div class="tbl_cell">
+							<div class="tbl roomInfo" id="info1">
+								<div class="tbl_row"><div class="tbl_cell">2 Players<br>Team Play<br>Level 5</div></div>
+							</div>
+						</div>
+						<div class="tbl_cell">
+							<div class="tbl room" id="room1">
+								<div class="tbl_row"><div class="tbl_cell"></div><div class="tbl_cell join center"><button class="join2">join</button></div><div class="tbl_cell"></div></div>
+								<div class="tbl_row"><div class="tbl_cell join middle"><button class="join1">join</button></div><div class="tbl_cell table"><img class="pre" src="http://cdn.wikimg.net/strategywiki/images/5/5e/Battle_City_Stage01.png"></img></div><div class="tbl_cell join middle"><button class="join3">join</button></div></div>
+								<div class="tbl_row"><div class="tbl_cell"></div><div class="tbl_cell join center"><button class="join4">join</button></div><div class="tbl_cell"></div></div>
+							</div>
+						</div>
+						<div class="tbl_cell">
+							<div class="tbl roomInfo" id="info1">
+								<div class="tbl_row"><div class="tbl_cell">2 Players<br>Team Play<br>Level 5</div></div>
+							</div>
+						</div>
+					</div>
+				</div>-->
+			</span>
+			<span id="newgr">
+				<button id="new">New<br>Game Room</button>
+			</span>
+		</div>
+	</div>
+	<div class="overlay"></div>
+	<div class="modal" id="newgrModal">
+		<div class="modalContent">
+			<form id="newgrForm">
+				No. of Players:<input type="radio" name="num" value="1">1</input><input type="radio" name="num" value="2">2</input><input type="radio" name="num" value="4">4</input><br>
+				<div id="choose4P"><input type="radio" name="type4P" value="3">individual play (1 vs 1 vs 1 vs 1)</input> <input type="radio" name="type4P" value="4">team play (2 vs 2)</input></div>
+				<div id="chooseLevel">
+					<div id="map">Starting from: Level <input type="number" name="level" min="1" max="5" value="1"></input></div>
+					<div class="preview">Preview: <br><img id="previewLevel"></img></div>
+				</div>
+				<div id="chooseMap">
+					<div id="map">Map: <input type="number" name="map" min="1" max="5" value="1"></input></div>
+					<div class="preview">Preview: <br><img id="previewMap"></img></div>
+				</div>
+				<br>
+				<div id="startGame"><button id="startGameBtn">Start Game</button></div>
+				<div id="submitNewgrForm"><button id="submitNewgrBtn">New Game Room</button></div>
+			</form>
+		</div>
+	</div>
+</body>
+
+</html>
