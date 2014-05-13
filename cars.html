@@ -1,0 +1,63 @@
+<html>
+	<head>
+		<script src='http://cdn.html5quintus.com/v0.2.0/quintus-all.js'></script>
+		<script src='http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.js'></script>
+		<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+		
+		<!-- <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/jquery-ui.min.js"></script> -->
+		
+		<!--style> body { padding:0px; margin:0px; background-color:black ; }  </style-->
+		<link rel="stylesheet" href="carstyle.css" />
+	</head>
+	<body>
+		<div id="fb-root"></div>
+<!-- 		<script>(function(d, s, id) {
+			var js, fjs = d.getElementsByTagName(s)[0];
+			if (d.getElementById(id)) return;
+			js = d.createElement(s); js.id = id;
+			js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&appId=528688120569031&version=v2.0";
+			fjs.parentNode.insertBefore(js, fjs);
+		}(document, 'script', 'facebook-jssdk'));</script> -->
+		<div class="fb-login-button" data-max-rows="1" data-size="medium" data-show-faces="false" data-auto-logout-link="true"></div>
+		
+		<div class="tbl" id="whole">
+			<div class="tbl_row">
+				<div class="tbl_cell">
+				</div>
+				<div class="tbl_cell center" id="carName">
+				</div>
+				<div class="tbl_cell">
+				</div>
+			</div>
+			<div class="tbl_row">
+				<div class="tbl_cell middle">
+					<button class="chooseCar" id="left"><</button>
+				</div>
+				<div class="tbl_cell middle">
+					<div id="carContainer">
+						<!-- <img src="images/car/normal.png"></img> -->
+					</div>
+					<div id="properties">
+						<div class="property" id="property1"></div>
+						<div class="property" id="property2"></div>
+						<div class="property" id="property3"></div>
+					</div>
+				</div>
+				<div class="tbl_cell middle">
+					<button class="chooseCar" id="right">></button>
+				</div>
+			</div>
+			<div class="tbl_row">
+				<div class="tbl_cell">
+				</div>
+				<div class="tbl_cell center">
+					<button id="carStatus">Using</button>
+				</div>
+				<div class="tbl_cell">
+				</div>
+			</div>
+		</div>
+		<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+		<script src='property.js'></script>
+	</body>
+</html>
