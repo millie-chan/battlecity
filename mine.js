@@ -1789,7 +1789,7 @@ window.addEventListener("load",function() {
 		Q.compileSheets("sprites2.png","newSprites.json");
 
 		Q.state.reset({ score: 0, lives: 2, stage: 1 });
-		Q.stageScene("level1");
+//		Q.stageScene("level1");
 	});
 
 	
