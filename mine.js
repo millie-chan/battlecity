@@ -90,22 +90,18 @@ window.addEventListener("load",function() {
 				isSnow = Q.stage().locate(p.x, p.y, SPRITE_SNOW);
 				if(isSnow && (p.vx!=0 || p.vy!=0) && (p.isSliding == false)){
 					if(p.angle == 90){
-						console.log("90");
 						p.destx = p.x + 32;
 						p.desty = p.y;
 					}
 					if(p.angle == -90){
-						console.log(p.isSliding);
 						p.destx = p.x - 32;
 						p.desty = p.y;
 					}
 					if(p.angle == 0){
-						console.log("0");
 						p.destx = p.x;
 						p.desty = p.y - 32;
 					}
 					if(p.angle == 180){
-						console.log("180");
 						p.destx = p.x;
 						p.desty = p.y + 32;
 					}
@@ -367,9 +363,9 @@ window.addEventListener("load",function() {
 				bullet_speed: 225,					//change-able ability
 				movement_speed: 90, 				//change-able ability
 				health: 1,
-				item_choice: "beam",
+				item_choice: "grenade",
 				cannonCooldown: false,
-				z: 0,
+				z: 1,
 				muteki: true
 			});
 
@@ -522,26 +518,22 @@ window.addEventListener("load",function() {
 			if(this.p.item_choice == "grenade"){
 				var i;
 				for (i in Q.stage().lists.EnemyA){
-					console.log(Q.stage().lists.EnemyA[i].p.health);
 					Q.stage().lists.EnemyA[i].p.health = 1;
 					Q.stage().lists.EnemyA[i].hit();
 				}
 				for (i in Q.stage().lists.EnemyB){
-					console.log(Q.stage().lists.EnemyB[i].p.health);
 					Q.stage().lists.EnemyB[i].p.health = 1;
 					Q.stage().lists.EnemyB[i].hit();
 				}
 				for (i in Q.stage().lists.EnemyC){
-					console.log(Q.stage().lists.EnemyC[i].p.health);
 					Q.stage().lists.EnemyC[i].p.health = 1;
 					Q.stage().lists.EnemyC[i].hit();
 				}
 				for (i in Q.stage().lists.EnemyD){
-					console.log(Q.stage().lists.EnemyD[i].p.health);
 					Q.stage().lists.EnemyD[i].p.health = 1;
 					Q.stage().lists.EnemyD[i].hit();
 				}
-				this.p.item_choice = "none";
+				//this.p.item_choice = "none";
 			}
 			
 			if(this.p.item_choice == "beam"){
@@ -865,7 +857,7 @@ window.addEventListener("load",function() {
 				type: SPRITE_ENEMY,
 				collisionMask: SPRITE_PLAYER | SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLET | SPRITE_BARRIER | SPRITE_WATER, //| SPRITE_BRICK | SPRITE_BIRD
 //				fire:true,
-				z: 0,
+				z: 1,
 				bulletCooldown: false
 			});
 
@@ -1238,7 +1230,7 @@ window.addEventListener("load",function() {
 			this._super(p,{
 				sheet: 'tree',
 				type: SPRITE_TREE,
-				z: 1,
+				z: 2,
 				sensor: true
 			});
 		}
@@ -1283,11 +1275,26 @@ window.addEventListener("load",function() {
 	// sensor and counting functionality
 	
 	Q.Brick.extend("Bird", {
-		init: function(p) {
+		init: function(p, ID, direction) {
 			this._super(Q._defaults(p,{
-				sheet: 'bird'
+				sheet: 'bird',
+				belongerID: ID,
 			}));
 			this.on("hit.sprite",this,"hit");
+			
+			if(direction == "up"){
+				this.p.angle = 0;
+			}
+			if(direction == "down"){
+				this.p.angle = 180;
+			}
+			if(direction == "right"){
+				this.p.angle = 90;
+			}
+			if(direction == "left"){
+				this.p.angle = -90;
+			}
+
 		},
 		hit: function(col){
 			if(col.obj.isA("Bullet")||col.obj.isA("BulletE")){
@@ -1437,7 +1444,7 @@ window.addEventListener("load",function() {
 					var ll = Q.state.get("total")-Q.state.get("AKilled")-Q.state.get("BKilled")-Q.state.get("CKilled")-Q.state.get("DKilled");
 					if (ll > 0){
 						//game over
-					} else if (ll == 0 && Q.state.get("stage") <= 2){				//change here to make more stage
+					} else if (ll == 0 && Q.state.get("stage") <= 4){				//change here to make more stage
 						Q.stageScene("level"+(Q.state.get("stage")+1));
 					}
 				}, 3000);
@@ -1498,14 +1505,14 @@ window.addEventListener("load",function() {
 		var map = stage.collisionLayer(new Q.TowerManMap({dataAsset: 'level1.json', sheet: 'tiles'}));
 		map.setup();
 		stage.playerStart=Q.tilePos2(5.5,12.5);
-		stage.insert(new Q.Bird(Q.tilePos2(7.5,12.5)));
+		stage.insert(new Q.Bird(Q.tilePos2(7.5,12.5,1)));
 		stage.PlayerTank = stage.insert(new Q.Player(stage.playerStart));
 //		 stage.add("viewport").follow(stage.PlayerTank);
 		stage.playerLife = 2;
 		stage.endgame = false;
-		stage.enemyNum=3;
-		stage.enemyANum=3;
-		stage.enemyBNum=0;
+		stage.enemyNum=20;
+		stage.enemyANum=18;
+		stage.enemyBNum=2;
 		stage.enemyCNum=0;
 		stage.enemyDNum=0;
 		stage.enemyMax=3;
@@ -1560,11 +1567,11 @@ window.addEventListener("load",function() {
 		
 		stage.playerLife = Q.state.get("lives");
 		stage.endgame = false;
-		stage.enemyNum=10;
-		stage.enemyANum=8;
-		stage.enemyBNum=2;
+		stage.enemyNum=20;
+		stage.enemyANum=14;
+		stage.enemyBNum=4;
 		stage.enemyCNum=0;
-		stage.enemyDNum=0;
+		stage.enemyDNum=2;
 		stage.enemyMax=3;
 		stage.currentEnemy=0;
 		stage.currentA=0;
@@ -1603,8 +1610,180 @@ window.addEventListener("load",function() {
 		});
 		Q.stageScene("ui",1);
 	}, {sort: true});
+	
+	Q.scene("level3",function(stage) {
+		var map = stage.collisionLayer(new Q.TowerManMap({dataAsset: 'level3.json', sheet: 'tiles'}));
+		map.setup();
 
-	Q.load("sprites2.png, newSprites.json, level1.json, level2.json, level3.json, level4.json, level5.json", function() {
+		stage.add("viewport");
+		stage.moveTo(32,0);
+		stage.playerStart=Q.tilePos2(5.5,12.5);
+		stage.PlayerTank = stage.insert(new Q.Player(stage.playerStart));
+		stage.insert(new Q.Bird(Q.tilePos2(7.5,12.5)));
+		
+		
+		stage.playerLife = Q.state.get("lives");
+		stage.endgame = false;
+		stage.enemyNum=20;
+		stage.enemyANum=14;
+		stage.enemyBNum=4;
+		stage.enemyCNum=0;
+		stage.enemyDNum=2;
+		stage.enemyMax=3;
+		stage.currentEnemy=0;
+		stage.currentA=0;
+		stage.currentB=0;
+		stage.currentC=0;
+		stage.currentD=0;
+		stage.score=0;
+		stage.diff=0;
+		stage.enemyArr=Q.genArray(stage);
+		console.log(stage.enemyArr);
+		stage.add("viewport");
+		stage.moveTo(32,0);
+		Q.genEnemy(stage,map.p.tiles[0].length,stage.enemyMax);
+		Q.state.set({
+			eNum: stage.enemyNum,
+			//lives: stage.playerLife,
+			stage: 3,
+			//score: 0,
+			total: stage.enemyNum,
+			ANum: stage.enemyANum,
+			BNum: stage.enemyBNum,
+			CNum: stage.enemyCNum,
+			DNum: stage.enemyDNum,
+			ALeft: stage.enemyANum,
+			BLeft: stage.enemyBNum,
+			CLeft: stage.enemyCNum,
+			DLeft: stage.enemyDNum,
+			AKilled: stage.currentA,
+			BKilled: stage.currentB,
+			CKilled: stage.currentC,
+			DKilled: stage.currentD,
+			//AScore: 100,
+			//BScore: 200,
+			//CScore: 300,
+			//DScore: 400
+		});
+		Q.stageScene("ui",1);
+	}, {sort: true});
+
+	Q.scene("level4",function(stage) {
+		var map = stage.collisionLayer(new Q.TowerManMap({dataAsset: 'level4.json', sheet: 'tiles'}));
+		map.setup();
+
+		stage.add("viewport");
+		stage.moveTo(32,0);
+		stage.playerStart=Q.tilePos2(5.5,12.5);
+		stage.PlayerTank = stage.insert(new Q.Player(stage.playerStart));
+		stage.insert(new Q.Bird(Q.tilePos2(7.5,12.5)));
+		
+		
+		stage.playerLife = Q.state.get("lives");
+		stage.endgame = false;
+		stage.enemyNum=20;
+		stage.enemyANum=0;
+		stage.enemyBNum=4;
+		stage.enemyCNum=10;
+		stage.enemyDNum=6;
+		stage.enemyMax=3;
+		stage.currentEnemy=0;
+		stage.currentA=0;
+		stage.currentB=0;
+		stage.currentC=0;
+		stage.currentD=0;
+		stage.score=0;
+		stage.diff=0;
+		stage.enemyArr=Q.genArray(stage);
+		console.log(stage.enemyArr);
+		stage.add("viewport");
+		stage.moveTo(32,0);
+		Q.genEnemy(stage,map.p.tiles[0].length,stage.enemyMax);
+		Q.state.set({
+			eNum: stage.enemyNum,
+			//lives: stage.playerLife,
+			stage: 4,
+			//score: 0,
+			total: stage.enemyNum,
+			ANum: stage.enemyANum,
+			BNum: stage.enemyBNum,
+			CNum: stage.enemyCNum,
+			DNum: stage.enemyDNum,
+			ALeft: stage.enemyANum,
+			BLeft: stage.enemyBNum,
+			CLeft: stage.enemyCNum,
+			DLeft: stage.enemyDNum,
+			AKilled: stage.currentA,
+			BKilled: stage.currentB,
+			CKilled: stage.currentC,
+			DKilled: stage.currentD,
+			//AScore: 100,
+			//BScore: 200,
+			//CScore: 300,
+			//DScore: 400
+		});
+		Q.stageScene("ui",1);
+	}, {sort: true});
+
+	Q.scene("level5",function(stage) {
+		var map = stage.collisionLayer(new Q.TowerManMap({dataAsset: 'level5.json', sheet: 'tiles'}));
+		map.setup();
+
+		stage.add("viewport");
+		stage.moveTo(32,0);
+		stage.playerStart=Q.tilePos2(5.5,12.5);
+		stage.PlayerTank = stage.insert(new Q.Player(stage.playerStart));
+		stage.insert(new Q.Bird(Q.tilePos2(7.5,12.5)));
+		
+		
+		stage.playerLife = Q.state.get("lives");
+		stage.endgame = false;
+		stage.enemyNum=20;
+		stage.enemyANum=8;
+		stage.enemyBNum=2;
+		stage.enemyCNum=0;
+		stage.enemyDNum=10;
+		stage.enemyMax=3;
+		stage.currentEnemy=0;
+		stage.currentA=0;
+		stage.currentB=0;
+		stage.currentC=0;
+		stage.currentD=0;
+		stage.score=0;
+		stage.diff=0;
+		stage.enemyArr=Q.genArray(stage);
+		console.log(stage.enemyArr);
+		stage.add("viewport");
+		stage.moveTo(32,0);
+		Q.genEnemy(stage,map.p.tiles[0].length,stage.enemyMax);
+		Q.state.set({
+			eNum: stage.enemyNum,
+			//lives: stage.playerLife,
+			stage: 5,
+			//score: 0,
+			total: stage.enemyNum,
+			ANum: stage.enemyANum,
+			BNum: stage.enemyBNum,
+			CNum: stage.enemyCNum,
+			DNum: stage.enemyDNum,
+			ALeft: stage.enemyANum,
+			BLeft: stage.enemyBNum,
+			CLeft: stage.enemyCNum,
+			DLeft: stage.enemyDNum,
+			AKilled: stage.currentA,
+			BKilled: stage.currentB,
+			CKilled: stage.currentC,
+			DKilled: stage.currentD,
+			//AScore: 100,
+			//BScore: 200,
+			//CScore: 300,
+			//DScore: 400
+		});
+		Q.stageScene("ui",1);
+	}, {sort: true});
+	
+
+	Q.load("sprites2.png, newSprites.json, level1.json, level2.json, level3.json, level4.json, level5.json, 4p_1.json", function() {
 		//Q.sheet("tiles","tiles.png", { tileW: 16, tileH: 16 });
 
 		Q.compileSheets("sprites2.png","newSprites.json");
