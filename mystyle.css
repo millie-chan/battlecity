@@ -47,11 +47,22 @@ div.middle {
     vertical-align: middle;
 }
 
+div#mypage{
+	display:none;
+	vertical-align: top;
+	margin-right:10px;
+}
+
+div#myInfo{
+	display:none;
+	margin-top: 50px;
+	text-align: center;
+}
+
 span#login {
     text-align: right;
-	margin-left: 200px;
 	display: inline-block;
-	width: 500px;
+	float: right;
 }
 
 span#newgr {
@@ -83,7 +94,7 @@ button#new{
 	font-weight:bold;
 	font-style:normal;
 	height:500px;
-	line-height:100px;
+	line-height:25px;
 	width:200px;
 	text-decoration:none;
 	text-align:center;
@@ -93,6 +104,7 @@ button#new:hover {
 	background-color:rgb(131, 81, 47);
 	text-shadow:0px 0px 0px transparent;
 }
+
 
 .join{
 	width:45px;
@@ -175,7 +187,7 @@ button#new:hover {
 	text-align:center;
 	text-shadow:1px 1px 0px #4d340d;
 }
-button#submitNewgrBtn, button#startGameBtn{
+button#submitNewgrBtn, button#startGameBtn, button#startMultiGameBtn{
 	-moz-box-shadow:inset 0px 1px 0px 0px #f5978e;
 	-webkit-box-shadow:inset 0px 1px 0px 0px #f5978e;
 	box-shadow:inset 0px 1px 0px 0px #f5978e;
@@ -203,10 +215,10 @@ button#submitNewgrBtn, button#startGameBtn{
 	text-align:center;
 	text-shadow:1px 1px 0px #810e05;
 }
-button#submitNewgrBtn:hover, button#startGameBtn:hover {
+button#submitNewgrBtn:hover, button#startGameBtn:hover button#startMultiGameBtn:hover{
 	background-color:#c62d1f;
 }
-button#submitNewgrBtn:disabled, button#startGameBtn:disabled {
+button#submitNewgrBtn:disabled, button#startGameBtn:disabled button#startMultiGameBtn:disabled{
 	box-shadow:inset 0px 1px 0px 0px #dddddd;
 	background-color:#dddddd;
 	color:#999999;
@@ -214,6 +226,51 @@ button#submitNewgrBtn:disabled, button#startGameBtn:disabled {
 	border:1px solid #dddddd;
 }
 
+button#mypageBtn, button#mypagebackBtn {
+	-moz-box-shadow:inset 0px 1px 0px 0px #f5978e;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #f5978e;
+	box-shadow:inset 0px 1px 0px 0px #f5978e;
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #f24537), color-stop(1, #c62d1f) );
+	background:-moz-linear-gradient( center top, #f24537 5%, #c62d1f 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#f24537', endColorstr='#c62d1f');
+	background-color:#f24537;
+	-webkit-border-top-left-radius:8px;
+	-moz-border-radius-topleft:8px;
+	border-top-left-radius:8px;
+	-webkit-border-top-right-radius:8px;
+	-moz-border-radius-topright:8px;
+	border-top-right-radius:8px;
+	-webkit-border-bottom-right-radius:8px;
+	-moz-border-radius-bottomright:8px;
+	border-bottom-right-radius:8px;
+	-webkit-border-bottom-left-radius:8px;
+	-moz-border-radius-bottomleft:8px;
+	border-bottom-left-radius:8px;
+	text-indent:0;
+	border:1px solid #d02718;
+	display:inline-block;
+	color:#ffffff;
+	font-family:Arial;
+	font-size:15px;
+	font-weight:bold;
+	font-style:normal;
+	height:25px;
+	line-height:25px;
+	width:75px;
+	text-decoration:none;
+	text-align:center;
+	text-shadow:1px 1px 0px #810e05;
+}
+button#mypageBtn:hover , button#mypagebackBtn:hover{
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #c62d1f), color-stop(1, #f24537) );
+	background:-moz-linear-gradient( center top, #c62d1f 5%, #f24537 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#c62d1f', endColorstr='#f24537');
+	background-color:#c62d1f;
+}
+button#mypageBtn:active, button#mypagebackBtn:active {
+	position:relative;
+	top:1px;
+}
 
 .overlay{
 	display:none;
@@ -249,13 +306,36 @@ button#submitNewgrBtn:disabled, button#startGameBtn:disabled {
     box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
 }
 
+.modal2{
+    /* some styles to position the modal at the center of the page */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 500px;
+    height: 370px;
+    margin-left: -250px;
+    margin-top: -185px;
+    background-color: #f1c40f;
+    text-align: left;
+    border-radius: 5px;
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #F0A011), color-stop(1, #F2401E) );
+	background:-moz-linear-gradient( center top, #F0A011 5%, #F2401E 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#F0A011', endColorstr='#F2401E');
+	background-color:#f0c911;
+	border:1px solid #e65f44;
+	color:#920D0D;
+    /* needed styles for the overlay */
+    z-index: 10; /* keep on top of other elements on the page */
+    box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
+}
+
 div.modalContent {
     font-weight: bold;
     font-family: sans-serif;
 	margin: 30px;
 }
 
-#newgrModal, #chooseLevel, #choose4P, #chooseMap, #submitNewgrForm, #startGame{
+#warningModal, #chooseItemModal, #newgrModal, #chooseLevel, #choose4P, #chooseMap, #submitNewgrForm, #startGame{
 	display:none;
 }
 
@@ -282,6 +362,17 @@ img.pre{
 	max-height: 90px;
 }
 
+img.item{
+	max-width: 60px;
+	max-height: 60px;
+	vertical-align: bottom;
+	margin-bottom: 15px;
+}
+
+input[name="item"] {
+    margin-bottom: 15px;
+}
+
 #gr{
 	margin-top: 50px;
 	text-align: center;
@@ -295,4 +386,47 @@ div.roomInfo {
 	top: 50px;
 	position: relative;
 	margin-right: 50px;
+}
+
+.seated{
+	-moz-box-shadow:inset 0px 1px 0px 0px #59370e;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #59370e;
+	box-shadow:inset 0px 1px 0px 0px #59370e;
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #FF00E0), color-stop(1, #381269) );
+	background:-moz-linear-gradient( center top, #FF00E0 5%, #381269 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#FF00E0', endColorstr='#381269');
+	background-color:#381269;
+	-webkit-border-top-left-radius:42px;
+	-moz-border-radius-topleft:42px;
+	border-top-left-radius:42px;
+	-webkit-border-top-right-radius:42px;
+	-moz-border-radius-topright:42px;
+	border-top-right-radius:42px;
+	-webkit-border-bottom-right-radius:42px;
+	-moz-border-radius-bottomright:42px;
+	border-bottom-right-radius:42px;
+	-webkit-border-bottom-left-radius:42px;
+	-moz-border-radius-bottomleft:42px;
+	border-bottom-left-radius:42px;
+	text-indent: -4;
+	border:1px solid #47310b;
+	display:inline-block;
+	color:#ffffff;
+	font-family:Arial;
+	font-size:15px;
+	font-weight:bold;
+	font-style:normal;
+	height:45px;
+	line-height:45px;
+	width:45px;
+	text-decoration:none;
+	text-align:center;
+	text-shadow:1px 1px 0px #4d340d;
+}
+
+.seated :hover {
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #381269), color-stop(1, #FF00E0) );
+	background:-moz-linear-gradient( center top, #381269 5%, #FF00E0 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#381269', endColorstr='#FF00E0');
+	background-color:#381269;
 }

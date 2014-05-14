@@ -3,6 +3,7 @@
 	height:480px;
 	background-image:url('images/status2.png');
 	position: absolute;
+	margin-top:50px;
 }
 .outerBlack {
 	width:544px;

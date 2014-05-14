@@ -1508,7 +1508,7 @@ window.addEventListener("load",function() {
 		stage.insert(new Q.Bird(Q.tilePos2(7.5,12.5,1)));
 		stage.PlayerTank = stage.insert(new Q.Player(stage.playerStart));
 //		 stage.add("viewport").follow(stage.PlayerTank);
-		stage.playerLife = 2;
+		stage.playerLife = Q.state.get("lives");
 		stage.endgame = false;
 		stage.enemyNum=20;
 		stage.enemyANum=18;
@@ -1532,7 +1532,7 @@ window.addEventListener("load",function() {
 			eNum: stage.enemyNum,
 			lives: stage.playerLife,
 			stage: 1,
-			score: 0,
+			score: Q.state.get("score"),
 			total: stage.enemyNum,
 			ANum: stage.enemyANum,
 			BNum: stage.enemyBNum,
@@ -1587,9 +1587,9 @@ window.addEventListener("load",function() {
 		Q.genEnemy(stage,map.p.tiles[0].length,stage.enemyMax);
 		Q.state.set({
 			eNum: stage.enemyNum,
-			//lives: stage.playerLife,
+			lives: stage.playerLife,
 			stage: 2,
-			//score: 0,
+			score: Q.state.get("score"),
 			total: stage.enemyNum,
 			ANum: stage.enemyANum,
 			BNum: stage.enemyBNum,
@@ -1603,10 +1603,10 @@ window.addEventListener("load",function() {
 			BKilled: stage.currentB,
 			CKilled: stage.currentC,
 			DKilled: stage.currentD,
-			//AScore: 100,
-			//BScore: 200,
-			//CScore: 300,
-			//DScore: 400
+			AScore: 100,
+			BScore: 200,
+			CScore: 300,
+			DScore: 400
 		});
 		Q.stageScene("ui",1);
 	}, {sort: true});
@@ -1644,9 +1644,9 @@ window.addEventListener("load",function() {
 		Q.genEnemy(stage,map.p.tiles[0].length,stage.enemyMax);
 		Q.state.set({
 			eNum: stage.enemyNum,
-			//lives: stage.playerLife,
+			lives: stage.playerLife,
 			stage: 3,
-			//score: 0,
+			score: Q.state.get("score"),
 			total: stage.enemyNum,
 			ANum: stage.enemyANum,
 			BNum: stage.enemyBNum,
@@ -1660,10 +1660,10 @@ window.addEventListener("load",function() {
 			BKilled: stage.currentB,
 			CKilled: stage.currentC,
 			DKilled: stage.currentD,
-			//AScore: 100,
-			//BScore: 200,
-			//CScore: 300,
-			//DScore: 400
+			AScore: 100,
+			BScore: 200,
+			CScore: 300,
+			DScore: 400
 		});
 		Q.stageScene("ui",1);
 	}, {sort: true});
@@ -1701,9 +1701,9 @@ window.addEventListener("load",function() {
 		Q.genEnemy(stage,map.p.tiles[0].length,stage.enemyMax);
 		Q.state.set({
 			eNum: stage.enemyNum,
-			//lives: stage.playerLife,
+			lives: stage.playerLife,
 			stage: 4,
-			//score: 0,
+			score: Q.state.get("score"),
 			total: stage.enemyNum,
 			ANum: stage.enemyANum,
 			BNum: stage.enemyBNum,
@@ -1717,10 +1717,10 @@ window.addEventListener("load",function() {
 			BKilled: stage.currentB,
 			CKilled: stage.currentC,
 			DKilled: stage.currentD,
-			//AScore: 100,
-			//BScore: 200,
-			//CScore: 300,
-			//DScore: 400
+			AScore: 100,
+			BScore: 200,
+			CScore: 300,
+			DScore: 400
 		});
 		Q.stageScene("ui",1);
 	}, {sort: true});
@@ -1758,9 +1758,9 @@ window.addEventListener("load",function() {
 		Q.genEnemy(stage,map.p.tiles[0].length,stage.enemyMax);
 		Q.state.set({
 			eNum: stage.enemyNum,
-			//lives: stage.playerLife,
+			lives: stage.playerLife,
 			stage: 5,
-			//score: 0,
+			score: Q.state.get("score"),
 			total: stage.enemyNum,
 			ANum: stage.enemyANum,
 			BNum: stage.enemyBNum,
@@ -1774,10 +1774,10 @@ window.addEventListener("load",function() {
 			BKilled: stage.currentB,
 			CKilled: stage.currentC,
 			DKilled: stage.currentD,
-			//AScore: 100,
-			//BScore: 200,
-			//CScore: 300,
-			//DScore: 400
+			AScore: 100,
+			BScore: 200,
+			CScore: 300,
+			DScore: 400
 		});
 		Q.stageScene("ui",1);
 	}, {sort: true});

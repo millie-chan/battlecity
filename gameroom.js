@@ -1,21 +1,38 @@
 var lvlArr=[5,3,2,3];
 var playerArr=Array();
+var myRoom;
+var myLevel;
+var myType;
 var imgArr1=['http://cdn.wikimg.net/strategywiki/images/5/5e/Battle_City_Stage01.png','http://cdn.wikimg.net/strategywiki/images/6/65/Battle_City_Stage02.png','http://cdn.wikimg.net/strategywiki/images/2/2f/Battle_City_Stage03.png','http://cdn.wikimg.net/strategywiki/images/f/f8/Battle_City_Stage14.png','http://cdn.wikimg.net/strategywiki/images/3/36/Battle_City_Stage17.png'];
-var imgArr2=['http://cdn.wikimg.net/strategywiki/images/2/2f/Battle_City_Stage03.png','http://cdn.wikimg.net/strategywiki/images/f/f8/Battle_City_Stage14.png','http://cdn.wikimg.net/strategywiki/images/3/36/Battle_City_Stage17.png'];
+var imgArr2=['./images/two1.png','http://cdn.wikimg.net/strategywiki/images/f/f8/Battle_City_Stage14.png','http://cdn.wikimg.net/strategywiki/images/3/36/Battle_City_Stage17.png'];
 var imgArr3=['./images/four1.png','http://cdn.wikimg.net/strategywiki/images/6/65/Battle_City_Stage02.png'];
-var imgArr4=['./images/four1.1.png','http://cdn.wikimg.net/strategywiki/images/2/2f/Battle_City_Stage03.png','http://cdn.wikimg.net/strategywiki/images/3/36/Battle_City_Stage17.png'];
+var imgArr4=['./images/four1.png','http://cdn.wikimg.net/strategywiki/images/2/2f/Battle_City_Stage03.png','http://cdn.wikimg.net/strategywiki/images/3/36/Battle_City_Stage17.png'];
+var playid;
+var myNum;
+var log = 0;
+var myItem;
+var myVar;
 
 $(document).ready(function() {
+	loadFBSDK(function(){
+		getPlayer();
+	});
 	$.post("http://54.254.178.30:1234/getroom", function(json) {
 		printRoooms(json);
 	});
 	$("#new").click(function(){
-		$("#newgrModal").css("display","block");
-		$(".overlay").css("display","block");
+		if($("#"+playid).length>0){
+			openAlert("You need to leave the current gameroom before joining a new one!<br>But, if you new a room, you cannot leave it.");
+		}
+		else{
+			$("#newgrModal").css("display","block");
+			$("#over1").css("display","block");
+		}
 	});	
-	$(".overlay").click(function(){
+	$("#over1").click(function(){
+		$("#warningModal").css("display","none");
 		$("#newgrModal").css("display","none");
-		$(".overlay").css("display","none");
+		$("#over1").css("display","none");
 		$( "input[name='num']:checked" ).prop('checked', false); 
 		$( "input[name='type4P']:checked" ).prop('checked', false); 
 		$("#startGame").slideUp();
@@ -91,9 +108,10 @@ $(document).ready(function() {
 	});
 	$("#submitNewgrBtn").click(function(e){
 		e.preventDefault();
-//		console.log($("#newgrForm").serialize());
+		$("input[name='pid']").val(playid);
+		console.log($("#newgrForm").serialize());
 		$.post("http://54.254.178.30:1234/newroom", $("#newgrForm").serialize(), function(json) {
-			$(".overlay").click();
+			$("#over1").click();
 			printRoooms(json);
 		});
 	});
@@ -102,14 +120,37 @@ $(document).ready(function() {
 		var n="level"+$("input[name='level']").val();
 //		console.log($("#newgrForm").serialize());
         console.log("play");
-		$(".overlay").click();
+		$("#over1").click();
 		$("#main").css("display","none");
 		$("#outer").css("display","block");
 		window.clearInterval(myVar);
+		Q.state.reset({ score: 0, lives: 2, stage: 1 });
 		Q.stageScene(n);
 		
 	});
-	var myVar;// = setInterval(function(){myTimer()},1500);
+	$("#startMultiGameBtn").click(function(e){
+		e.preventDefault();
+		window.clearInterval(myVar);
+		if(!($("input[name='item']:checked").val())){
+			myItem=$("input[name='item']:checked").val();
+		}
+//		console.log($("#newgrForm").serialize());
+        console.log($("input[name='item']:checked").val());
+		$("#chooseItemModal").css("display","none");
+		$( "input[name='item']:checked" ).prop('checked', false); 
+		console.log("me "+ playid+" ppl "+playerArr+" room "+myRoom+" type "+myType+" level "+myLevel+" ## "+playerArr.length+" # "+myNum);
+		$.post("http://54.254.178.30:1234/removeroom","roomId="+myRoom, function(json) {
+			printRoooms(json);
+		});
+		$("#over2").css("display","none");
+/*		$(".overlay").click();
+		$("#main").css("display","none");
+		$("#outer").css("display","block");
+		window.clearInterval(myVar);
+		Q.stageScene(n);*/
+		
+	});
+	// = setInterval(function(){myTimer()},1500);
 	function myTimer() {
 		$.post("http://54.254.178.30:1234/getroom", function(json) {
 			printRoooms(json);
@@ -123,12 +164,22 @@ $(document).ready(function() {
 			window.clearInterval(myVar);
 		}
 	});
+	$("#mypageBtn").click(function(){
+		$("#myInfo").css("display","block");
+		$("#main").css("display","none");
+		$("#outer").css("display","none");
+	});	
+	$("#mypagebackBtn").click(function(){
+		$("#myInfo").css("display","none");
+		$("#main").css("display","block");
+		$("#outer").css("display","none");
+	});	
+
 });
 
 function printRoooms(json){
 	var len=json.length;
 	var enter=0;
-	var myRoom="12345";
 	var content="";
 	playerArr=Array();
 	var full=false;
@@ -147,9 +198,12 @@ function printRoooms(json){
 			}
 			else{
 				content=content+'<div class="tbl_cell join center"><button class="join1 '+json[i-1].roomid+'" id="'+json[i-1].player1+'" disabled></button></div>';
-/*				if(myID==json[i-1].player1){
+				if(playid==json[i-1].player1){
 					myRoom=json[i-1].roomid;
-				}*/
+					myLevel=json[i-1].mapN;
+					myType=json[i-1].playerN;
+					myNum=0;
+				}
 			}
 		}
 		else{
@@ -162,9 +216,12 @@ function printRoooms(json){
 			}
 			else{
 				content=content+'<div class="tbl_cell join middle"><button class="join2 '+json[i-1].roomid+'" id="'+json[i-1].player2+'" disabled></button></div>';
-/*				if(myID==json[i-1].player2){
+				if(playid==json[i-1].player2){
 					myRoom=json[i-1].roomid;
-				}*/
+					myLevel=json[i-1].mapN;
+					myType=json[i-1].playerN;
+					myNum=1;
+				}
 			}
 		}
 		else{
@@ -184,9 +241,12 @@ function printRoooms(json){
 			}
 			else{
 				content=content+'<div class="tbl_cell join middle"><button class="join4 '+json[i-1].roomid+'" id="'+json[i-1].player4+'" disabled></button></div>';
-/*				if(myID==json[i-1].player4){
+				if(playid==json[i-1].player4){
 					myRoom=json[i-1].roomid;
-				}*/
+					myLevel=json[i-1].mapN;
+					myType=json[i-1].playerN;
+					myNum=3;
+				}
 			}
 		}
 		else{
@@ -199,9 +259,12 @@ function printRoooms(json){
 			}
 			else{
 				content=content+'<div class="tbl_cell join center"><button class="join3 '+json[i-1].roomid+'" id="'+json[i-1].player3+'" disabled></button></div>';
-/*				if(myID==json[i-1].player3){
+				if(playid==json[i-1].player3){
 					myRoom=json[i-1].roomid;
-				}*/
+					myLevel=json[i-1].mapN;
+					myType=json[i-1].playerN;
+					myNum=2;
+				}
 			}
 		}
 		else{
@@ -232,14 +295,37 @@ function printRoooms(json){
 		}
 	}
 	$("#rooms").html(content);
+	console.log($("#"+playid).html());
+	if($("#"+playid).length>0){
+		$("#"+playid).addClass("seated");
+		$("#"+playid).parent().removeClass("join");
+		if(myRoom!=playid){
+			$("#"+playid).html("leave");
+			$("#"+playid).prop("disabled",false);
+			$("#"+playid).click(function(e){
+				e.preventDefault();
+				var classes=$(this).attr("class").split(" ");
+				console.log(classes[1]+" wanna leave! "+classes[0]);
+				var postStr="player="+classes[0]+"&pId="+playid+"&roomId="+classes[1];
+				$.post("http://54.254.178.30:1234/leaveroom", postStr, function(json) {
+					printRoooms(json);
+				});
+			});
+		}
+	}
 	$(".join button").click(function(e){
 		e.preventDefault();
-		var classes=$(this).attr("class").split(" ");
-		console.log(classes[1]+" wanna join! "+classes[0]);
-		var postStr="player="+classes[0]+"&pId=23456&roomId="+classes[1];
-		$.post("http://54.254.178.30:1234/joinroom", postStr, function(json) {
-			printRoooms(json);
-		});
+		if($("#"+playid).length>0){
+			openAlert("You need to leave the current gameroom before joining a new one!<br>But, if you new a room, you cannot leave it.");
+		}
+		else{
+			var classes=$(this).attr("class").split(" ");
+			console.log(classes[1]+" wanna join! "+classes[0]);
+			var postStr="player="+classes[0]+"&pId="+playid+"&roomId="+classes[1];
+			$.post("http://54.254.178.30:1234/joinroom", postStr, function(json) {
+				printRoooms(json);
+			});
+		}
 	});
 	$("."+myRoom).each(function( index ) {
 		if(index==0){
@@ -255,7 +341,85 @@ function printRoooms(json){
 		console.log(index+"full"+full);
 	});
 	if(full){
-		console.log("full!!!"+playerArr);
+		console.log("full!!! "+playerArr+" room "+myRoom);
+		window.clearInterval(myVar);
+		$("#chooseItemModal").css("display","block");
+		$("#over2").css("display","block");
 	}
 }
 
+function openAlert(msg){
+	var str="";
+	str+='<div class="modalContent">'+msg+'</div>';
+	$("#warningModal").html(str);
+	$("#warningModal").css("display","block");
+	$("#over1").css("display","block");
+	//setTimeout(function(){$("#warningModal").css("display","none");},4000);
+}
+
+function getPlayer(){
+	console.log("no "+playid);
+	if (log == 1){
+		console.log("in "+playid);
+		$("#mypage").css("display","inline-block");
+	}
+}
+
+function checkLogin(callback){
+	var time=new Date().getTime();
+	FB.getLoginStatus(function(response) {
+		console.log(response);
+		if (response.status === 'connected') {
+			// the user is logged in and has authenticated your
+			// app, and response.authResponse supplies
+			// the user's ID, a valid access token, a signed
+			// request, and the time the access token 
+			// and signed request each expire
+			var uid = response.authResponse.userID;
+			console.log("connected uid: "+uid);
+			//var accessToken = response.authResponse.accessToken;
+			playid = uid;
+			log = 1;
+			//getPlayer();
+		} else if (response.status === 'not_authorized') {
+			console.log("not_authorized");
+			playid = "tmp"+time;
+			log = 0;
+		} else {
+			console.log("not_logged_in_FB");
+			playid = "tmp"+time;
+			log = 0;
+		}
+		callback && callback();
+	});
+	FB.Event.subscribe('auth.authResponseChange', function(response) {
+		console.log("auth.authResponseChange");
+		if (response.status == 'connected') {
+			var uid = response.authResponse.userID;
+			console.log("I become connected uid: "+uid);
+			playid = uid;
+			log = 1;
+			//getPlayer();
+		} else {
+			console.log("still not_authorized or not_logged_in_FB");
+			playid = "tmp"+time;
+			log = 0;
+		}
+		callback && callback();
+	});
+}
+
+function loadFBSDK(callback){
+	$.ajaxSetup({ cache: true });
+	$.getScript('//connect.facebook.net/en_UK/all.js', function(){
+		FB.init({
+			appId: '528688120569031',
+			xfbml      : true,
+			version    : 'v2.0'
+		});
+		checkLogin(callback);
+		//$('#loginbutton,#feedbutton').removeAttr('disabled');
+		
+		//FB.getLoginStatus(updateStatusCallback);
+	});
+}

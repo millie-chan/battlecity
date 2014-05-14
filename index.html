@@ -11,52 +11,37 @@
 
 
 <body>
-	<script>
-		window.fbAsyncInit = function() {
-			FB.init({
-				appId      : '528688120569031',
-				xfbml      : true,
-				version    : 'v2.0'
-			});
-		};
-
-		(function(d, s, id){
-			var js, fjs = d.getElementsByTagName(s)[0];
-			if (d.getElementById(id)) {return;}
-			js = d.createElement(s); js.id = id;
-			js.src = "//connect.facebook.net/en_US/sdk.js";
-			fjs.parentNode.insertBefore(js, fjs);
-		}(document, 'script', 'facebook-jssdk'));
-	</script>
 	<div id="top">
 		<span>
 			<img id="banner" src="./images/logo.png"></img>
 		</span>
 		<span id="login">
 			<input type="checkbox" name="up" value="go">update</input>
+			<div id="mypage"><button id="mypageBtn">My page</button></div>
 			<div class="fb-login-button" scope="email" data-max-rows="1" data-size="large" data-show-faces="false" data-auto-logout-link="true" onlogin="login();"></div>
 		</span>
 	</div>
-		<div class='outerImage' id='outer'  style="display:none">
-			<canvas id='myGame' width='448' height='448' style='background-color:black ;'></canvas>
-			<div id="scoreBG"></div>
-			<div id="levelNum"></div>
-			<div id="score0"></div>
-			<div id="score1"></div>
-			<div id="score2"></div>
-			<div id="score3"></div>
-			<div id="score4"></div>
-			<div id="carnum0"></div>
-			<div id="carnum1"></div>
-			<div id="carnum2"></div>
-			<div id="carnum3"></div>
-			<div id="carnum4"></div>
-			<div class="numSprite num0" id="level0"></div>
-			<div class="numSprite num0" id="level1"></div>
-			<div class="numSprite num0" id="lives1"></div>
-			<div class="numSprite num0" id="lives2"></div>
-			<div id="over"></div>
-		</div>
+	<div id="myInfo"><button id="mypagebackBtn">Back</button></div>
+	<div class='outerImage' id='outer'  style="display:none">
+		<canvas id='myGame' width='448' height='448' style='background-color:black ;'></canvas>
+		<div id="scoreBG"></div>
+		<div id="levelNum"></div>
+		<div id="score0"></div>
+		<div id="score1"></div>
+		<div id="score2"></div>
+		<div id="score3"></div>
+		<div id="score4"></div>
+		<div id="carnum0"></div>
+		<div id="carnum1"></div>
+		<div id="carnum2"></div>
+		<div id="carnum3"></div>
+		<div id="carnum4"></div>
+		<div class="numSprite num0" id="level0"></div>
+		<div class="numSprite num0" id="level1"></div>
+		<div class="numSprite num0" id="lives1"></div>
+		<div class="numSprite num0" id="lives2"></div>
+		<div id="over"></div>
+	</div>
 	<div id="main">
 		<div id="gr">
 			<img id="grbanner" src="./images/gameroom.png"></img>
@@ -159,10 +144,12 @@
 			</span>
 		</div>
 	</div>
-	<div class="overlay"></div>
+	<div class="overlay" id="over1"></div>
+	<div class="overlay" id="over2"></div>
 	<div class="modal" id="newgrModal">
 		<div class="modalContent">
 			<form id="newgrForm">
+				<input type="hidden" name="pid" value="0"></input>
 				No. of Players:<input type="radio" name="num" value="1">1</input><input type="radio" name="num" value="2">2</input><input type="radio" name="num" value="4">4</input><br>
 				<div id="choose4P"><input type="radio" name="type4P" value="3">individual play (1 vs 1 vs 1 vs 1)</input> <input type="radio" name="type4P" value="4">team play (2 vs 2)</input></div>
 				<div id="chooseLevel">
@@ -179,6 +166,21 @@
 			</form>
 		</div>
 	</div>
+	<div class="modal2" id="chooseItemModal">
+		<div class="modalContent">
+			<form id="chooseItemForm">
+				<input type="hidden" name="pid" value="0"></input>
+				Choose one item to use in the game!(can use once only!)<br><br>
+				<input type="radio" name="item" value="beam"><img class="item" src="./images/8shoots.PNG"> beam(8 bullets shot at a time)</img></input><br>
+				<input type="radio" name="item" value="barrier"><img class="item" src="./images/barrier.PNG"> barrier(not be hurt within 8 seconds)</img></input><br>
+				<input type="radio" name="item" value="brick"><img class="item" src="./images/wall.PNG"> shovel(recover all walls around the fortress)</img></input>
+				<div id="startMultiGame"><button id="startMultiGameBtn">Start Game</button></div>
+			</form>
+		</div>
+	</div>
+	<div class="modal2" id="warningModal">
+	</div>
+
 </body>
 
 </html>
