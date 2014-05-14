@@ -1,8 +1,16 @@
 $(document).ready(function() {
 	var carArray = ["normal", "speed", "bullet2", "blood2", "amptank"];
 	var statusArray = ["Activate", "Use It?", "Used"];
+	//var allP = Array();
+	//var allP = {};
+	var basicP = [90, 220, 500];
+	var maxP = [210, 750, 100];
+	var sliderInfo = [0, 100, 1, 3]; //min, max, step, numofslider
+	var upP = new Array();
+	var carNeed = [0, 7, 15, 4, 10];
+	var spendArray = [10, 10, 10];
+	
 	var currentNum = 0;
-	var curCar = 0;
 	var login = 0;
 	var playerid;
 	var myPlayer = {
@@ -10,18 +18,34 @@ $(document).ready(function() {
 		coins: 0,
 		currentcar: 'hoho'
 	};
-	var myCar;
+	var myCar = {};
+	
+	//setup
+	function setup(callback){
+		$("#carContainer").css('background-image', 'url("images/car/'+carArray[currentNum]+'.png")');
+		disableButton(currentNum);
+		for (var i = 0; i < basicP.length; i++){
+			upP[i] = (maxP[i] - basicP[i])/10;
+		}
+		console.log(upP);
+		prepareSlider(sliderInfo[3], sliderInfo);
+		callback && callback();
+		
+	}
+	
+	function loadPage(){
+		getPlayer(function(){
+			getAllCars(function(){
+				nameStatus(currentNum);
+			});
+		});
+	}
 	
 	loadFBSDK(function(){
-		getPlayer();
-		getAllCars(function(){
-			nameStatus(currentNum);
+		setup(function(){
+			loadPage();
 		});
 	});
-	
-	$("#carContainer").css('background-image', 'url("images/car/'+carArray[currentNum]+'.png")');
-	
-	disableButton(currentNum);
 	
 	function checkLogin(callback){
 		FB.getLoginStatus(function(response) {
@@ -32,19 +56,31 @@ $(document).ready(function() {
 				// the user's ID, a valid access token, a signed
 				// request, and the time the access token 
 				// and signed request each expire
-				var uid = response.authResponse.userID;
-				console.log("connected uid: "+uid);
-				//var accessToken = response.authResponse.accessToken;
-				playerid = uid;
-				login = 1;
-				//getPlayer();
+				if (login == 0) {
+					var uid = response.authResponse.userID;
+					console.log("connected uid: "+uid);
+					//var accessToken = response.authResponse.accessToken;
+					playerid = uid;
+					login = 1;
+					//getPlayer();
+				}
 			} else if (response.status === 'not_authorized') {
 				console.log("not_authorized");
 				playerid = "tmp00000";
+				myPlayer = {
+					id: playerid,
+					coins: 0,
+					currentcar: 'currentcar'
+				};
 				login = 0;
 			} else {
 				console.log("not_logged_in_FB");
 				playerid = "tmp00000";
+				myPlayer = {
+					id: playerid,
+					coins: 0,
+					currentcar: 'currentcar'
+				};
 				login = 0;
 			}
 			callback && callback();
@@ -52,15 +88,24 @@ $(document).ready(function() {
 		FB.Event.subscribe('auth.authResponseChange', function(response) {
 			console.log("auth.authResponseChange");
 			if (response.status == 'connected') {
-				var uid = response.authResponse.userID;
-				console.log("I become connected uid: "+uid);
-				playerid = uid;
-				login = 1;
-				//getPlayer();
+				if (login == 0){
+					var uid = response.authResponse.userID;
+					console.log("I become connected uid: "+uid);
+					playerid = uid;
+					login = 1;
+					//getPlayer();
+				}
 			} else {
 				console.log("still not_authorized or not_logged_in_FB");
-				playerid = "tmp00000";
-				login = 0;
+				if (login == 1) {
+					playerid = "tmp00000";
+					myPlayer = {
+						id: playerid,
+						coins: 0,
+						currentcar: 'currentcar'
+					};
+					login = 0;
+				}
 			}
 			callback && callback();
 		});
@@ -81,7 +126,7 @@ $(document).ready(function() {
 		});
 	}
 	
-	function getPlayer(){
+	function getPlayer(callback){
 		//console.log(playerMe);
 		if (login == 1){
 			var postStr = 'pId='+playerid;
@@ -90,7 +135,8 @@ $(document).ready(function() {
 				myPlayer.id = playerid;
 				myPlayer.coins = json.coins;
 				myPlayer.currentcar = json.currentcar;
-				//console.log(playerMe);
+				console.log(myPlayer);
+				callback && callback();
 			});
 		}
 	}
@@ -102,15 +148,124 @@ $(document).ready(function() {
 			$.post("http://54.254.178.30:1234/getcar", postStr, function(json) {
 				console.log(json);
 				myCar = json;
-				callback && callback();
-				//if (json.hasOwnProperty(''))
+				callback && callback(json);
 			});
+		}
+	}
+	
+	function buyCar(carNum){
+		var cartype = carArray[carNum];
+		if (myPlayer.coins < carNeed[carNum]){
+			console.log("from client: no money no talk");
+		} else {
+			if (login == 1){
+				var postStr="pId="+playerid+"&cartype="+cartype+"&needm="+carNeed[carNum];
+				$.post("http://54.254.178.30:1234/buycar", postStr, function(json) {
+					console.log(json);
+					if (json == "nomoney"){
+						console.log("in fact you have no money");
+					}
+					loadPage();
+				});
+			}		
+		}
+	}
+	
+	function useCar(carNum){
+		var cartype = carArray[carNum];
+		console.log(carArray[carNum]+" "+carArray[currentNum]);
+		if (login == 1){
+			var postStr="pId="+playerid+"&cartype="+cartype;
+			$.post("http://54.254.178.30:1234/usecar", postStr, function(json) {
+				console.log(json);
+				loadPage(carNum);
+			});
+		}
+	}
+	
+	function sliderToReal(val,type){
+		var r = (val-1)*upP[type]+basicP[type];
+		return r;
+	}
+	
+	function realToSlider(val, type){
+		var r;
+		r = (val - basicP[type])/upP[type] + 1;
+		/*
+		switch (type) {
+			case 0:
+				r = (val - basicP[0])/upP[0] + 1;
+				break;
+			case 1:
+				r = (val - basicP[1])/upP[1] + 1;
+				break;
+			case 2:
+				r = -val;
+				break;
+		}
+		console.log(r);*/
+		return r;
+	}
+	
+	function prepareSlider(num, info){
+		console.log("prepare slider");
+		for (var i = 0; i < num; i++){
+			$("#property"+i).slider({
+				min: 0,
+				max: 11,
+				range: "min",
+				value: 0,
+				slide: function(event, ui) {
+					return false;
+				}
+			});
+		}
+		/*
+		for (var i = 0; i < num; i++){
+			console.log(basicP[i]-upP[i]);
+			console.log(maxP[i]-upP[i]);
+			console.log(basicP[i]+" "+maxP[i]+" "+upP[i]);
+			$("#property"+i).slider({
+				min: basicP[i]-upP[i],
+				max: maxP[i],
+				step: upP[i],
+				range: "min",
+				value: 0,
+				slide: function(event, ui) {
+					return false;
+					
+					// var pa = myCar[carArray[currentNum]];
+					// var targetS = event.target.id.replace(/property/, '');
+					// if (ui.value < realToSlider(pa[targetS])){
+						// return false;
+					// }
+					
+				}
+			});
+		}*/
+	}
+	
+	function showProperties(pArray){
+		console.log("propeties: "+pArray);
+		for (var i = 0; i < pArray.length; i++){
+			$( "#property"+i ).slider("value", realToSlider(pArray[i], i));
+			$( "#property"+i ).slider("enable");
+			$("#scale"+i).html("current:"+sliderToReal($("#property"+i).slider("value"), i)+" max:"+maxP[i]);
+		}
+	}
+	
+	function disableP(){
+		for (var i = 0; i < sliderInfo[3]; i++){
+			$( "#property"+i ).slider("value", 0);
+			$( "#property"+i ).slider("option", "disabled", true);
 		}
 	}
 	
 	function nameStatus(target){
 		$("#carName").html(carArray[target]);
+		console.log(myCar);
 		if (myCar.hasOwnProperty(carArray[target])){
+			console.log(myPlayer.currentcar+" "+carArray[target]);
 			if (myPlayer.currentcar != carArray[target]) {
 				$("#carStatus").prop("disabled", false);
 				$("#carStatus").html(statusArray[1]);
@@ -118,9 +273,11 @@ $(document).ready(function() {
 				$("#carStatus").prop("disabled", true);
 				$("#carStatus").html(statusArray[2]);
 			}
+			showProperties(myCar[carArray[target]]);
 		} else {
 			$("#carStatus").prop("disabled", false);
 			$("#carStatus").html(statusArray[0]);
+			disableP();
 		}
 	}
 	
@@ -138,16 +295,6 @@ $(document).ready(function() {
 			$("#right").prop("disabled", true);
 		}
 	}
-	
-	$("div#property1").progressbar({
-		value: 10
-	});
-	$("div#property2").progressbar({
-		value: 10
-	});
-	$("div#property3").progressbar({
-		value: 10
-	});
 	
 	$("#left").click(function(){
 		var nextNum = currentNum - 1;
@@ -168,6 +315,36 @@ $(document).ready(function() {
 		}
 	});
 	$("#carStatus").click(function(){
+		var cs = $("#carStatus").html();
+		if (cs == statusArray[0]) {
+			buyCar(currentNum);
+		} else if (cs == statusArray[1]) {
+			useCar(currentNum);
+		} else {
+			console.log("what's wrong with car status?");
+		}
 		console.log("player is "+playerid);
+	});
+	$("button[id^=buy]").click(function(event){
+		var idnum = event.target.id.replace(/buy/, '');
+		var cartype = carArray[currentNum];
+		//var v = sliderToReal($("#property"+idnum).slider("option","value"));
+		console.log(sliderToReal($("#property"+idnum).slider("value")));
+		console.log(myPlayer.coins+" "+spendArray[idnum]);
+		if (myPlayer.coins < spendArray[idnum]){
+			console.log("from client: no money no talk");
+		} else {
+			if (login == 1){
+				var postStr="pId="+playerid+"&cartype="+cartype+"&needm="+spendArray[idnum]+"&qn="+idnum+"&up="+upP[idnum];
+				console.log(postStr);
+				$.post("http://54.254.178.30:1234/buyp", postStr, function(json) {
+					console.log("afterpost"+json);
+					if (json == "nomoney"){
+						console.log("in fact you have no money");
+					}
+					loadPage();
+				});
+			}		
+		}
 	});
 });
