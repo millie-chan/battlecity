@@ -159,7 +159,7 @@ $(document).ready(function() {
 		$("#main").css("display","none");
 		$("#outer").css("display","block");
 		window.clearInterval(myVar);
-		console.log("curr car "+myPlayer.currentcar+" cool "+myCar[myPlayer.currentcar][2]+" bullet "+myCar[myPlayer.currentcar][1]+" move "+myCar[myPlayer.currentcar][0]);
+//		console.log("curr car "+myPlayer.currentcar+" cool "+myCar[myPlayer.currentcar][2]+" bullet "+myCar[myPlayer.currentcar][1]+" move "+myCar[myPlayer.currentcar][0]);
 		if(log){
 			Q.setPlayer(playid,myPlayer.currentcar,"grenade",myCar[myPlayer.currentcar][2],myCar[myPlayer.currentcar][1],myCar[myPlayer.currentcar][0]);
 		}

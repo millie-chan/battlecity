@@ -1507,6 +1507,17 @@ window.addEventListener("load",function() {
 								}
 							});
 						}
+						else{
+							if (ll > 0) {
+								$("#coinModal").html("Game Over!<br>Click to go back to game room");
+								$("#coinModal").css("display", "block");
+								$("#over1").css("display", "block");
+							} else {
+								$("#coinModal").html("The End!<br>Click to go back to game room");
+								$("#coinModal").css("display", "block");
+								$("#over1").css("display", "block");
+							}
+						}
 					} else if (ll == 0 && Q.state.get("stage") <= 4){				//change here to make more stage
 						Q.stageScene("level"+(Q.state.get("stage")+1));
 					}
@@ -1576,17 +1587,17 @@ window.addEventListener("load",function() {
 		stage.playerLife = Q.state.get("lives");
 		stage.endgame = false;
 		
-		stage.enemyNum=3;
+		/*stage.enemyNum=3;
 		stage.enemyANum=3;
 		stage.enemyBNum=0;
 		stage.enemyCNum=0;
-		stage.enemyDNum=0;
+		stage.enemyDNum=0;*/
 		
-		//stage.enemyNum=20;
-		//stage.enemyANum=18;
-		//stage.enemyBNum=2;
-		//stage.enemyCNum=0;
-		//stage.enemyDNum=0;
+		stage.enemyNum=20;
+		stage.enemyANum=18;
+		stage.enemyBNum=2;
+		stage.enemyCNum=0;
+		stage.enemyDNum=0;
 		stage.enemyMax=3;
 		stage.currentEnemy=0;
 		stage.currentA=0;

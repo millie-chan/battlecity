@@ -32,14 +32,15 @@ for(var player_no = 0; player_no < no_of_player; player_no++){
     if(!Q2.sync_info.bullet_list[player_no][bullet_id]){
 		Q2.sync_info.bullet_list[player_no][bullet_id] = new Q2.Bullet_zom({shooter: Q2.sync_info.player[player_no],no_bullet: bullet_id});
 		Q2.stage().insert(Q2.sync_info.bullet_list[player_no][bullet_id]);
+		Q2.sync_info.bullet_list[player_no][bullet_id].p.x = obj.player[player_no].bullet[b_count].x;
+		Q2.sync_info.bullet_list[player_no][bullet_id].p.y = obj.player[player_no].bullet[b_count].y;
+		Q2.sync_info.bullet_list[player_no][bullet_id].p.vx = obj.player[player_no].bullet[b_count].vx;
+		Q2.sync_info.bullet_list[player_no][bullet_id].p.vy = obj.player[player_no].bullet[b_count].vy;
+		Q2.sync_info.bullet_list[player_no][bullet_id].p.angle = obj.player[player_no].bullet[b_count].angle;
 		//console.log("sd");
 	}
 	
-	Q2.sync_info.bullet_list[player_no][bullet_id].p.x = obj.player[player_no].bullet[b_count].x;
-	Q2.sync_info.bullet_list[player_no][bullet_id].p.y = obj.player[player_no].bullet[b_count].y;
-	Q2.sync_info.bullet_list[player_no][bullet_id].p.vx = obj.player[player_no].bullet[b_count].vx;
-	Q2.sync_info.bullet_list[player_no][bullet_id].p.vy = obj.player[player_no].bullet[b_count].vy;
-	Q2.sync_info.bullet_list[player_no][bullet_id].p.angle = obj.player[player_no].bullet[b_count].angle;
+
 	
  }
  
@@ -49,6 +50,11 @@ for(var player_no = 0; player_no < no_of_player; player_no++){
 		//console.log(d_counter);
 		if(Q2.stage().locate(obj.destroy_list[d_counter].x,obj.destroy_list[d_counter].y).isA("Brick")){
 			Q2.stage().locate(obj.destroy_list[d_counter].x,obj.destroy_list[d_counter].y).destroy();
+		}
+		else{
+			if(Q2.stage().locate(obj.destroy_list[d_counter].x,obj.destroy_list[d_counter].y).isA("Bird")){
+				Q2.stage().locate(obj.destroy_list[d_counter].x,obj.destroy_list[d_counter].y).des();
+			}
 		}
 	}
   }

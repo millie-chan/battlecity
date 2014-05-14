@@ -1,9 +1,9 @@
-var TICK_INTERVAL = 70;
+var TICK_INTERVAL = 100;
 
 //$("#startMultiGameBtn").click(function(e) {
 //	e.preventDefault();
 window.addEventListener("load",function() {
-	$("#outer").css("left", (window.innerWidth-544)/2+"px");
+/*	$("#outer").css("left", (window.innerWidth-544)/2+"px");
 	for (var i=1; i <= 20; i++) {
 		if (i % 2 ==0) {
 			$('<div class="numSprite bomb eneven" id="en'+i+'" style="display:none"></div>').appendTo($("#outer"));
@@ -12,7 +12,7 @@ window.addEventListener("load",function() {
 			$('<div class="numSprite bomb enodd" id="en'+i+'" style="display:none"></div>').appendTo($("#outer"));
 			$("#en"+i).css("top", (40 + i*8)+'px');
 		}
-	}
+	}*/
 	
 	//var ItemType2="glasses";
 	var CoolDown2=300;
@@ -263,6 +263,9 @@ window.addEventListener("load",function() {
 					this.destroy();
 					stage.insert(new Q2.Disappear1({ x: xX, y: yY},false));
 					stage.insert(new Q2.Disappear1({ x: pX, y: pY},true));
+					Q2.sync_info.destroy_list[destroy_counter] = {};
+					Q2.sync_info.destroy_list[destroy_counter].x = collision.obj.p.x;
+					Q2.sync_info.destroy_list[destroy_counter++].y = collision.obj.p.y;
 					collision.obj.p.sheet='flag';
 				}
 				else{
@@ -362,7 +365,7 @@ window.addEventListener("load",function() {
 					this.destroy();
 					stage.insert(new Q2.Disappear1({ x: xX, y: yY},false));
 					stage.insert(new Q2.Disappear1({ x: pX, y: pY},true));
-					collision.obj.p.sheet='flag';
+//					collision.obj.p.sheet='flag';
 				}
 				else{
 					if(!this.p.isBeam)this.p.shooter.bullet++;
@@ -543,22 +546,24 @@ window.addEventListener("load",function() {
 			}
 			if(p.tank_type == "speed"){
 				p.movement_speed = p.movement_speed*1.5;
-				p.sheet = "playerSpeed";
+				//p.sheet = "playerSpeed";
 			}
 			if(p.tank_type == "blood2"){
 				p.health = 2;
-				p.sheet = "playerBlood2";
+				//p.sheet = "playerBlood2";
 			}
 			if(p.tank_type == "bullet2"){
 				p.bullet = 2;
 				p.max_bullet = 2;
 				p.cooldown_time = p.cooldown_time/2;
-				p.sheet = "playerBullet2";
+				//p.sheet = "playerBullet2";
 			}
 			if(p.tank_type == "amptank"){
 				p.collisionMask = SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLETE;
-				p.sheet = "playerAmptank";
+				//p.sheet = "playerAmptank";
 			}
+			console.log("player"+p.Id+p.tank_type);
+			p.sheet = "player"+p.Id+p.tank_type;
 		},
 		
 		fire: function() {
@@ -791,15 +796,15 @@ window.addEventListener("load",function() {
 					Q2.stage().insert(new Q2.Disappear1({ x: pX, y: pY},true));
 					this.destroy();
 					if(this.p.Id == pid){
-					if (Q2.stage().endgame == false) {
-						Q2.stage().endgame = true;
-						$("#over").show().animate({
-							top: 224
-						}, 3000, function (){
-							Q2.clearStages();
-							Q2.stageScene('showScore');
-						});
-					}
+						if (Q2.stage().endgame == false) {
+							Q2.stage().endgame = true;
+							$("#over").show().animate({
+								top: 224
+							}, 3000, function (){
+								// Q2.clearStages();
+								// Q2.stageScene('showScore');
+							});
+						}
 					}else{
 						Q2.stage().insert(new Q2.Appear(Q2.p_start[this.p.Id],4,3.5,this.p.Id));
 					}
@@ -1506,6 +1511,23 @@ window.addEventListener("load",function() {
 					}
 				}
 			}
+		},
+		des: function(){
+			//if(col.obj.isA("Bullet")||col.obj.isA("BulletE")){
+				this.p.sheet='flag';
+				console.log("endgame, score: "+this.stage.score);
+				if(this.p.belongerID == pid){
+					if (Q2.stage().endgame == false) {
+						Q2.stage().endgame = true;
+						$("#over").show().animate({
+							top: 224
+						}, 3000, function (){
+							Q2.clearStages();
+							Q2.stageScene('showScore');
+						});
+					}
+				}
+			//}
 		}
 	});
 
