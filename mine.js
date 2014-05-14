@@ -592,7 +592,7 @@ window.addEventListener("load",function() {
 					for (j in Q.stage().lists.Tree){
 						Q.stage().lists.Tree[j].p.opacity = 1;
 					}
-				},  3000);
+				},  10000);
 				this.p.item_choice = "none";
 			}
 			
