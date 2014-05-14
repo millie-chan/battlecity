@@ -153,7 +153,7 @@ button#new:hover {
 	background-color:#694212;
 }
 .join button:disabled{
-		-moz-box-shadow:inset 0px 1px 0px 0px #59370e;
+	-moz-box-shadow:inset 0px 1px 0px 0px #59370e;
 	-webkit-box-shadow:inset 0px 1px 0px 0px #59370e;
 	box-shadow:inset 0px 1px 0px 0px #59370e;
 	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #ab5411), color-stop(1, #694212) );
@@ -215,10 +215,10 @@ button#submitNewgrBtn, button#startGameBtn, button#startMultiGameBtn{
 	text-align:center;
 	text-shadow:1px 1px 0px #810e05;
 }
-button#submitNewgrBtn:hover, button#startGameBtn:hover button#startMultiGameBtn:hover{
+button#submitNewgrBtn:hover, button#startGameBtn:hover, button#startMultiGameBtn:hover{
 	background-color:#c62d1f;
 }
-button#submitNewgrBtn:disabled, button#startGameBtn:disabled button#startMultiGameBtn:disabled, .spend:disabled, .chooseCar:disabled{
+button#submitNewgrBtn:disabled, button#startGameBtn:disabled, button#startMultiGameBtn:disabled {
 	box-shadow:inset 0px 1px 0px 0px #dddddd;
 	background-color:#dddddd;
 	color:#999999;
@@ -226,13 +226,10 @@ button#submitNewgrBtn:disabled, button#startGameBtn:disabled button#startMultiGa
 	border:1px solid #dddddd;
 }
 
-button#mypageBtn, button#mypagebackBtn {
+button#mypageBtn, button#mypagebackBtn, button#carStatus {
 	-moz-box-shadow:inset 0px 1px 0px 0px #f5978e;
 	-webkit-box-shadow:inset 0px 1px 0px 0px #f5978e;
 	box-shadow:inset 0px 1px 0px 0px #f5978e;
-	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #f24537), color-stop(1, #c62d1f) );
-	background:-moz-linear-gradient( center top, #f24537 5%, #c62d1f 100% );
-	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#f24537', endColorstr='#c62d1f');
 	background-color:#f24537;
 	-webkit-border-top-left-radius:8px;
 	-moz-border-radius-topleft:8px;
@@ -261,15 +258,19 @@ button#mypageBtn, button#mypagebackBtn {
 	text-align:center;
 	text-shadow:1px 1px 0px #810e05;
 }
-button#mypageBtn:hover , button#mypagebackBtn:hover{
-	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #c62d1f), color-stop(1, #f24537) );
-	background:-moz-linear-gradient( center top, #c62d1f 5%, #f24537 100% );
-	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#c62d1f', endColorstr='#f24537');
+button#mypageBtn:hover , button#mypagebackBtn:hover , button#carStatus:hover{
 	background-color:#c62d1f;
 }
-button#mypageBtn:active, button#mypagebackBtn:active {
+button#mypageBtn:active, button#mypagebackBtn:active , button#carStatus:active{
 	position:relative;
 	top:1px;
+}
+button#mypageBtn:disabled,button#mypagebackBtn:disabled,button#carStatus:disabled{
+	box-shadow:inset 0px 1px 0px 0px #dddddd;
+	background-color:#dddddd;
+	color:#999999;
+	text-shadow:1px 1px 0px #777777;
+	border:1px solid #dddddd;
 }
 
 .overlay{
@@ -358,7 +359,7 @@ div.modalContent {
 	margin: 30px;
 }
 
-#warningModal, #chooseItemModal, #newgrModal, #chooseLevel, #choose4P, #chooseMap, #submitNewgrForm, #startGame{
+#coinModal, #warningModal, #chooseItemModal, #newgrModal, #chooseLevel, #choose4P, #chooseMap, #submitNewgrForm, #startGame{
 	display:none;
 }
 

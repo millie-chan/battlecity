@@ -2,9 +2,12 @@
 
 <head>
 	<script src='http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.js'></script>
+	<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
 	<script src='./gameroom.js'></script>
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
 	<link href="mystyle.css" rel="stylesheet">
 	<link href="game.css" rel="stylesheet">
+	<link href="carstyle.css" rel="stylesheet">
 	<script src='http://cdn.html5quintus.com/v0.2.0/quintus-all.js'></script>
 	<script src='mine.js'></script>
 </head>
@@ -21,7 +24,61 @@
 			<div class="fb-login-button" scope="email" data-max-rows="1" data-size="large" data-show-faces="false" data-auto-logout-link="true" onlogin="login();"></div>
 		</span>
 	</div>
-	<div id="myInfo"><button id="mypagebackBtn">Back</button></div>
+	<div id="myInfo" class="center">
+		<div class="tbl" id="whole">
+			<div class="tbl_row">
+				<div class="tbl_cell" id="coinNum">
+				</div>
+				<div class="tbl_cell center" id="carName">
+				</div>
+				<div class="tbl_cell">
+				</div>
+			</div>
+			<div class="tbl_row">
+				<div class="tbl_cell middle">
+					<button class="chooseCar" id="left"><</button>
+				</div>
+				<div class="tbl_cell middle center">
+					<div class="tbl_cell center" id="carContainer">
+						<!-- <img src="images/car/normal.png"></img> -->
+					</div>
+					<div class="center" id="properties">
+						<div class="pContainer">
+							<div>Tank speed</div>
+							<div class="vOfp" id="scale0"></div>
+							<div class="property" id="property0"></div>
+							<button class="spend" id="buy0">spend 100 coins to upgrade</button>
+						</div>
+						<div class="pContainer">
+							<div>Bullet speed</div>
+							<div class="vOfp" id="scale1"></div>
+							<div class="property" id="property1"></div>
+							<button class="spend" id="buy1">spend 100 coins to upgrade</button>
+						</div>
+						<div class="pContainer">
+							<div>Bullet cooldown time</div>
+							<div class="vOfp" id="scale2"></div>
+							<div class="property" id="property2"></div>
+							<button class="spend" id="buy2">spend 100 coins to upgrade</button>
+						</div>
+					</div>
+				</div>
+				<div class="tbl_cell middle">
+					<button class="chooseCar" id="right">></button>
+				</div>
+			</div>
+			<div class="tbl_row">
+				<div class="tbl_cell">
+				</div>
+				<div class="tbl_cell center">
+					<button id="carStatus">Using</button>
+					<div id="moneyneed"></div>
+				</div>
+				<div class="tbl_cell">
+				</div>
+			</div>
+		<br><br>
+		</div><button id="mypagebackBtn">Back</button></div>
 	<div class='outerImage' id='outer'  style="display:none">
 		<canvas id='myGame' width='448' height='448' style='background-color:black ;'></canvas>
 		<div id="scoreBG"></div>
@@ -170,15 +227,18 @@
 		<div class="modalContent">
 			<form id="chooseItemForm">
 				<input type="hidden" name="pid" value="0"></input>
-				Choose one item to use in the game!(can use once only!)<br><br>
+				Choose one item to use in the game by pressing 'X'!<br>(Can be used once per life only!)<br><br>
 				<input type="radio" name="item" value="beam"><img class="item" src="./images/8shoots.PNG"> beam(8 bullets shot at a time)</img></input><br>
 				<input type="radio" name="item" value="barrier"><img class="item" src="./images/barrier.PNG"> barrier(not be hurt within 8 seconds)</img></input><br>
-				<input type="radio" name="item" value="brick"><img class="item" src="./images/wall.PNG"> shovel(recover all walls around the fortress)</img></input>
+				<input type="radio" name="item" value="brick"><img class="item" src="./images/wall.PNG"> shovel(recover all walls around the fortress)</img></input><br>
+				<input type="radio" name="item" value="glasses"><img class="item" src="./images/glasses.PNG"> glass(see through all trees for 10 seconds)</img></input>
 				<div id="startMultiGame"><button id="startMultiGameBtn">Start Game</button></div>
 			</form>
 		</div>
 	</div>
-	<div class="modal2" id="warningModal">
+	<div class="modal3" id="warningModal">
+	</div>
+	<div class="modal3" id="coinModal">
 	</div>
 
 </body>
