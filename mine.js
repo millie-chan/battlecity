@@ -10,7 +10,7 @@ window.addEventListener("load",function() {
 		}
 	}
 	var TankType="normal";
-	var ItemType="grenade";
+	var ItemType="glasses";
 	var CoolDown=300;
 	var BulletSpeed=225;
 	var MoveSpeed=90;
@@ -578,8 +578,24 @@ window.addEventListener("load",function() {
 					setTimeout(fire_one, 10*i);
 				}
 				
-				//this.p.item_choice = "none";
+				this.p.item_choice = "none";
 			}
+			
+			if(this.p.item_choice == "glasses"){
+				var i;
+				for (i in Q.stage().lists.Tree){
+					Q.stage().lists.Tree[i].p.opacity = 0.2;
+				}
+				
+				setTimeout(function(){
+					var j;
+					for (j in Q.stage().lists.Tree){
+						Q.stage().lists.Tree[j].p.opacity = 1;
+					}
+				},  3000);
+				this.p.item_choice = "none";
+			}
+			
 			
 			
 
@@ -1524,11 +1540,18 @@ window.addEventListener("load",function() {
 //		 stage.add("viewport").follow(stage.PlayerTank);
 		stage.playerLife = Q.state.get("lives");
 		stage.endgame = false;
-		stage.enemyNum=20;
-		stage.enemyANum=18;
-		stage.enemyBNum=2;
+		
+		stage.enemyNum=3;
+		stage.enemyANum=3;
+		stage.enemyBNum=0;
 		stage.enemyCNum=0;
 		stage.enemyDNum=0;
+		
+		//stage.enemyNum=20;
+		//stage.enemyANum=18;
+		//stage.enemyBNum=2;
+		//stage.enemyCNum=0;
+		//stage.enemyDNum=0;
 		stage.enemyMax=3;
 		stage.currentEnemy=0;
 		stage.currentA=0;
@@ -1751,7 +1774,8 @@ window.addEventListener("load",function() {
 		
 		
 		stage.playerLife = Q.state.get("lives");
-		stage.endgame = false;
+		stage.endgame = false;	
+		
 		stage.enemyNum=20;
 		stage.enemyANum=8;
 		stage.enemyBNum=2;
@@ -1803,7 +1827,7 @@ window.addEventListener("load",function() {
 		Q.compileSheets("sprites2.png","newSprites.json");
 
 		Q.state.reset({ score: 0, lives: 2, stage: 1 });
-//		Q.stageScene("level1");
+		Q.stageScene("level1");
 	});
 
 	
