@@ -218,7 +218,7 @@ button#submitNewgrBtn, button#startGameBtn, button#startMultiGameBtn{
 button#submitNewgrBtn:hover, button#startGameBtn:hover button#startMultiGameBtn:hover{
 	background-color:#c62d1f;
 }
-button#submitNewgrBtn:disabled, button#startGameBtn:disabled button#startMultiGameBtn:disabled{
+button#submitNewgrBtn:disabled, button#startGameBtn:disabled button#startMultiGameBtn:disabled, .spend:disabled, .chooseCar:disabled{
 	box-shadow:inset 0px 1px 0px 0px #dddddd;
 	background-color:#dddddd;
 	color:#999999;
@@ -312,9 +312,9 @@ button#mypageBtn:active, button#mypagebackBtn:active {
     top: 50%;
     left: 50%;
     width: 500px;
-    height: 370px;
+    height: 450px;
     margin-left: -250px;
-    margin-top: -185px;
+    margin-top: -225px;
     background-color: #f1c40f;
     text-align: left;
     border-radius: 5px;
@@ -324,6 +324,29 @@ button#mypageBtn:active, button#mypagebackBtn:active {
 	background-color:#f0c911;
 	border:1px solid #e65f44;
 	color:#920D0D;
+    /* needed styles for the overlay */
+    z-index: 10; /* keep on top of other elements on the page */
+    box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
+}
+
+.modal3{
+    /* some styles to position the modal at the center of the page */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 500px;
+    height: 250px;
+    margin-left: -250px;
+    margin-top: -185px;
+    background-color: #f1c40f;
+    text-align: left;
+    border-radius: 5px;
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #f0c911), color-stop(1, #f2ab1e) );
+	background:-moz-linear-gradient( center top, #f0c911 5%, #f2ab1e 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#f0c911', endColorstr='#f2ab1e');
+	background-color:#f0c911;
+	border:1px solid #e65f44;
+	color:#c92200;
     /* needed styles for the overlay */
     z-index: 10; /* keep on top of other elements on the page */
     box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
