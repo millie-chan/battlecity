@@ -1,12 +1,12 @@
-var lvlArr=[5,3,2,3];
+var lvlArr=[5,2,2,3];
 var playerArr=Array();
 var myRoom;
 var myLevel;
 var myType;
 var imgArr1=['http://cdn.wikimg.net/strategywiki/images/5/5e/Battle_City_Stage01.png','http://cdn.wikimg.net/strategywiki/images/6/65/Battle_City_Stage02.png','http://cdn.wikimg.net/strategywiki/images/2/2f/Battle_City_Stage03.png','http://cdn.wikimg.net/strategywiki/images/f/f8/Battle_City_Stage14.png','http://cdn.wikimg.net/strategywiki/images/3/36/Battle_City_Stage17.png'];
-var imgArr2=['./images/two1.png','http://cdn.wikimg.net/strategywiki/images/f/f8/Battle_City_Stage14.png','http://cdn.wikimg.net/strategywiki/images/3/36/Battle_City_Stage17.png'];
-var imgArr3=['./images/four1.png','http://cdn.wikimg.net/strategywiki/images/6/65/Battle_City_Stage02.png'];
-var imgArr4=['./images/four1.png','http://cdn.wikimg.net/strategywiki/images/2/2f/Battle_City_Stage03.png','http://cdn.wikimg.net/strategywiki/images/3/36/Battle_City_Stage17.png'];
+var imgArr2=['./images/two1.png','./images/two2.png'];
+var imgArr3=['./images/four1.png','./images/fourin1.png'];
+var imgArr4=['./images/four1.png','./images/four2.png','./images/fourin1.png'];
 var playid;
 var myNum;
 var log = 0;
@@ -124,6 +124,8 @@ $(document).ready(function() {
 		$("#main").css("display","none");
 		$("#outer").css("display","block");
 		window.clearInterval(myVar);
+//		console.log(Q);
+		Q.setPlayer("speed","grenade",300,225,90);
 		Q.state.reset({ score: 0, lives: 2, stage: 1 });
 		Q.stageScene(n);
 		

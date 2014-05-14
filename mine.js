@@ -9,6 +9,12 @@ window.addEventListener("load",function() {
 			$("#en"+i).css("top", (40 + i*8)+'px');
 		}
 	}
+	var TankType="normal";
+	var ItemType="grenade";
+	var CoolDown=300;
+	var BulletSpeed=225;
+	var MoveSpeed=90;
+	
 	var Q = window.Q = Quintus({ development: true })
 			.include("Sprites, Scenes, Input, 2D, Anim")
 			.setup("myGame", { width: 448, height: 448 })
@@ -353,17 +359,17 @@ window.addEventListener("load",function() {
 			this._super(p,{
 				sheet:"player",
 				type: SPRITE_PLAYER,
-				tank_type: "speed",
+				tank_type: TankType,
 				barrier: null,
 				collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLETE | SPRITE_WATER,
 				bullet: 1,
 				max_bullet: 1,
 				barrier_time: 3,
-				cooldown_time: 300,					//change-able ability
-				bullet_speed: 225,					//change-able ability
-				movement_speed: 90, 				//change-able ability
+				cooldown_time: CoolDown,					//change-able ability
+				bullet_speed: BulletSpeed,					//change-able ability
+				movement_speed: MoveSpeed, 				//change-able ability
 				health: 1,
-				item_choice: "grenade",
+				item_choice: ItemType,
 				cannonCooldown: false,
 				z: 1,
 				muteki: true
@@ -533,7 +539,7 @@ window.addEventListener("load",function() {
 					Q.stage().lists.EnemyD[i].p.health = 1;
 					Q.stage().lists.EnemyD[i].hit();
 				}
-				//this.p.item_choice = "none";
+				this.p.item_choice = "none";
 			}
 			
 			if(this.p.item_choice == "beam"){
@@ -925,7 +931,7 @@ window.addEventListener("load",function() {
 			this._super(Q._defaults(p,{
 				sheet: "enemyA",
 				name: "A",
-				speed: 100,
+				speed: 90,
 				direction: 'down',
 				switchPercent: 1,
 				bullet: 1,
@@ -953,7 +959,7 @@ window.addEventListener("load",function() {
 				direction: 'down',
 				switchPercent: 2,
 				bullet: 1,
-				health: 2,
+				health: 1,
 				score: 200
 			}));
         },
@@ -972,7 +978,7 @@ window.addEventListener("load",function() {
 			this._super(Q._defaults(p,{
 				sheet: "enemyC",
 				name: "C",
-				speed: 100,
+				speed: 90,
 				direction: 'down',
 				switchPercent: 0,
 				bullet: 2,
@@ -995,7 +1001,7 @@ window.addEventListener("load",function() {
 			this._super(Q._defaults(p,{
 				sheet: "enemyD",
 				name: "D",
-				speed: 80,
+				speed: 70,
 				direction: 'down',
 				switchPercent: 1,
 				bullet: 1,
@@ -1215,6 +1221,14 @@ window.addEventListener("load",function() {
 		}
 		return Q.shuffle(arr);
 	}
+	
+	Q.setPlayer=function(tank,item,cool,bul,move){ 
+		TankType=tank;
+		ItemType=item;
+		CoolDown=cool;
+		BulletSpeed=bul;
+		MoveSpeed=move;
+	};
 	
 	Q.Sprite.extend("Swall", {
 		init: function(p) {
