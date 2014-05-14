@@ -15,10 +15,12 @@ window.addEventListener("load",function() {
 	var BulletSpeed=225;
 	var MoveSpeed=90;
 	
-	var Q = window.Q = Quintus({ development: true })
-			.include("Sprites, Scenes, Input, 2D, Anim")
+	var Q = window.Q = Quintus({ development: true , audioSupported: [ 'wav' ]})
+			.include("Sprites, Scenes, Input, 2D, Anim, Audio")
 			.setup("myGame", { width: 448, height: 448 })
-			.controls(true);
+			.controls(true)
+			.enableSound();
+			
 
 	// 3. Add in the default keyboard controls
 	//    along with joypad controls for touch
@@ -205,6 +207,7 @@ window.addEventListener("load",function() {
 				}
 				collision.obj.destroy();
 				this.destroy();
+				Q.audio.play('hitbrick.wav');
 				stage.insert(new Q.Disappear1({ x: xX, y: yY},false));
 				////console.log(f);
 			}
@@ -215,6 +218,9 @@ window.addEventListener("load",function() {
 				}
 				this.destroy();
 				stage.insert(new Q.Disappear1({ x: xX, y: yY},false));
+				if(collision.obj.isA("Swall")){
+					Q.audio.play('hitswall.wav');
+				}
 				////console.log(f);
 			}
 			else if(collision.obj.isA("Bird")){
@@ -274,6 +280,7 @@ window.addEventListener("load",function() {
 					this.p.belong.bullet++;
 				}
 				this.destroy();
+				Q.audio.play('hitbrick.wav');
 				stage.insert(new Q.Disappear1({ x: xX, y: yY},false));
 			}
 			else if(collision.obj.isA("Swall")||collision.obj.isA("Bullet")){
@@ -283,6 +290,9 @@ window.addEventListener("load",function() {
 					this.p.belong.bullet++;
 				}
 				this.destroy();
+				if(collision.obj.isA("Swall")){
+					Q.audio.play('hitswall.wav');
+				}
 				stage.insert(new Q.Disappear1({ x: xX, y: yY},false));
 				////console.log(f);
 			}
@@ -438,10 +448,12 @@ window.addEventListener("load",function() {
 				var bullet = new Q.Bullet({dx: bullet_x, dy: bullet_y, angle: this.p.angle, shooter: this.p, speed: this.p.bullet_speed, isBeam: false});
 				var playerTank = this.p;
 				Q.stage().insert(bullet);
-
+				
 				this.p.bullet--;
 				this.p.cannonCooldown = true;
 				setTimeout(function(){playerTank.cannonCooldown = false },  this.p.cooldown_time);
+				
+				Q.audio.play('fire.wav');
 			}
 		},
 		
@@ -625,6 +637,7 @@ window.addEventListener("load",function() {
 				this.p.health--;
 				console.log("just get hurt");
 			}else{
+				Q.audio.play('boom.wav');
 				if(Q.stage().playerLife>0){
 					console.log("die");
 					Q.stage().playerLife--;
@@ -908,6 +921,7 @@ window.addEventListener("load",function() {
 				var yY=p.y;
 				////console.log("x "+xX+" y "+yY);
 				this.destroy();
+				Q.audio.play('boom.wav');
 				stage.currentEnemy--;
 				stage.insert(new Q.Disappear1({ x: xX, y: yY}, p.score));
 				Q.state.inc("score", p.score);
@@ -1328,6 +1342,7 @@ window.addEventListener("load",function() {
 		},
 		hit: function(col){
 			if(col.obj.isA("Bullet")||col.obj.isA("BulletE")){
+				Q.audio.play('boom.wav');
 				this.p.sheet='flag';
 				console.log("endgame, score: "+this.stage.score);
 				if (Q.stage().endgame == false) {
@@ -1490,6 +1505,8 @@ window.addEventListener("load",function() {
 					$(".C"+index).remove();
 					numToImage("#score"+index, i*Q.state.get(value+"Score"), "S"+index);
 					numToImage("#carnum"+index, i, "C"+index);
+					Q.audio.play('score.wav');
+					
 					i++;
 				} else {
 					clearInterval(iid);
@@ -1588,6 +1605,7 @@ window.addEventListener("load",function() {
 			CScore: 300,
 			DScore: 400
 		});
+		Q.audio.play('opening.wav');
 		Q.stageScene("ui",1);
 	}, {sort:true});
 	
@@ -1645,6 +1663,7 @@ window.addEventListener("load",function() {
 			CScore: 300,
 			DScore: 400
 		});
+		Q.audio.play('opening.wav');
 		Q.stageScene("ui",1);
 	}, {sort: true});
 	
@@ -1702,6 +1721,7 @@ window.addEventListener("load",function() {
 			CScore: 300,
 			DScore: 400
 		});
+		Q.audio.play('opening.wav');
 		Q.stageScene("ui",1);
 	}, {sort: true});
 
@@ -1759,6 +1779,7 @@ window.addEventListener("load",function() {
 			CScore: 300,
 			DScore: 400
 		});
+		Q.audio.play('opening.wav');
 		Q.stageScene("ui",1);
 	}, {sort: true});
 
@@ -1817,11 +1838,12 @@ window.addEventListener("load",function() {
 			CScore: 300,
 			DScore: 400
 		});
+		Q.audio.play('opening.wav');
 		Q.stageScene("ui",1);
 	}, {sort: true});
 	
 
-	Q.load("sprites2.png, newSprites.json, level1.json, level2.json, level3.json, level4.json, level5.json, 4p_1.json", function() {
+	Q.load("sprites2.png, newSprites.json, level1.json, level2.json, level3.json, level4.json, level5.json, 4p_1.json, opening.wav, fire.wav, hitbrick.wav, hitswall.wav, boom.wav, score.wav", function() {
 		//Q.sheet("tiles","tiles.png", { tileW: 16, tileH: 16 });
 
 		Q.compileSheets("sprites2.png","newSprites.json");
