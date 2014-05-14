@@ -85,40 +85,7 @@ div.middle {
 	position:relative;
 	top:1px;
 }
-.chooseCar:disabled {
-	-moz-box-shadow:inset 0px 0px 16px -8px #bbdaf7;
-	-webkit-box-shadow:inset 0px 0px 16px -8px #bbdaf7;
-	box-shadow:inset 0px 0px 16px -8px #bbdaf7;
-	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #5e9fe0), color-stop(1, #3183d4) );
-	background:-moz-linear-gradient( center top, #5e9fe0 5%, #3183d4 100% );
-	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#5e9fe0', endColorstr='#3183d4');
-	background-color:#5e9fe0;
-	-webkit-border-top-left-radius:20px;
-	-moz-border-radius-topleft:20px;
-	border-top-left-radius:20px;
-	-webkit-border-top-right-radius:20px;
-	-moz-border-radius-topright:20px;
-	border-top-right-radius:20px;
-	-webkit-border-bottom-right-radius:20px;
-	-moz-border-radius-bottomright:20px;
-	border-bottom-right-radius:20px;
-	-webkit-border-bottom-left-radius:20px;
-	-moz-border-radius-bottomleft:20px;
-	border-bottom-left-radius:20px;
-	text-indent:0;
-	border:1px solid #77abe0;
-	display:inline-block;
-	color:#3782cc;
-	font-family:Arial;
-	font-size:28px;
-	font-weight:bold;
-	font-style:normal;
-	height:53px;
-	line-height:53px;
-	width:54px;
-	text-decoration:none;
-	text-align:center;
-}
+
 
 .ui-widget-content {
 	background: white;

@@ -3,8 +3,18 @@ $(document).ready(function() {
 	var statusArray = ["Activate", "Use It?", "Used"];
 	//var allP = Array();
 	//var allP = {};
-	var basicP = [90, 220, 500];
-	var maxP = [210, 750, 100];
+	var basicP = new Array();
+	basicP[0] = [90, 220, 500];
+	basicP[1] = [150, 220, 500];
+	basicP[2] = [80, 220, 500];
+	basicP[3] = [90, 220, 500];
+	basicP[4] = [100, 220, 500];
+	var maxP = new Array();
+	maxP[0] = [210, 750, 100];
+	maxP[1] = [270, 750, 100];
+	maxP[2] = [200, 750, 100];
+	maxP[3] = [210, 750, 100];
+	maxP[4] = [220, 750, 100];
 	var sliderInfo = [0, 100, 1, 3]; //min, max, step, numofslider
 	var upP = new Array();
 	var carNeed = [0, 7, 15, 4, 10];
@@ -24,8 +34,11 @@ $(document).ready(function() {
 	function setup(callback){
 		$("#carContainer").css('background-image', 'url("images/car/'+carArray[currentNum]+'.png")');
 		disableButton(currentNum);
-		for (var i = 0; i < basicP.length; i++){
-			upP[i] = (maxP[i] - basicP[i])/10;
+		for (var j = 0; j < carArray.length; j++){
+			upP[j] = new Array();
+			for (var i = 0; i < basicP[0].length; i++){
+				upP[j][i] = (maxP[j][i] - basicP[j][i])/10;
+			}
 		}
 		console.log(upP);
 		prepareSlider(sliderInfo[3], sliderInfo);
@@ -183,14 +196,13 @@ $(document).ready(function() {
 		}
 	}
 	
-	function sliderToReal(val,type){
-		var r = (val-1)*upP[type]+basicP[type];
+	function sliderToReal(val,type, tar){
+		var r = (val-1)*upP[tar][type]+basicP[tar][type];
 		return r;
 	}
 	
-	function realToSlider(val, type){
-		var r;
-		r = (val - basicP[type])/upP[type] + 1;
+	function realToSlider(val, type, tar){
+		var r = ((val - basicP[tar][type]) / upP[tar][type]) + 1;
 		/*
 		switch (type) {
 			case 0:
@@ -202,8 +214,12 @@ $(document).ready(function() {
 			case 2:
 				r = -val;
 				break;
-		}
-		console.log(r);*/
+		}*/
+		console.log(val+" "+type+" "+tar);
+		console.log("HIHI"+val);
+		console.log("HIHI"+basicP[tar][type]);
+		console.log("HIHI"+upP[tar][type]);
+		console.log(r);
 		return r;
 	}
 	
@@ -245,12 +261,13 @@ $(document).ready(function() {
 		}*/
 	}
 	
-	function showProperties(pArray){
+	function showProperties(pArray, target){
 		console.log("propeties: "+pArray);
 		for (var i = 0; i < pArray.length; i++){
-			$( "#property"+i ).slider("value", realToSlider(pArray[i], i));
-			$( "#property"+i ).slider("enable");
-			$("#scale"+i).html("current:"+sliderToReal($("#property"+i).slider("value"), i)+" max:"+maxP[i]);
+			$( "#property"+i ).slider("value", realToSlider(pArray[i], i, target));
+			$( "#property"+i ).slider("option", "disabled", false);
+			$("#buy"+i).prop("disabled", false);
+			$("#scale"+i).html("current:"+sliderToReal($("#property"+i).slider("value"), i, target)+" max:"+maxP[target][i]);
 		}
 	}
 	
@@ -258,25 +275,44 @@ $(document).ready(function() {
 		for (var i = 0; i < sliderInfo[3]; i++){
 			$( "#property"+i ).slider("value", 0);
 			$( "#property"+i ).slider("option", "disabled", true);
+			$("#buy"+i).prop("disabled", true);
 		}
 	}
 	
 	function nameStatus(target){
-		$("#carName").html(carArray[target]);
-		console.log(myCar);
-		if (myCar.hasOwnProperty(carArray[target])){
-			console.log(myPlayer.currentcar+" "+carArray[target]);
-			if (myPlayer.currentcar != carArray[target]) {
-				$("#carStatus").prop("disabled", false);
-				$("#carStatus").html(statusArray[1]);
-			} else {
-				$("#carStatus").prop("disabled", true);
-				$("#carStatus").html(statusArray[2]);
-			}
-			showProperties(myCar[carArray[target]]);
-		} else {
+		if (login == 1) {
 			$("#carStatus").prop("disabled", false);
-			$("#carStatus").html(statusArray[0]);
+			$("#carName").html(carArray[target]);
+			$("#moneyneed").html("");
+			if (target == 2){
+				$("#carName").html($("#carName").html()+" (with two bullet)");
+			} else if (target == 3){
+				$("#carName").html($("#carName").html()+" (die after two hit)");
+			} else if (target == 4){
+				$("#carName").html($("#carName").html()+" (able to cross water)");
+			}
+			console.log(myCar);
+			if (myCar.hasOwnProperty(carArray[target])){
+				console.log(myPlayer.currentcar+" "+carArray[target]);
+				if (myPlayer.currentcar != carArray[target]) {
+					$("#carStatus").prop("disabled", false);
+					$("#carStatus").html(statusArray[1]);
+				} else {
+					$("#carStatus").prop("disabled", true);
+					$("#carStatus").html(statusArray[2]);
+				}
+				showProperties(myCar[carArray[target]], target);
+			} else {
+				$("#carStatus").prop("disabled", false);
+				$("#moneyneed").html("need coins:"+carNeed[target]);
+				$("#carStatus").html(statusArray[0]);
+				for (var i = 0; i < basicP[0].length; i++){
+					$("#scale"+i).html("start from:"+basicP[target][i]);
+				}
+				disableP();
+			}
+		} else {
+			$("#carStatus").prop("disabled", true);
 			disableP();
 		}
 	}
@@ -329,13 +365,13 @@ $(document).ready(function() {
 		var idnum = event.target.id.replace(/buy/, '');
 		var cartype = carArray[currentNum];
 		//var v = sliderToReal($("#property"+idnum).slider("option","value"));
-		console.log(sliderToReal($("#property"+idnum).slider("value")));
+		console.log(sliderToReal($("#property"+idnum).slider("value"), idnum, currentNum));
 		console.log(myPlayer.coins+" "+spendArray[idnum]);
 		if (myPlayer.coins < spendArray[idnum]){
 			console.log("from client: no money no talk");
 		} else {
 			if (login == 1){
-				var postStr="pId="+playerid+"&cartype="+cartype+"&needm="+spendArray[idnum]+"&qn="+idnum+"&up="+upP[idnum];
+				var postStr="pId="+playerid+"&cartype="+cartype+"&needm="+spendArray[idnum]+"&qn="+idnum+"&up="+upP[currentNum][idnum];
 				console.log(postStr);
 				$.post("http://54.254.178.30:1234/buyp", postStr, function(json) {
 					console.log("afterpost"+json);
