@@ -14,6 +14,7 @@ window.addEventListener("load",function() {
 	var CoolDown=300;
 	var BulletSpeed=225;
 	var MoveSpeed=90;
+	var PlayerId;
 	
 	var Q = window.Q = Quintus({ development: true , audioSupported: [ 'wav' ]})
 			.include("Sprites, Scenes, Input, 2D, Anim, Audio")
@@ -400,7 +401,7 @@ window.addEventListener("load",function() {
 				//do nothing
 			}
 			if(p.tank_type == "speed"){
-				p.movement_speed = p.movement_speed*1.5;
+				//p.movement_speed = p.movement_speed*1.5;
 				p.sheet = "playerSpeed";
 			}
 			if(p.tank_type == "blood2"){
@@ -1252,7 +1253,8 @@ window.addEventListener("load",function() {
 		return Q.shuffle(arr);
 	}
 	
-	Q.setPlayer=function(tank,item,cool,bul,move){ 
+	Q.setPlayer=function(id,tank,item,cool,bul,move){ 
+		PlayerId=id;
 		TankType=tank;
 		ItemType=item;
 		CoolDown=cool;
@@ -1487,8 +1489,24 @@ window.addEventListener("load",function() {
 					$("#levelNum").hide();
 					Q.clearStages();
 					var ll = Q.state.get("total")-Q.state.get("AKilled")-Q.state.get("BKilled")-Q.state.get("CKilled")-Q.state.get("DKilled");
-					if (ll > 0){
-						//game over
+					if (ll > 0 || Q.state.get("stage") == 5){
+						//game over or no more stage
+						if (PlayerId != "abc"){
+							console.log("Get coins: "+(Q.state.get("score") / 10));
+							var postStr="pId="+playerid+"&coins="+(Q.state.get("score") / 10);
+							$.post("http://54.254.178.30:1234/endcoin", postStr, function(json) {
+								console.log("add money finished");
+								if (ll > 0) {
+									$("#coinModal").html("Game Over! You got "+(Q.state.get("score") / 10)+" coins<br>Click to go back to game room");
+									$("#coinModal").css("display", "block");
+									$("#over1").css("display", "block");
+								} else {
+									$("#coinModal").html("The End! You got "+(Q.state.get("score") / 10)+" coins<br>Click to go back to game room");
+									$("#coinModal").css("display", "block");
+									$("#over1").css("display", "block");
+								}
+							});
+						}
 					} else if (ll == 0 && Q.state.get("stage") <= 4){				//change here to make more stage
 						Q.stageScene("level"+(Q.state.get("stage")+1));
 					}
