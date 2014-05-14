@@ -38,6 +38,10 @@ var myPlayer = {
 	currentcar: 'hoho'
 };
 var myCar = {};
+var allCars = new Array();
+var pid;
+var proom;
+var no_of_player;
 
 $(document).ready(function() {
 	loadFBSDK(function(){
@@ -179,15 +183,48 @@ $(document).ready(function() {
 		$("#chooseItemModal").css("display","none");
 		$( "input[name='item']:checked" ).prop('checked', false); 
 		console.log("me "+ playid+" ppl "+playerArr+" room "+myRoom+" type "+myType+" level "+myLevel+" ## "+playerArr.length+" # "+myNum);
-		$.post("http://54.254.178.30:1234/removeroom","roomId="+myRoom, function(json) {
-			printRoooms(json);
+		var poststr="";
+		for (var i=0; i < playerArr.length; i++){
+			poststr += "player"+(i+1)+"="+playerArr[i]+"&";
+		}
+		console.log("poststr "+poststr);
+		$.post("http://54.254.178.30:1234/carsinroom",poststr, function(json) {
+			if (json != null) {
+				console.log(json);
+				console.log(json[0]+" "+json[1]+" "+json[2]+" "+json[3]);
+				allCars[0] = json[0];
+				allCars[1] = json[1];
+				allCars[2] = json[2];
+				allCars[3] = json[3];
+				$.post("http://54.254.178.30:1234/removeroom","roomId="+myRoom, function(json) {
+					printRoooms(json);
+				});
+				$("#over2").css("display","none");
+				$(".overlay").click();
+				$("#main").css("display","none");
+				$("#outer").css("display","block");
+				window.clearInterval(myVar);
+				pid = myNum;
+				proom = myRoom;
+				no_of_player = playerArr.length;
+				if(log){
+					Q2.setPlayer(playid,myPlayer.currentcar,myItem,myCar[myPlayer.currentcar][2],myCar[myPlayer.currentcar][1],myCar[myPlayer.currentcar][0]);
+				}
+				else{
+					Q2.setPlayer("abc","normal","grenade",500,220,90);
+				}
+				Q2.state.reset({ score: 0, lives: 2, stage: 1 });
+				var sta="level1";
+				/*switch(myType){
+					case "2": if(myLevel=="1"){sta="2p_1";}else if(myLevel=="2"){sta="2p_snow";}break;
+					case "3": if(myLevel=="1"){sta="4p_1";}else if(myLevel=="2"){sta="4p_snow";}break;
+					case "4": if(myLevel=="1"){sta="4p_1";}else if(myLevel=="2"){sta="4p_team";}else if(myLevel=="3"){sta="4p_snow";}break;
+				}*/
+				Q2.stageScene(sta);
+				zom_car();
+				setTimeout(start_round,7000);
+			}
 		});
-		$("#over2").css("display","none");
-/*		$(".overlay").click();
-		$("#main").css("display","none");
-		$("#outer").css("display","block");
-		window.clearInterval(myVar);
-		Q.stageScene(n);*/
 		
 	});
 	// = setInterval(function(){myTimer()},1500);
