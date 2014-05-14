@@ -1499,7 +1499,7 @@ window.addEventListener("load",function() {
 			if(col.obj.isA("Bullet")||col.obj.isA("BulletE")){
 				this.p.sheet='flag';
 				console.log("endgame, score: "+this.stage.score);
-				if(this.p.belongerID == 1){
+				if(this.p.belongerID == pid){
 					if (Q2.stage().endgame == false) {
 						Q2.stage().endgame = true;
 						$("#over").show().animate({
