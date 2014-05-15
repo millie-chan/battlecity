@@ -1,4 +1,3 @@
-
 window.bg_timer = null;
 
 var hit_counter = 0;

@@ -24,8 +24,7 @@ window.addEventListener("load",function() {
 			.setup("myGame", { width: 448, height: 448 })
 			.controls(true);
 
-	// 3. Add in the default keyboard controls
-	//    along with joypad controls for touch
+
 	Q2.input.keyboardControls();
 	Q2.input.joypadControls();
 

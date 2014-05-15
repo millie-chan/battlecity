@@ -38,7 +38,7 @@ var myPlayer = {
 	currentcar: 'hoho'
 };
 var myCar = {};
-var allCars = new Array();
+var allCars = new Array(); //(0,1,3,2)
 var pid;
 var proom;
 var no_of_player;
