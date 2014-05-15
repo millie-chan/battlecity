@@ -209,8 +209,8 @@ $(document).ready(function() {
 				console.log(json[0]+" "+json[1]+" "+json[2]+" "+json[3]);
 				allCars[0] = json[0];
 				allCars[1] = json[1];
-				allCars[2] = json[2];
-				allCars[3] = json[3];
+				allCars[2] = json[3];
+				allCars[3] = json[2];
 				$.post("http://54.254.178.30:1234/removeroom","roomId="+myRoom, function(json) {
 					printRoooms(json);
 				});
@@ -226,6 +226,14 @@ $(document).ready(function() {
 				proom = myRoom;
 				no_of_player = playerArr.length;
 				pmode=myType;
+/*				Q2.sync_info = [];
+				Q2.sync_info.player = [];
+				Q2.sync_info.bullet_list = [];
+
+				Q2.sync_info.destroy_list = [];
+				Q2.sync_info.hit_list = [];
+				Q2.sync_info.barrier_list = [];
+				Q2.sync_info.brick_list = [];*/
 				if(log){
 					Q2.setPlayer(playid,myPlayer.currentcar,myItem,myCar[myPlayer.currentcar][2],myCar[myPlayer.currentcar][1],myCar[myPlayer.currentcar][0]);
 				}
@@ -492,7 +500,9 @@ function printRoooms(json){
 			$("#"+playid).click(function(e){
 				e.preventDefault();
 				var classes=$(this).attr("class").split(" ");
-				$("#"+playid).attr("id","");
+				console.log("check!!!"+$("#"+playid).attr("id"));
+				myRoom=null;
+				$("#"+playid).removeAttr("id");
 				console.log(classes[1]+" wanna leave! "+classes[0]);
 				var postStr="player="+classes[0]+"&pId="+playid+"&roomId="+classes[1];
 				$.post("http://54.254.178.30:1234/leaveroom", postStr, function(json) {

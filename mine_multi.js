@@ -524,7 +524,7 @@ window.addEventListener("load",function() {
 				cooldown_time: CoolDown2,					//change-able ability
 				bullet_speed: BulletSpeed2,					//change-able ability
 				movement_speed: MoveSpeed2, 				//change-able ability
-				health: 3,
+				health: 1,
 				item_choice: ItemType2,
 				cannonCooldown: false,
 				z: 1,
@@ -700,7 +700,7 @@ window.addEventListener("load",function() {
 					Q2.stage().lists.EnemyD[i].p.health = 1;
 					Q2.stage().lists.EnemyD[i].hit();
 				}
-				//this.p.item_choice = "none";
+				this.p.item_choice = "none";
 			}
 			
 			if(this.p.item_choice == "beam"){
@@ -739,19 +739,19 @@ window.addEventListener("load",function() {
 					setTimeout(fire_one, 10*i);
 				}
 				
-				//this.p.item_choice = "none";
+				this.p.item_choice = "none";
 			}
 			
 			if(this.p.item_choice == "glasses"){
 				var i;
-				for (i in Q.stage().lists.Tree){
-					Q.stage().lists.Tree[i].p.opacity = 0.2;
+				for (i in Q2.stage().lists.Tree){
+					Q2.stage().lists.Tree[i].p.opacity = 0.2;
 				}
 				
 				setTimeout(function(){
 					var j;
-					for (j in Q.stage().lists.Tree){
-						Q.stage().lists.Tree[j].p.opacity = 1;
+					for (j in Q2.stage().lists.Tree){
+						Q2.stage().lists.Tree[j].p.opacity = 1;
 					}
 				},  10000);
 				this.p.item_choice = "none";
@@ -800,7 +800,9 @@ window.addEventListener("load",function() {
 					var pY=this.p.y;
 					Q2.stage().insert(new Q2.Disappear1({ x: pX, y: pY},true));
 					console.log(this.p.Id);
+					if(!Q2.sync_info.life[this.p.Id]){
 					Q2.stage().insert(new Q2.Appear(Q2.p_start[this.p.Id],4,3.5,this.p.Id));
+					}
 					//Gloria add animation~~~~~~yeah~~~~~~~
 					//add flash and then revive~
 					this.destroy();
@@ -827,7 +829,9 @@ window.addEventListener("load",function() {
 							});
 						}
 					}else{
+					if(!Q2.sync_info.life[this.p.Id]){
 						Q2.stage().insert(new Q2.Appear(Q2.p_start[this.p.Id],4,3.5,this.p.Id));
+						}
 					}
 				}
 			}

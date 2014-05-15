@@ -140,6 +140,18 @@ for(var player_no = 0; player_no < no_of_player; player_no++){
  }
  }
  var only_you = true;
+ if( pmode == 4){
+	if(pid == 0 || pid == 1){
+		if(!Q2.sync_info.life[2] || !Q2.sync_info.life[3]){
+			only_you = false;
+		}
+	}else{
+		if(!Q2.sync_info.life[0] || !Q2.sync_info.life[1]){
+			only_you = false;
+		}
+	}
+ 
+ }else{
  for(var tt = 0; tt < no_of_player; tt++){
 	if(tt != pid){
 		if(!Q2.sync_info.life[tt]){
@@ -147,6 +159,8 @@ for(var player_no = 0; player_no < no_of_player; player_no++){
 		}
 	}
  }
+ }
+
  if(only_you){
  console.log("you win");
  window.clearInterval(window.bg_timer);
@@ -162,6 +176,17 @@ for(var player_no = 0; player_no < no_of_player; player_no++){
 });
 
 var zom_car = function() {
+	/*Q2.sync_info = [];
+	Q2.sync_info.player = [];
+	Q2.sync_info.bullet_list = [];
+
+	Q2.sync_info.destroy_list = [];
+	Q2.sync_info.hit_list = [];
+	Q2.sync_info.barrier_list = [];
+	Q2.sync_info.brick_list = [];*/
+	//Q2.p_start = [];
+
+
 for(var player_no = 0; player_no < no_of_player; player_no++){
 console.log(player_no);
 	if(player_no != pid){
