@@ -393,6 +393,17 @@ window.addEventListener("load",function() {
 			//this.on('step',this,'countdown');
 			Q.input.on("fire",this,"fire");
 			Q.input.on("action",this,"item");
+			Q.input.keys[81] = "item_q";
+			Q.input.keys[87] = "item_w";
+			Q.input.keys[69] = "item_e";
+			Q.input.keys[82] = "item_r";
+			Q.input.keys[84] = "item_t";
+			
+			Q.input.on("item_q",this,"item_q");
+			Q.input.on("item_w",this,"item_w");
+			Q.input.on("item_e",this,"item_e");
+			Q.input.on("item_r",this,"item_r");
+			Q.input.on("item_t",this,"item_t");
 		},
 		
 		extend: function() {
@@ -457,7 +468,35 @@ window.addEventListener("load",function() {
 				Q.audio.play('fire.wav');
 			}
 		},
+		item_q: function(){
+			//used in single player to demo
+			this.p.item_choice = "grenade";
+			this.item();
+		},
 		
+		item_w: function(){
+			//used in single player to demo
+			this.p.item_choice = "beam";
+			this.item();
+		},
+		
+		item_e: function(){
+			//used in single player to demo
+			this.p.item_choice = "brick";
+			this.item();
+		},
+		
+		item_r: function(){
+			//used in single player to demo
+			this.p.item_choice = "barrier";
+			this.item();
+		},
+		
+		item_t: function(){
+			//used in single player to demo
+			this.p.item_choice = "glasses";
+			this.item();
+		},
 		item: function(){
 			//Item: Barrier
 			//Usage: open barrier and become super tank(will not get hurt)			

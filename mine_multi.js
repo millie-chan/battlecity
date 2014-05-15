@@ -14,7 +14,7 @@ window.addEventListener("load",function() {
 		}
 	}*/
 	
-	//var ItemType2="glasses";
+	var ItemType2="none";
 	var CoolDown2=300;
 	var BulletSpeed2=225;
 	var MoveSpeed2=90;
@@ -38,7 +38,8 @@ window.addEventListener("load",function() {
 
 	Q2.sync_info.destroy_list = [];
 	Q2.sync_info.hit_list = [];
-
+	Q2.sync_info.barrier_list = [];
+	Q2.sync_info.brick_list = [];
 	Q2.p_start = [];
 	
 	var bullet_counter = 0;
@@ -243,7 +244,7 @@ window.addEventListener("load",function() {
 				////console.log(f);
 			}
 			else if(collision.obj.isA("Bullet")||collision.obj.isA("Bullet_zom")){
-				if(this.p.shooter.ID != collision.obj.p.shooter.ID){
+				if(this.p.shooter.Id != collision.obj.p.shooter.Id){
 					if(this.p.first_colli){
 					if(!this.p.isBeam)this.p.shooter.bullet++;
 						this.p.first_colli = false;
@@ -304,7 +305,7 @@ window.addEventListener("load",function() {
 				type:SPRITE_BULLET,
 				no_bullet: props.no_bullet,
 				first_colli: true,
-				collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLETE | SPRITE_BARRIER | SPRITE_PLAYER
+				collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_BULLETE | SPRITE_BARRIER | SPRITE_PLAYER | SPRITE_BULLET
 			});
 //			this.on('step',this,'countdown');
 			this.on("hit.sprite",'collision');
@@ -344,8 +345,10 @@ window.addEventListener("load",function() {
 				stage.insert(new Q2.Disappear1({ x: xX, y: yY},false));
 				////console.log(f);
 			}
-			else if(collision.obj.isA("Bullet")){
-				if(this.p.shooter.ID != collision.obj.p.shooter.ID){
+			else if(collision.obj.isA("Bullet")||collision.obj.isA("Bullet_zom")){
+//			if(collision.obj.isA("Bullet")){console.log("BOOM this "+this.p.shooter.ID+" obj "+collision.obj.p.shooter.ID);}
+			
+				if(this.p.shooter.Id != collision.obj.p.shooter.Id){
 					if(this.p.first_colli){
 					if(!this.p.isBeam)this.p.shooter.bullet++;
 						this.p.first_colli = false;
@@ -522,7 +525,7 @@ window.addEventListener("load",function() {
 				bullet_speed: BulletSpeed2,					//change-able ability
 				movement_speed: MoveSpeed2, 				//change-able ability
 				health: 3,
-				item_choice: "beam",
+				item_choice: ItemType2,
 				cannonCooldown: false,
 				z: 1,
 				Id: id,
@@ -739,7 +742,20 @@ window.addEventListener("load",function() {
 				//this.p.item_choice = "none";
 			}
 			
-			
+			if(this.p.item_choice == "glasses"){
+				var i;
+				for (i in Q.stage().lists.Tree){
+					Q.stage().lists.Tree[i].p.opacity = 0.2;
+				}
+				
+				setTimeout(function(){
+					var j;
+					for (j in Q.stage().lists.Tree){
+						Q.stage().lists.Tree[j].p.opacity = 1;
+					}
+				},  10000);
+				this.p.item_choice = "none";
+			}
 
 		},
 		
@@ -801,6 +817,11 @@ window.addEventListener("load",function() {
 							$("#over").show().animate({
 								top: 224
 							}, 3000, function (){
+								window.clearInterval(window.bg_timer);
+								$("#coinModal").html("You LOSE!<br>Click to go back to game room");
+								$("#coinModal").css("display", "block");
+								$("#over1").css("display", "block");
+								$("#over").hide();
 								// Q2.clearStages();
 								// Q2.stageScene('showScore');
 							});
@@ -1411,7 +1432,7 @@ window.addEventListener("load",function() {
 	Q2.setPlayer=function(id,tank,item,cool,bul,move){ 
 		// PlayerId=id;
 		// TankType=tank;
-		// ItemType=item;
+		ItemType2=item;
 		CoolDown2=cool;
 		BulletSpeed2=bul;
 		MoveSpeed2=move;
@@ -1505,8 +1526,13 @@ window.addEventListener("load",function() {
 						$("#over").show().animate({
 							top: 224
 						}, 3000, function (){
-							Q2.clearStages();
-							Q2.stageScene('showScore');
+							window.clearInterval(window.bg_timer);
+							$("#coinModal").html("You LOSE!<br>Click to go back to game room");
+							$("#coinModal").css("display", "block");
+							$("#over1").css("display", "block");
+							$("#over").hide();
+//							Q2.clearStages();
+//							Q2.stageScene('showScore');
 						});
 					}
 				}
@@ -1522,12 +1548,17 @@ window.addEventListener("load",function() {
 						$("#over").show().animate({
 							top: 224
 						}, 3000, function (){
-							Q2.clearStages();
-							Q2.stageScene('showScore');
+							window.clearInterval(window.bg_timer);
+							$("#coinModal").html("You LOSE!<br>Click to go back to game room");
+							$("#coinModal").css("display", "block");
+							$("#over1").css("display", "block");
+							$("#over").hide();
+//							Q2.clearStages();
+//							Q2.stageScene('showScore');
 						});
 					}
 				}
-			//}
+			// }
 		}
 	});
 
@@ -1719,7 +1750,7 @@ window.addEventListener("load",function() {
 		});
 	});
 	
-	Q2.scene("level1",function(stage) {
+	Q2.scene("4p_1",function(stage) {
 		var map = stage.collisionLayer(new Q2.TowerManMap({dataAsset: '4p_1.json', sheet: 'tiles'}));
 		map.setup();
 		stage.playerStart=Q2.tilePos2(12,25.5);
@@ -1785,28 +1816,35 @@ window.addEventListener("load",function() {
 		Q2.stageScene("ui",1);
 	}, {sort:true});
 	
-	/*
-	Q2.scene("level1",function(stage) {
-		var map = stage.collisionLayer(new Q2.TowerManMap({dataAsset: 'level1.json', sheet: 'tiles'}));
+	Q2.scene("4p_snow",function(stage) {
+		var map = stage.collisionLayer(new Q2.TowerManMap({dataAsset: '4p_snow.json', sheet: 'tiles'}));
 		map.setup();
-		//stage.playerStart=Q2.tilePos2(5.5,12.5);
-		Q2.p_start[0] = Q2.tilePos2(5.5,12.5);
-Q2.p_start[1] = Q2.tilePos2(5.5,10.5);
-Q2.p_start[2] = Q2.tilePos2(5.5,8.5);
-Q2.p_start[3] = Q2.tilePos2(5.5,6.5);
+		stage.playerStart=Q2.tilePos2(12,25.5);
+		
+		
+		
+		stage.insert(new Q2.Bird(Q2.tilePos2(8.5,14.5), 0, "up"));
+		stage.insert(new Q2.Bird(Q2.tilePos2(8.5, 0.5), 1, "down"));
+		stage.insert(new Q2.Bird(Q2.tilePos2(1.5,7.5), 2, "right"));
+		stage.insert(new Q2.Bird(Q2.tilePos2(15.5,7.5), 3, "left"));
+		
+		Q2.p_start[0] = Q2.tilePos2(6.5,14.5);
+		Q2.p_start[1] = Q2.tilePos2(10.5,0.5);
+		Q2.p_start[2] = Q2.tilePos2(1.5,5.5);
+		Q2.p_start[3] = Q2.tilePos2(15.5,9.5);
 		stage.playerStart=Q2.p_start[pid];
-		stage.insert(new Q2.Bird(Q2.tilePos2(7.5,12.5)));
-		stage.PlayerTank = stage.insert(new Q2.Player(stage.playerStart));
-//		 stage.add("viewport").follow(stage.PlayerTank);
+		
+		stage.PlayerTank = stage.insert(new Q2.Player(stage.playerStart,pid));
+		// stage.add("viewport").follow(stage.PlayerTank);
 		stage.playerLife = 2;
 		stage.endgame = false;
-		stage.enemyNum=20;
-		stage.enemyANum=18;
-		stage.enemyBNum=2;
+		stage.enemyNum=0;
+		stage.enemyANum=0;
+		stage.enemyBNum=0;
 		stage.enemyCNum=0;
 		stage.enemyDNum=0;
 		stage.enemyMax=3;
-		stage.currentEnemy=0;
+		stage.currentEnemy=1; //hahaha
 		stage.currentA=0;
 		stage.currentB=0;
 		stage.currentC=0;
@@ -1821,7 +1859,7 @@ Q2.p_start[3] = Q2.tilePos2(5.5,6.5);
 		Q2.state.set({
 			eNum: stage.enemyNum,
 			lives: stage.playerLife,
-			stage: 1, 
+			stage: 1,
 			score: 0,
 			total: stage.enemyNum,
 			ANum: stage.enemyANum,
@@ -1842,202 +1880,37 @@ Q2.p_start[3] = Q2.tilePos2(5.5,6.5);
 			DScore: 400
 		});
 		Q2.stageScene("ui",1);
-	
 	}, {sort:true});
-	*/
-	Q2.scene("level2",function(stage) {
-		var map = stage.collisionLayer(new Q2.TowerManMap({dataAsset: 'level2.json', sheet: 'tiles'}));
-		map.setup();
-
-		stage.add("viewport");
-		stage.moveTo(32,0);
-		stage.playerStart=Q2.tilePos2(5.5,12.5);
-		
-
-		stage.PlayerTank = stage.insert(new Q2.Player(stage.playerStart));
-		stage.insert(new Q2.Bird(Q2.tilePos2(7.5,12.5)));
-		
-		
-		stage.playerLife = Q2.state.get("lives");
-		stage.endgame = false;
-		stage.enemyNum=20;
-		stage.enemyANum=14;
-		stage.enemyBNum=4;
-		stage.enemyCNum=0;
-		stage.enemyDNum=2;
-		stage.enemyMax=3;
-		stage.currentEnemy=0;
-		stage.currentA=0;
-		stage.currentB=0;
-		stage.currentC=0;
-		stage.currentD=0;
-		stage.score=0;
-		stage.diff=0;
-		stage.enemyArr=Q2.genArray(stage);
-		console.log(stage.enemyArr);
-		stage.add("viewport");
-		stage.moveTo(32,0);
-		Q2.genEnemy(stage,map.p.tiles[0].length,stage.enemyMax);
-		Q2.state.set({
-			eNum: stage.enemyNum,
-			//lives: stage.playerLife,
-			stage: 2,
-			//score: 0,
-			total: stage.enemyNum,
-			ANum: stage.enemyANum,
-			BNum: stage.enemyBNum,
-			CNum: stage.enemyCNum,
-			DNum: stage.enemyDNum,
-			ALeft: stage.enemyANum,
-			BLeft: stage.enemyBNum,
-			CLeft: stage.enemyCNum,
-			DLeft: stage.enemyDNum,
-			AKilled: stage.currentA,
-			BKilled: stage.currentB,
-			CKilled: stage.currentC,
-			DKilled: stage.currentD,
-			//AScore: 100,
-			//BScore: 200,
-			//CScore: 300,
-			//DScore: 400
-		});
-		Q2.stageScene("ui",1);
-	}, {sort: true});
 	
-	Q2.scene("level3",function(stage) {
-		var map = stage.collisionLayer(new Q2.TowerManMap({dataAsset: 'level3.json', sheet: 'tiles'}));
+	Q2.scene("4p_team",function(stage) {
+		var map = stage.collisionLayer(new Q2.TowerManMap({dataAsset: '4p_team.json', sheet: 'tiles'}));
 		map.setup();
-
-		stage.add("viewport");
-		stage.moveTo(32,0);
-		stage.playerStart=Q2.tilePos2(5.5,12.5);
-		stage.PlayerTank = stage.insert(new Q2.Player(stage.playerStart));
-		stage.insert(new Q2.Bird(Q2.tilePos2(7.5,12.5)));
+		stage.playerStart=Q2.tilePos2(12,25.5);
 		
 		
-		stage.playerLife = Q2.state.get("lives");
+		
+		stage.insert(new Q2.Bird(Q2.tilePos2(1.5,17), 0, "up"));
+		stage.insert(new Q2.Bird(Q2.tilePos2(13.5, 17), 1, "up"));
+		stage.insert(new Q2.Bird(Q2.tilePos2(1.5,0.5), 2, "down"));
+		stage.insert(new Q2.Bird(Q2.tilePos2(13.5,0.5), 3, "down"));
+		
+		Q2.p_start[0] = Q2.tilePos2(3.5,17);
+		Q2.p_start[1] = Q2.tilePos2(11.5,17);
+		Q2.p_start[2] = Q2.tilePos2(3.5,0.5);
+		Q2.p_start[3] = Q2.tilePos2(11.5,0.5);
+		stage.playerStart=Q2.p_start[pid];
+		
+		stage.PlayerTank = stage.insert(new Q2.Player(stage.playerStart,pid));
+		// stage.add("viewport").follow(stage.PlayerTank);
+		stage.playerLife = 2;
 		stage.endgame = false;
-		stage.enemyNum=20;
-		stage.enemyANum=14;
-		stage.enemyBNum=4;
-		stage.enemyCNum=0;
-		stage.enemyDNum=2;
-		stage.enemyMax=3;
-		stage.currentEnemy=0;
-		stage.currentA=0;
-		stage.currentB=0;
-		stage.currentC=0;
-		stage.currentD=0;
-		stage.score=0;
-		stage.diff=0;
-		stage.enemyArr=Q2.genArray(stage);
-		console.log(stage.enemyArr);
-		stage.add("viewport");
-		stage.moveTo(32,0);
-		Q2.genEnemy(stage,map.p.tiles[0].length,stage.enemyMax);
-		Q2.state.set({
-			eNum: stage.enemyNum,
-			//lives: stage.playerLife,
-			stage: 3,
-			//score: 0,
-			total: stage.enemyNum,
-			ANum: stage.enemyANum,
-			BNum: stage.enemyBNum,
-			CNum: stage.enemyCNum,
-			DNum: stage.enemyDNum,
-			ALeft: stage.enemyANum,
-			BLeft: stage.enemyBNum,
-			CLeft: stage.enemyCNum,
-			DLeft: stage.enemyDNum,
-			AKilled: stage.currentA,
-			BKilled: stage.currentB,
-			CKilled: stage.currentC,
-			DKilled: stage.currentD,
-			//AScore: 100,
-			//BScore: 200,
-			//CScore: 300,
-			//DScore: 400
-		});
-		Q2.stageScene("ui",1);
-	}, {sort: true});
-
-	Q2.scene("level4",function(stage) {
-		var map = stage.collisionLayer(new Q2.TowerManMap({dataAsset: 'level4.json', sheet: 'tiles'}));
-		map.setup();
-
-		stage.add("viewport");
-		stage.moveTo(32,0);
-		stage.playerStart=Q2.tilePos2(5.5,12.5);
-		stage.PlayerTank = stage.insert(new Q2.Player(stage.playerStart));
-		stage.insert(new Q2.Bird(Q2.tilePos2(7.5,12.5)));
-		
-		
-		stage.playerLife = Q2.state.get("lives");
-		stage.endgame = false;
-		stage.enemyNum=20;
+		stage.enemyNum=0;
 		stage.enemyANum=0;
-		stage.enemyBNum=4;
-		stage.enemyCNum=10;
-		stage.enemyDNum=6;
-		stage.enemyMax=3;
-		stage.currentEnemy=0;
-		stage.currentA=0;
-		stage.currentB=0;
-		stage.currentC=0;
-		stage.currentD=0;
-		stage.score=0;
-		stage.diff=0;
-		stage.enemyArr=Q2.genArray(stage);
-		console.log(stage.enemyArr);
-		stage.add("viewport");
-		stage.moveTo(32,0);
-		Q2.genEnemy(stage,map.p.tiles[0].length,stage.enemyMax);
-		Q2.state.set({
-			eNum: stage.enemyNum,
-			//lives: stage.playerLife,
-			stage: 4,
-			//score: 0,
-			total: stage.enemyNum,
-			ANum: stage.enemyANum,
-			BNum: stage.enemyBNum,
-			CNum: stage.enemyCNum,
-			DNum: stage.enemyDNum,
-			ALeft: stage.enemyANum,
-			BLeft: stage.enemyBNum,
-			CLeft: stage.enemyCNum,
-			DLeft: stage.enemyDNum,
-			AKilled: stage.currentA,
-			BKilled: stage.currentB,
-			CKilled: stage.currentC,
-			DKilled: stage.currentD,
-			//AScore: 100,
-			//BScore: 200,
-			//CScore: 300,
-			//DScore: 400
-		});
-		Q2.stageScene("ui",1);
-	}, {sort: true});
-
-	Q2.scene("level5",function(stage) {
-		var map = stage.collisionLayer(new Q2.TowerManMap({dataAsset: 'level5.json', sheet: 'tiles'}));
-		map.setup();
-
-		stage.add("viewport");
-		stage.moveTo(32,0);
-		stage.playerStart=Q2.tilePos2(5.5,12.5);
-		stage.PlayerTank = stage.insert(new Q2.Player(stage.playerStart));
-		stage.insert(new Q2.Bird(Q2.tilePos2(7.5,12.5)));
-		
-		
-		stage.playerLife = Q2.state.get("lives");
-		stage.endgame = false;
-		stage.enemyNum=20;
-		stage.enemyANum=8;
-		stage.enemyBNum=2;
+		stage.enemyBNum=0;
 		stage.enemyCNum=0;
-		stage.enemyDNum=10;
+		stage.enemyDNum=0;
 		stage.enemyMax=3;
-		stage.currentEnemy=0;
+		stage.currentEnemy=1; //hahaha
 		stage.currentA=0;
 		stage.currentB=0;
 		stage.currentC=0;
@@ -2051,9 +1924,9 @@ Q2.p_start[3] = Q2.tilePos2(5.5,6.5);
 		Q2.genEnemy(stage,map.p.tiles[0].length,stage.enemyMax);
 		Q2.state.set({
 			eNum: stage.enemyNum,
-			//lives: stage.playerLife,
-			stage: 5,
-			//score: 0,
+			lives: stage.playerLife,
+			stage: 1,
+			score: 0,
 			total: stage.enemyNum,
 			ANum: stage.enemyANum,
 			BNum: stage.enemyBNum,
@@ -2067,16 +1940,135 @@ Q2.p_start[3] = Q2.tilePos2(5.5,6.5);
 			BKilled: stage.currentB,
 			CKilled: stage.currentC,
 			DKilled: stage.currentD,
-			//AScore: 100,
-			//BScore: 200,
-			//CScore: 300,
-			//DScore: 400
+			AScore: 100,
+			BScore: 200,
+			CScore: 300,
+			DScore: 400
 		});
 		Q2.stageScene("ui",1);
-	}, {sort: true});
+	}, {sort:true});
 	
+	Q2.scene("2p_1",function(stage) {
+		var map = stage.collisionLayer(new Q2.TowerManMap({dataAsset: '2p_1.json', sheet: 'tiles'}));
+		map.setup();
+	
+		stage.insert(new Q2.Bird(Q2.tilePos2(7.5,19), 0, "up"));
+		stage.insert(new Q2.Bird(Q2.tilePos2(7.5, 0.5), 1, "down"));
+		
+		Q2.p_start[0] = Q2.tilePos2(5.5,19);
+		Q2.p_start[1] = Q2.tilePos2(9.5,0.5);
+		
+		stage.playerStart=Q2.p_start[pid];
+		
+		stage.PlayerTank = stage.insert(new Q2.Player(stage.playerStart,pid));
+		// stage.add("viewport").follow(stage.PlayerTank);
+		stage.playerLife = 2;
+		stage.endgame = false;
+		stage.enemyNum=0;
+		stage.enemyANum=0;
+		stage.enemyBNum=0;
+		stage.enemyCNum=0;
+		stage.enemyDNum=0;
+		stage.enemyMax=3;
+		stage.currentEnemy=1; //hahaha
+		stage.currentA=0;
+		stage.currentB=0;
+		stage.currentC=0;
+		stage.currentD=0;
+		stage.score=0;
+		stage.diff=0;
+		stage.enemyArr=Q2.genArray(stage);
+		console.log(stage.enemyArr);
+		stage.add("viewport");
+		stage.moveTo(32,0);
+		Q2.genEnemy(stage,map.p.tiles[0].length,stage.enemyMax);
+		Q2.state.set({
+			eNum: stage.enemyNum,
+			lives: stage.playerLife,
+			stage: 1,
+			score: 0,
+			total: stage.enemyNum,
+			ANum: stage.enemyANum,
+			BNum: stage.enemyBNum,
+			CNum: stage.enemyCNum,
+			DNum: stage.enemyDNum,
+			ALeft: stage.enemyANum,
+			BLeft: stage.enemyBNum,
+			CLeft: stage.enemyCNum,
+			DLeft: stage.enemyDNum,
+			AKilled: stage.currentA,
+			BKilled: stage.currentB,
+			CKilled: stage.currentC,
+			DKilled: stage.currentD,
+			AScore: 100,
+			BScore: 200,
+			CScore: 300,
+			DScore: 400
+		});
+		Q2.stageScene("ui",1);
+	}, {sort:true});
+	
+	Q2.scene("2p_snow",function(stage) {
+		var map = stage.collisionLayer(new Q2.TowerManMap({dataAsset: '2p_snow.json', sheet: 'tiles'}));
+		map.setup();
+	
+		stage.insert(new Q2.Bird(Q2.tilePos2(7.5, 12.5), 0, "up"));
+		stage.insert(new Q2.Bird(Q2.tilePos2(7.5, 0.5), 1, "down"));
+		
+		Q2.p_start[0] = Q2.tilePos2(5.5,12.5);
+		Q2.p_start[1] = Q2.tilePos2(9.5,0.5);
+		
+		stage.playerStart=Q2.p_start[pid];
+		
+		stage.PlayerTank = stage.insert(new Q2.Player(stage.playerStart,pid));
+		// stage.add("viewport").follow(stage.PlayerTank);
+		stage.playerLife = 2;
+		stage.endgame = false;
+		stage.enemyNum=0;
+		stage.enemyANum=0;
+		stage.enemyBNum=0;
+		stage.enemyCNum=0;
+		stage.enemyDNum=0;
+		stage.enemyMax=3;
+		stage.currentEnemy=1; //hahaha
+		stage.currentA=0;
+		stage.currentB=0;
+		stage.currentC=0;
+		stage.currentD=0;
+		stage.score=0;
+		stage.diff=0;
+		stage.enemyArr=Q2.genArray(stage);
+		console.log(stage.enemyArr);
+		stage.add("viewport");
+		stage.moveTo(32,0);
+		Q2.genEnemy(stage,map.p.tiles[0].length,stage.enemyMax);
+		Q2.state.set({
+			eNum: stage.enemyNum,
+			lives: stage.playerLife,
+			stage: 1,
+			score: 0,
+			total: stage.enemyNum,
+			ANum: stage.enemyANum,
+			BNum: stage.enemyBNum,
+			CNum: stage.enemyCNum,
+			DNum: stage.enemyDNum,
+			ALeft: stage.enemyANum,
+			BLeft: stage.enemyBNum,
+			CLeft: stage.enemyCNum,
+			DLeft: stage.enemyDNum,
+			AKilled: stage.currentA,
+			BKilled: stage.currentB,
+			CKilled: stage.currentC,
+			DKilled: stage.currentD,
+			AScore: 100,
+			BScore: 200,
+			CScore: 300,
+			DScore: 400
+		});
+		Q2.stageScene("ui",1);
+	}, {sort:true});
 
-	Q2.load("sprites2.png, newSprites.json, level1.json, level2.json, level3.json, level4.json, level5.json, 4p_1.json", function() {
+	Q2.load("sprites2.png, newSprites.json, level1.json, level2.json, level3.json, level4.json, level5.json, 4p_1.json, 4p_snow.json, 4p_team.json, 2p_1.json, 2p_snow.json", function() {
 		//Q2.sheet("tiles","tiles.png", { tileW: 16, tileH: 16 });
 
 		Q2.compileSheets("sprites2.png","newSprites.json");

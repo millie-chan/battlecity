@@ -23,7 +23,7 @@
 			<img id="banner" src="./images/logo.png"></img>
 		</span>
 		<span id="login">
-			<input type="checkbox" name="up" value="go">update</input>
+<!--			<input type="checkbox" name="up" value="go" checked>update</input>-->
 			<div id="mypage"><button id="mypageBtn">My page</button></div>
 			<div class="fb-login-button" scope="email" data-max-rows="1" data-size="large" data-show-faces="false" data-auto-logout-link="true" onlogin="login();"></div>
 		</span>
@@ -211,6 +211,7 @@
 		<div class="modalContent">
 			<form id="newgrForm">
 				<input type="hidden" name="pid" value="0"></input>
+				<input type="hidden" name="rid" value="0"></input>
 				No. of Players:<input type="radio" name="num" value="1">1</input><input type="radio" name="num" value="2">2</input><input type="radio" name="num" value="4">4</input><br>
 				<div id="choose4P"><input type="radio" name="type4P" value="3">individual play (1 vs 1 vs 1 vs 1)</input> <input type="radio" name="type4P" value="4">team play (2 vs 2)</input></div>
 				<div id="chooseLevel">
@@ -243,6 +244,8 @@
 	<div class="modal3" id="warningModal">
 	</div>
 	<div class="modal3" id="coinModal">
+	</div>
+	<div class="modal3" id="countdownModal">
 	</div>
 
 </body>

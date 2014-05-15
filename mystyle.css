@@ -359,7 +359,13 @@ div.modalContent {
 	margin: 30px;
 }
 
-#coinModal, #warningModal, #chooseItemModal, #newgrModal, #chooseLevel, #choose4P, #chooseMap, #submitNewgrForm, #startGame{
+div#countdownModal {
+    font-size: 72px;
+    text-align: center;
+    line-height: 250px;
+}
+
+#countdownModal,#coinModal, #warningModal, #chooseItemModal, #newgrModal, #chooseLevel, #choose4P, #chooseMap, #submitNewgrForm, #startGame{
 	display:none;
 }
 

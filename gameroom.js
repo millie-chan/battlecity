@@ -11,7 +11,7 @@ var playid;
 var myNum;
 var log = 0;
 var myItem;
-var myVar;
+var myVar=null;;
 var carArray = ["normal", "speed", "bullet2", "blood2", "amptank"];
 var statusArray = ["Activate", "Use It?", "Used"];
 var basicP = new Array();
@@ -42,6 +42,7 @@ var allCars = new Array();
 var pid;
 var proom;
 var no_of_player;
+var pmode;
 
 $(document).ready(function() {
 	loadFBSDK(function(){
@@ -68,6 +69,9 @@ $(document).ready(function() {
 		$("#over1").css("display","none");
 		$("#main").css("display","block");
 		$("#outer").css("display","none");
+		if(!myVar){
+			myVar = setInterval(function(){myTimer()},1500);
+		}
 		$( "input[name='num']:checked" ).prop('checked', false); 
 		$( "input[name='type4P']:checked" ).prop('checked', false); 
 		$("#startGame").slideUp();
@@ -143,7 +147,9 @@ $(document).ready(function() {
 	});
 	$("#submitNewgrBtn").click(function(e){
 		e.preventDefault();
+		var time1=new Date().getTime();
 		$("input[name='pid']").val(playid);
+		$("input[name='rid']").val(playid+"ttt"+time1);
 		console.log($("#newgrForm").serialize());
 		$.post("http://54.254.178.30:1234/newroom", $("#newgrForm").serialize(), function(json) {
 			$("#over1").click();
@@ -158,7 +164,10 @@ $(document).ready(function() {
 		$("#over1").click();
 		$("#main").css("display","none");
 		$("#outer").css("display","block");
-		window.clearInterval(myVar);
+		if(myVar){
+			window.clearInterval(myVar);
+			myVar=null;
+		}
 //		console.log("curr car "+myPlayer.currentcar+" cool "+myCar[myPlayer.currentcar][2]+" bullet "+myCar[myPlayer.currentcar][1]+" move "+myCar[myPlayer.currentcar][0]);
 		if(log){
 			Q.setPlayer(playid,myPlayer.currentcar,"grenade",myCar[myPlayer.currentcar][2],myCar[myPlayer.currentcar][1],myCar[myPlayer.currentcar][0]);
@@ -167,22 +176,28 @@ $(document).ready(function() {
 			Q.setPlayer("abc","normal","grenade",500,220,90);
 		}
 		Q.clearStages();
-		Q.state.reset({ score: 0, lives: 2, stage: 1 });
+		Q.state.reset({ score: 0, lives: 2, stage: n });
 		Q.stageScene(n);
 		$("#myGame").attr('tabindex','0');
 		$("#myGame").focus();
 	});
 	$("#startMultiGameBtn").click(function(e){
 		e.preventDefault();
-		window.clearInterval(myVar);
-		if(!($("input[name='item']:checked").val())){
+		if(myVar){
+			window.clearInterval(myVar);
+			myVar=null;
+		}
+		if(($("input[name='item']:checked").val())){
 			myItem=$("input[name='item']:checked").val();
+		}
+		else{
+			myItem="none";
 		}
 //		console.log($("#newgrForm").serialize());
         console.log($("input[name='item']:checked").val());
 		$("#chooseItemModal").css("display","none");
 		$( "input[name='item']:checked" ).prop('checked', false); 
-		console.log("me "+ playid+" ppl "+playerArr+" room "+myRoom+" type "+myType+" level "+myLevel+" ## "+playerArr.length+" # "+myNum);
+		console.log("me "+ playid+" ppl "+playerArr+" room "+myRoom+" type "+myType+" item "+myItem+" level "+myLevel+" ## "+playerArr.length+" # "+myNum);
 		var poststr="";
 		for (var i=0; i < playerArr.length; i++){
 			poststr += "player"+(i+1)+"="+playerArr[i]+"&";
@@ -203,54 +218,97 @@ $(document).ready(function() {
 				$(".overlay").click();
 				$("#main").css("display","none");
 				$("#outer").css("display","block");
-				window.clearInterval(myVar);
+				if(myVar){
+					window.clearInterval(myVar);
+					myVar=null;
+				}			
 				pid = myNum;
 				proom = myRoom;
 				no_of_player = playerArr.length;
+				pmode=myType;
 				if(log){
 					Q2.setPlayer(playid,myPlayer.currentcar,myItem,myCar[myPlayer.currentcar][2],myCar[myPlayer.currentcar][1],myCar[myPlayer.currentcar][0]);
 				}
 				else{
-					Q2.setPlayer("abc","normal","grenade",500,220,90);
+					Q2.setPlayer("abc","normal",myItem,500,220,90);
 				}
 				Q2.state.reset({ score: 0, lives: 2, stage: 1 });
 				var sta="level1";
-				/*switch(myType){
+				switch(myType){
 					case "2": if(myLevel=="1"){sta="2p_1";}else if(myLevel=="2"){sta="2p_snow";}break;
 					case "3": if(myLevel=="1"){sta="4p_1";}else if(myLevel=="2"){sta="4p_snow";}break;
 					case "4": if(myLevel=="1"){sta="4p_1";}else if(myLevel=="2"){sta="4p_team";}else if(myLevel=="3"){sta="4p_snow";}break;
-				}*/
+				}
+				console.log(sta);
+				Q2.clearStages();
 				Q2.stageScene(sta);
 				zom_car();
 				setTimeout(start_round,7000);
+				$("#countdownModal").css("display","block");
+				$("#over2").css("display","block");
+				for(var i=5;i>=0;i--){
+					var j=i;
+					var sth=function(j){
+						setTimeout(function(){
+							$("#countdownModal").html(j);
+							if(j==0){
+								$("#countdownModal").css("display","none");
+								$("#over2").css("display","none");
+								$("#myGame").attr('tabindex','0');
+								$("#myGame").focus();
+							}
+						},1000*(5-j));
+					}
+					sth(j);
+				}
 			}
 		});
 		
 	});
-	// = setInterval(function(){myTimer()},1500);
+	myVar = setInterval(function(){myTimer()},1500);
 	function myTimer() {
 		$.post("http://54.254.178.30:1234/getroom", function(json) {
 			printRoooms(json);
 		});
 	}
-	$("input[name='up']").change(function(){
+	
+
+
+/*	$("input[name='up']").change(function(){
+		if($("input[name='up']:checked").val()=="go"){
+			myVar = setInterval(function(){myTimer()},1500);
+		}
+		else{
+			window.clearInterval(myVar);
+			myVar=null;
+			console.log(myVar);
+		}
+	});*/
+/*	$("input[name='up']").change(function(){
 		if($("input[name='up']:checked").val()=="go"){
 			myVar = setInterval(function(){myTimer()},1500);
 		}
 		else{
 			window.clearInterval(myVar);
 		}
-	});
+	});*/
 	$("#mypageBtn").click(function(){
 		loadPage();
 		$("#myInfo").css("display","block");
 		$("#main").css("display","none");
 		$("#outer").css("display","none");
+		if(!myVar){
+			myVar = setInterval(function(){myTimer()},1500);
+		}
+		
 	});	
 	$("#mypagebackBtn").click(function(){
 		$("#myInfo").css("display","none");
 		$("#main").css("display","block");
 		$("#outer").css("display","none");
+		if(!myVar){
+			myVar = setInterval(function(){myTimer()},1500);
+		}
 	});	
 
 	$("#left").click(function(){
@@ -424,16 +482,17 @@ function printRoooms(json){
 		}
 	}
 	$("#rooms").html(content);
-	console.log($("#"+playid).html());
+	//console.log($("#"+playid).html());
 	if($("#"+playid).length>0){
 		$("#"+playid).addClass("seated");
 		$("#"+playid).parent().removeClass("join");
-		if(myRoom!=playid){
+		if(myRoom.indexOf(playid+"ttt")==-1){
 			$("#"+playid).html("leave");
 			$("#"+playid).prop("disabled",false);
 			$("#"+playid).click(function(e){
 				e.preventDefault();
 				var classes=$(this).attr("class").split(" ");
+				$("#"+playid).attr("id","");
 				console.log(classes[1]+" wanna leave! "+classes[0]);
 				var postStr="player="+classes[0]+"&pId="+playid+"&roomId="+classes[1];
 				$.post("http://54.254.178.30:1234/leaveroom", postStr, function(json) {
@@ -467,7 +526,7 @@ function printRoooms(json){
 		else{
 			playerArr[index]=$(this).attr("id");
 		}
-		console.log(index+"full"+full);
+//		console.log(index+"full"+full);
 	});
 	if(full){
 		console.log("full!!! "+playerArr+" room "+myRoom);
